@@ -7,8 +7,8 @@ import { PlanView } from '@/views/plan/PlanView';
 import { NotesView } from '@/views/notes/NotesView';
 import { ReviewView } from '@/views/review/ReviewView';
 import { SearchView } from '@/views/search/SearchView';
-import { SettingsView } from '@/views/SettingsView';
-import { HelpView } from '@/views/HelpView';
+import { SettingsView } from '@/views/settings/SettingsView';
+import { HelpView } from '@/views/help/HelpView';
 
 export function App() {
   const page = useAppStore((s) => s.page);
