@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { ConfirmHost } from '@/components/ConfirmHost';
 import { PlanView } from '@/views/PlanView';
 import { NotesView } from '@/views/NotesView';
-import { ReviewView } from '@/views/ReviewView';
+import { ReviewView } from '@/views/review/ReviewView';
 import { SearchView } from '@/views/SearchView';
 import { SettingsView } from '@/views/SettingsView';
 import { HelpView } from '@/views/HelpView';
