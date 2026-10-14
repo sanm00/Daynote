@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useAppStore } from '@/store';
-import { relTime } from '@/lib/date';
 import { TAG_ORDER } from '@/lib/tags';
 import { mdToHtml, insertPair, toggleFence } from '@/lib/markdown';
 import type { Note } from '@/types';
+import { SaveStatus } from '@/components/SaveStatus';
 import type { NoteFind } from './useNoteFind';
 
 interface Props {
@@ -106,7 +106,7 @@ export function NoteEditor({ note, find }: Props) {
             </button>
           ))}
         </div>
-        <span className="note-time">更新于 {relTime(note.updatedAt)}</span>
+        <SaveStatus updatedAt={note.updatedAt} />
         <div className="view-switch" data-mode={noteMode}>
           <span className="view-switch-thumb" />
           <button

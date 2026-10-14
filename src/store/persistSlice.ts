@@ -1,6 +1,7 @@
 import { generateDemoNotes, generateDemoTasks } from '@/lib/seed';
 import { storage, type StoreData } from '@/lib/storage';
 import { SCHEMA_VERSION } from '@/lib/constants';
+import { toast } from '@/lib/toast';
 import { isBlankNote, touchedTitles } from './noteTitle';
 import type { PersistSlice, SliceCreator } from './types';
 
@@ -63,8 +64,12 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
       // Never persist blank notes (a new note the user abandoned).
       const persistable = notes.filter((n) => !isBlankNote(n));
       await storage.save({ version: SCHEMA_VERSION, settings, tasks, notes: persistable });
+      set({ saveState: 'saved' });
     } catch (error) {
       console.error('保存本地数据失败', error);
+      const firstFailure = get().saveState !== 'error';
+      set({ saveState: 'error' });
+      if (firstFailure) toast('保存失败，请检查磁盘空间');
     }
   },
 });

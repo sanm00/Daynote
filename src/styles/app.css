@@ -286,3 +286,80 @@ html[data-theme='dark'] .confirm-overlay {
   width: 16px;
   height: 16px;
 }
+
+/* Inline task rename (added alongside the demo's read-only title). */
+.task .mini-btn {
+  font-family: inherit;
+}
+.task.rename-row {
+  display: block;
+  background: var(--surface-2);
+  border-color: var(--primary);
+}
+.rename-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rename-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.task-title-input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  letter-spacing: 0.05px;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Save status indicator replaces the demo's static "更新于 …" note timestamp. */
+.save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.save-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted-2);
+  flex: none;
+}
+.save-status.saving {
+  color: var(--orange);
+}
+.save-status.saving .save-dot {
+  background: var(--orange);
+  animation: save-pulse 1s ease-in-out infinite;
+}
+.save-status.error {
+  color: var(--red);
+}
+.save-status.error .save-dot {
+  background: var(--red);
+}
+@keyframes save-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

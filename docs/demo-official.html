@@ -789,6 +789,17 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 }
 .task:hover .mini-btn{opacity:1}
 .mini-btn:hover{color:var(--primary);background:var(--primary-soft)}
+.task.rename-row{display:block;background:var(--surface-2);border-color:var(--primary)}
+.rename-body{display:flex;flex-direction:column;gap:6px}
+.rename-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.task-title-input{
+  display:block;width:100%;
+  font-family:inherit;font-size:var(--fs-sm);line-height:1.35;letter-spacing:.05px;
+  color:var(--text);background:var(--card);
+  border:1px solid var(--primary);border-radius:6px;
+  padding:4px 8px;outline:none;
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
 
 .task.resched-row{display:block;background:var(--surface-2);border-color:var(--primary)}
 .resched-body{display:flex;flex-direction:column;gap:6px}
@@ -923,6 +934,17 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .note-tag-chip.active[data-tag="健康"]{background:var(--tag-health-bg);color:var(--tag-health-fg)}
 
 .note-time{font-size:var(--fs-2xs);color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.save-status{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-left:auto;font-size:var(--fs-2xs);color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--muted-2);flex:none}
+.save-status.saving{color:var(--orange)}
+.save-status.saving .save-dot{background:var(--orange);animation:save-pulse 1s ease-in-out infinite}
+.save-status.error{color:var(--red)}
+.save-status.error .save-dot{background:var(--red)}
+@keyframes save-pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .note-find-btn{
   border:0;background:transparent;color:var(--muted-2);padding:4px;border-radius:5px;
   cursor:pointer;display:flex;align-items:center;transition:.12s var(--ease);
@@ -2072,6 +2094,8 @@ const state = {
   addTag: '工作',
   popMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   reschedulingId: null,
+  renamingId: null,
+  saveState: 'idle',
   noteFilter: 'all',
   noteMode: 'preview',
   findOpen: false,
@@ -2246,6 +2270,17 @@ function rowHTML(t, mode){
     </div>`;
   }
   const actions = `<button class="mini-btn" data-act="resched" title="${isUnsched ? '安排到某天' : '改期'}">${isUnsched ? '排期' : '改期'}</button>`;
+  if(state.renamingId === t.id){
+    return `<div class="task rename-row${isUnsched ? ' inbound' : ''}" data-id="${t.id}">
+      <div class="rename-body">
+        <input class="task-title-input" data-rename-input value="${escapeHtml(t.title)}">
+        <div class="rename-actions">
+          <button class="chip" data-rename="save">保存</button>
+          <button class="chip ghost" data-rename="cancel">取消</button>
+        </div>
+      </div>
+    </div>`;
+  }
   const schedAt = !isUnsched && t.date < todayStr();
   let metaExtra;
   if(isUnsched){
@@ -2267,6 +2302,7 @@ function rowHTML(t, mode){
     </div>
     <span class="prio ${t.prio}" title="优先级"></span>
     <div class="task-actions">
+      <button class="mini-btn" data-act="rename" title="编辑任务">编辑</button>
       ${actions}
       <button class="del" data-act="del" title="删除">×</button>
     </div>
@@ -2288,7 +2324,35 @@ function groupedRows(list, mode){
   return html;
 }
 
-function renderTasks(){
+function wireRenameInput(){
+  const row = $('#taskList .rename-row');
+  if(!row) return;
+  const input = row.querySelector('[data-rename-input]');
+  const id = Number(row.dataset.id);
+  const commit = () => {
+    const t = tasks.find(x => x.id === id);
+    const v = input.value.trim();
+    if(t && v) t.title = v;
+    state.renamingId = null;
+    renderTasks();
+  };
+  const cancel = () => { state.renamingId = null; renderTasks(); };
+  input.addEventListener('keydown', e => {
+    e.stopPropagation();
+    if(e.key === 'Enter'){ e.preventDefault(); commit(); }
+    else if(e.key === 'Escape'){ e.preventDefault(); cancel(); }
+  });
+  const save = row.querySelector('[data-rename="save"]');
+  const cancelBtn = row.querySelector('[data-rename="cancel"]');
+  if(save) save.addEventListener('click', commit);
+  if(cancelBtn) cancelBtn.addEventListener('click', cancel);
+  input.focus();
+  input.setSelectionRange(0, input.value.length);
+}
+
+function renderTasks(){ renderTasksBody(); wireRenameInput(); }
+
+function renderTasksBody(){
   const view = state.planView;
   const isDate = view.kind === 'date';
   const progLine = $('#dayProgressLine');
@@ -2978,7 +3042,7 @@ function renderNoteEditor(){
             <button class="note-tag-chip${tag === n.tag ? ' active' : ''}" data-tag="${tag}">${tag}</button>
           `).join('')}
         </div>
-        <span class="note-time">更新于 ${relTime(n.updatedAt)}</span>
+        <span class="save-status" id="saveStatus"></span>
         <div class="view-switch" id="noteModeSeg" data-mode="${state.noteMode}">
           <span class="view-switch-thumb"></span>
           <button class="view-switch-btn${state.noteMode === 'preview' ? ' active' : ''}" data-mode="preview" title="预览渲染效果">
@@ -3015,6 +3079,7 @@ function renderNoteEditor(){
     </div>`;
   renderNoteContent(n);
   applyNoteMode();
+  renderSaveStatus();
 }
 
 function renderNotes(){ renderNotesList(); renderNoteEditor(); nfSyncDom(); }
@@ -3041,8 +3106,32 @@ function syncNoteItem(n){
   if(title) title.textContent = n.title || '无标题';
   if(snippet) snippet.textContent = plainText(n.content).slice(0, 60) || '暂无内容';
   if(time) time.textContent = relTime(n.updatedAt);
-  const timeEl = document.querySelector('.note-editor .note-time');
-  if(timeEl) timeEl.textContent = `更新于 ${relTime(n.updatedAt)}`;
+  const timeEl = document.querySelector('.note-editor .save-status');
+  if(timeEl) renderSaveStatus(timeEl);
+}
+
+function saveStatusLabel(){
+  if(state.saveState === 'saving') return '保存中…';
+  if(state.saveState === 'error') return '保存失败';
+  const n = notes.find(x => x.id === state.currentNoteId);
+  return `已保存 · ${n ? relTime(n.updatedAt) : relTime(new Date().toISOString())}`;
+}
+function renderSaveStatus(el){
+  el = el || $('#saveStatus');
+  if(!el) return;
+  el.className = `save-status ${state.saveState === 'saving' ? 'saving' : state.saveState === 'error' ? 'error' : 'saved'}`;
+  el.innerHTML = `<i class="save-dot"></i>${saveStatusLabel()}`;
+}
+
+let demoSaveTimer = null;
+function demoTouchSave(){
+  state.saveState = 'saving';
+  renderSaveStatus();
+  if(demoSaveTimer) clearTimeout(demoSaveTimer);
+  demoSaveTimer = setTimeout(() => {
+    state.saveState = 'saved';
+    renderSaveStatus();
+  }, 400);
 }
 
 function renderSettings(){
@@ -3056,8 +3145,17 @@ function renderSettings(){
 
 /* ============ 全局搜索 ============ */
 let prevPage = 'plan';
+function planToToday(){
+  state.planView = { kind: 'date' };
+  state.selectedDate = todayStr();
+  const d = today();
+  state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  state.reschedulingId = null;
+  state.addDate = todayStr();
+}
 function showPage(page){
   if(page !== 'notes' && state.findOpen) nfClose();
+  if(page === 'plan') planToToday();
   state.page = page;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
@@ -3264,6 +3362,10 @@ document.addEventListener('keydown', e => {
   } else if(e.key === 'Escape' && state.findOpen && state.page === 'notes'){
     e.preventDefault();
     nfClose();
+  } else if(e.key === 'Escape' && state.reschedulingId !== null){
+    e.preventDefault();
+    state.reschedulingId = null;
+    renderTasks();
   } else if(e.key === 'Escape' && state.page === 'search'){
     closeSearch();
   }
@@ -3603,7 +3705,14 @@ $('#taskList').addEventListener('click', e => {
     renderPlan();
   } else if(btn.dataset.act === 'resched'){
     state.reschedulingId = (state.reschedulingId === id ? null : id);
+    state.renamingId = null;
     renderTasks();
+  } else if(btn.dataset.act === 'rename'){
+    if(state.renamingId !== id){
+      state.renamingId = id;
+      state.reschedulingId = null;
+      renderTasks();
+    }
   } else if(btn.dataset.act === 'pickdate'){
     e.stopPropagation();
     dpOpen(btn, {
@@ -3698,6 +3807,7 @@ $('#notesMain').addEventListener('input', e => {
   else return;
   n.updatedAt = new Date().toISOString();
   syncNoteItem(n);
+  demoTouchSave();
 });
 
 $('#notesMain').addEventListener('click', async e => {
@@ -3726,6 +3836,7 @@ $('#notesMain').addEventListener('click', async e => {
       c.classList.toggle('active', c === chip);
     });
     syncNoteItem(n);
+    demoTouchSave();
     return;
   }
   if(e.target.id === 'noteDelBtn'){

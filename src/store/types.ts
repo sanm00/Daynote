@@ -17,6 +17,8 @@ export interface PlanView {
   kind: PlanViewKind;
 }
 
+export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
 export interface DataSlice {
   // data
   tasks: Task[];
@@ -27,9 +29,11 @@ export interface DataSlice {
   ready: boolean;
   storageKind: StorageKind;
   storagePath: string | null;
+  saveState: SaveState;
 
   toggleTodo: (id: number) => void;
   cycleTag: (id: number) => void;
+  updateTask: (id: number, patch: Partial<Pick<Task, 'title'>>) => void;
   deleteTask: (id: number) => void;
   rescheduleTask: (id: number, date: string | null) => void;
   submitQuickAdd: (title: string) => void;

@@ -14,6 +14,7 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
   ready: false,
   storageKind: storage.kind,
   storagePath: null,
+  saveState: 'idle',
 
   toggleTodo: (id) =>
     set((s) => ({
@@ -27,6 +28,13 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
     set((s) => ({
       tasks: s.tasks.map((t) => (t.id === id ? { ...t, tag: nextTag(t.tag) } : t)),
     })),
+  updateTask: (id, patch) => {
+    const title = patch.title?.trim();
+    if (patch.title !== undefined && !title) return;
+    set((s) => ({
+      tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...(title !== undefined ? { title } : {}) } : t)),
+    }));
+  },
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
   rescheduleTask: (id, date) =>
     set((s) => ({

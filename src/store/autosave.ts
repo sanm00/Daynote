@@ -25,6 +25,9 @@ export function setupAutoPersist() {
     prevTasks = state.tasks;
     prevNotes = state.notes;
 
+    // Flip the save indicator immediately, not 300ms later.
+    useAppStore.setState({ saveState: 'saving' });
+
     if (persistTimer) clearTimeout(persistTimer);
     persistTimer = setTimeout(() => {
       persistTimer = null;

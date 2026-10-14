@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import type { Task } from '@/types';
 import { addDays, dateLabel, dateLabelFor, fmt, hmOf, nearestWeekend, today, todayStr } from '@/lib/date';
@@ -14,8 +15,42 @@ export function TaskRow({ t, datePop }: Props) {
   const setReschedulingId = useAppStore((s) => s.setReschedulingId);
   const toggleTodo = useAppStore((s) => s.toggleTodo);
   const cycleTag = useAppStore((s) => s.cycleTag);
+  const updateTask = useAppStore((s) => s.updateTask);
   const deleteTask = useAppStore((s) => s.deleteTask);
   const rescheduleTask = useAppStore((s) => s.rescheduleTask);
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(t.title);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  const isRescheduling = reschedulingId === t.id;
+  useEffect(() => {
+    if (!isRescheduling) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setReschedulingId(null);
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [isRescheduling, setReschedulingId]);
+
+  const startEdit = () => {
+    setDraft(t.title);
+    setEditing(true);
+  };
+  const commitEdit = () => {
+    updateTask(t.id, { title: draft });
+    setEditing(false);
+  };
 
   const tStr = todayStr();
   const isUnsched = t.date === null;
@@ -65,6 +100,39 @@ export function TaskRow({ t, datePop }: Props) {
               选择日期
             </button>
             <button className="chip ghost" onClick={() => setReschedulingId(null)}>
+              取消
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div key={t.id} className={`task rename-row${isUnsched ? ' inbound' : ''}`} data-id={t.id}>
+        <div className="rename-body">
+          <input
+            ref={inputRef}
+            className="task-title-input"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                commitEdit();
+              } else if (e.key === 'Escape') {
+                e.preventDefault();
+                setEditing(false);
+              }
+            }}
+          />
+          <div className="rename-actions">
+            <button className="chip" onClick={commitEdit}>
+              保存
+            </button>
+            <button className="chip ghost" onClick={() => setEditing(false)}>
               取消
             </button>
           </div>
@@ -132,6 +200,9 @@ export function TaskRow({ t, datePop }: Props) {
       </div>
       <span className={`prio ${t.prio}`} title="优先级" />
       <div className="task-actions">
+        <button className="mini-btn" data-act="rename" title="编辑任务" onClick={startEdit}>
+          编辑
+        </button>
         {action}
         <button className="del" data-act="del" title="删除" onClick={() => deleteTask(t.id)}>
           ×

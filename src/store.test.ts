@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useAppStore } from '@/store';
+import { todayStr } from '@/lib/date';
 
 function resetStore() {
   useAppStore.setState({
@@ -145,5 +146,69 @@ describe('resetAll', () => {
     expect(s.findOpen).toBe(false);
     expect(s.planView).toEqual({ kind: 'date' });
     expect(s.settings).toEqual({ theme: 'dark', defaultTag: '学习' });
+  });
+});
+
+describe('updateTask', () => {
+  beforeEach(() => {
+    resetStore();
+    useAppStore.setState({
+      tasks: [
+        { id: 1, title: '原任务', tag: '工作', prio: 'mid', date: null, done: false, doneAt: null },
+      ],
+    });
+  });
+
+  it('renames the task, trimming surrounding whitespace', () => {
+    useAppStore.getState().updateTask(1, { title: '  新名字  ' });
+    expect(useAppStore.getState().tasks[0].title).toBe('新名字');
+  });
+
+  it('ignores a blank title (no empty task names)', () => {
+    useAppStore.getState().updateTask(1, { title: '   ' });
+    expect(useAppStore.getState().tasks[0].title).toBe('原任务');
+  });
+
+  it('is a no-op for an unknown id', () => {
+    useAppStore.getState().updateTask(99, { title: 'x' });
+    expect(useAppStore.getState().tasks.map((t) => t.title)).toEqual(['原任务']);
+  });
+});
+
+describe('persistNow', () => {
+  beforeEach(resetStore);
+
+  it('flips the save state to saved once the write resolves', async () => {
+    useAppStore.setState({ saveState: 'saving' });
+    await useAppStore.getState().persistNow();
+    expect(useAppStore.getState().saveState).toBe('saved');
+  });
+});
+
+describe('plan page defaults', () => {
+  beforeEach(resetStore);
+
+  it('selects today (date view) whenever the plan page is entered', () => {
+    useAppStore.setState({
+      page: 'settings',
+      selectedDate: '2000-01-01',
+      planView: { kind: 'pending' },
+      calMonth: new Date(2000, 0, 1),
+      reschedulingId: 5,
+    });
+    useAppStore.getState().setPage('plan');
+    const s = useAppStore.getState();
+    expect(s.selectedDate).toBe(todayStr());
+    expect(s.planView).toEqual({ kind: 'date' });
+    expect(s.reschedulingId).toBeNull();
+  });
+
+  it('lands on today for ⌘I new todo as well', () => {
+    useAppStore.setState({ page: 'notes', selectedDate: '2000-01-01', planView: { kind: 'unscheduled' } });
+    useAppStore.getState().requestNewTodo();
+    const s = useAppStore.getState();
+    expect(s.page).toBe('plan');
+    expect(s.selectedDate).toBe(todayStr());
+    expect(s.planView).toEqual({ kind: 'date' });
   });
 });

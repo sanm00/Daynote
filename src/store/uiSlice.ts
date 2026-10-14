@@ -1,6 +1,19 @@
 import { parseDate, today, todayStr } from '@/lib/date';
 import type { SliceCreator, UiSlice } from './types';
 
+/** Plan page always opens on today, regardless of where the user left it. */
+function planTodayState() {
+  const t = todayStr();
+  const d = today();
+  return {
+    planView: { kind: 'date' as const },
+    selectedDate: t,
+    calMonth: new Date(d.getFullYear(), d.getMonth(), 1),
+    reschedulingId: null,
+    addDate: t,
+  };
+}
+
 export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   page: 'plan',
   prevPage: 'plan',
@@ -28,7 +41,8 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   setPage: (page) => {
     const s = get();
     if (s.page === 'notes' && page !== 'notes') s.finalizeNote(s.currentNoteId);
-    set({ page, prevPage: page === 'search' ? s.prevPage : s.page });
+    const base = { page, prevPage: page === 'search' ? s.prevPage : s.page };
+    set(page === 'plan' ? { ...base, ...planTodayState() } : base);
   },
   openSearch: () => {
     const cur = get().page;
@@ -36,12 +50,13 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   },
   closeSearch: () => {
     const { prevPage } = get();
-    set({ page: prevPage === 'search' ? 'plan' : prevPage });
+    const target = prevPage === 'search' ? 'plan' : prevPage;
+    set(target === 'plan' ? { page: target, ...planTodayState() } : { page: target });
   },
   requestNewTodo: () =>
     set({
+      ...planTodayState(),
       page: 'plan',
-      reschedulingId: null,
       newTodoPending: true,
     }),
   consumeNewTodo: () => set({ newTodoPending: false }),
