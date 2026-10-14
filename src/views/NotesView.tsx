@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import { relTime } from '../lib/date';
-import { TAG_ORDER } from '../lib/tags';
-import { mdToHtml, plainText, insertPair, toggleFence } from '../lib/markdown';
-import { toast } from '../lib/toast';
-import { confirmDialog } from '../lib/confirm';
-import type { Note, Tag } from '../types';
+import { useAppStore } from '@/store';
+import { relTime } from '@/lib/date';
+import { TAG_ORDER } from '@/lib/tags';
+import { mdToHtml, plainText, insertPair, toggleFence } from '@/lib/markdown';
+import { toast } from '@/lib/toast';
+import { confirmDialog } from '@/lib/confirm';
+import type { Note, Tag } from '@/types';
 
 const NOTE_ICON = (
   <>

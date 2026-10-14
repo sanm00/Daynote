@@ -1,4 +1,5 @@
-import type { Note, Settings, Task } from '../types';
+import type { Note, Settings, Task } from '@/types';
+import { LOCAL_KEY } from './constants';
 
 export interface StoreData {
   version: number;
@@ -22,8 +23,6 @@ export interface StorageAdapter {
   /** Absolute storage root, or `null` when the backend has no filesystem. */
   root(): Promise<string | null>;
 }
-
-const LOCAL_KEY = 'daynote-data';
 
 function createLocalAdapter(): StorageAdapter {
   return {

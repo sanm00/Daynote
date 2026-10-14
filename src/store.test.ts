@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useAppStore } from './store';
+import { useAppStore } from '@/store';
 
 function resetStore() {
   useAppStore.setState({

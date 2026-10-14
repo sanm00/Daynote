@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { useAppStore } from './store';
-import { Titlebar } from './components/Titlebar';
-import { Sidebar } from './components/Sidebar';
-import { ConfirmHost } from './components/ConfirmHost';
-import { PlanView } from './views/PlanView';
-import { NotesView } from './views/NotesView';
-import { ReviewView } from './views/ReviewView';
-import { SearchView } from './views/SearchView';
-import { SettingsView } from './views/SettingsView';
-import { HelpView } from './views/HelpView';
+import { useAppStore } from '@/store';
+import { Titlebar } from '@/components/Titlebar';
+import { Sidebar } from '@/components/Sidebar';
+import { ConfirmHost } from '@/components/ConfirmHost';
+import { PlanView } from '@/views/PlanView';
+import { NotesView } from '@/views/NotesView';
+import { ReviewView } from '@/views/ReviewView';
+import { SearchView } from '@/views/SearchView';
+import { SettingsView } from '@/views/SettingsView';
+import { HelpView } from '@/views/HelpView';
 
 export function App() {
   const page = useAppStore((s) => s.page);

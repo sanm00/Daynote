@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import { todayStr } from '../lib/date';
-import { QUOTES } from '../lib/quotes';
-import type { Page } from '../types';
+import { useAppStore } from '@/store';
+import { todayStr } from '@/lib/date';
+import { QUOTES } from '@/lib/quotes';
+import type { Page } from '@/types';
 
 const NAV: Array<{ id: Page; label: string; icon: JSX.Element }> = [
   {

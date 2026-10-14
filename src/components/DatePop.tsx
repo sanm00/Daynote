@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { addDays, fmt, parseDate, today, todayStr } from '../lib/date';
+import { addDays, fmt, parseDate, today, todayStr } from '@/lib/date';
 
 export interface DatePopProps {
   open: boolean;

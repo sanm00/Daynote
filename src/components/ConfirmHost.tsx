@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useConfirmStore } from '../lib/confirm';
+import { useConfirmStore } from '@/lib/confirm';
 
 /** Renders the active `confirmDialog()` request. Mount once at the app root. */
 export function ConfirmHost() {

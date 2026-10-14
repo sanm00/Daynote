@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import type { Priority, Task } from '../types';
+import { useAppStore } from '@/store';
+import type { Priority, Task } from '@/types';
 import {
   addDays,
   dateLabel,
@@ -12,10 +12,10 @@ import {
   parseDate,
   today,
   todayStr,
-} from '../lib/date';
-import { TAG_DOT, TAG_ORDER } from '../lib/tags';
-import { toast } from '../lib/toast';
-import { DatePop } from '../components/DatePop';
+} from '@/lib/date';
+import { TAG_DOT, TAG_ORDER } from '@/lib/tags';
+import { toast } from '@/lib/toast';
+import { DatePop } from '@/components/DatePop';
 
 const pw: Record<Priority, number> = { high: 0, mid: 1, low: 2 };
 

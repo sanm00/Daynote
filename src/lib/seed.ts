@@ -1,4 +1,4 @@
-import type { Note, Priority, Tag, Task } from '../types';
+import type { Note, Priority, Tag, Task } from '@/types';
 import { addDays, fmt, parseDate, today, todayStr } from './date';
 import { TAG_ORDER } from './tags';
 

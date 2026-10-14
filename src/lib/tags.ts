@@ -1,4 +1,4 @@
-import type { Tag } from '../types';
+import type { Tag } from '@/types';
 
 export const TAG_ORDER: Tag[] = ['工作', '学习', '生活', '健康'];
 

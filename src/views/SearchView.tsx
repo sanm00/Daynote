@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import { dateLabelFor, todayStr } from '../lib/date';
-import { escapeHtml, plainText } from '../lib/markdown';
-import { relTime } from '../lib/date';
-import { toast } from '../lib/toast';
-import type { SearchType } from '../types';
+import { useAppStore } from '@/store';
+import { dateLabelFor, todayStr } from '@/lib/date';
+import { escapeHtml, plainText } from '@/lib/markdown';
+import { relTime } from '@/lib/date';
+import { toast } from '@/lib/toast';
+import type { SearchType } from '@/types';
 
 function highlight(text: string, q: string): string {
   const safe = escapeHtml(text == null ? '' : text);

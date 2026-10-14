@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import { fmt } from '../lib/date';
-import { TAG_ORDER } from '../lib/tags';
-import { toast } from '../lib/toast';
-import { isTauriRuntime } from '../lib/storage';
-import { pickJsonFile, saveJsonFile } from '../lib/fileio';
-import { confirmDialog } from '../lib/confirm';
+import { useAppStore } from '@/store';
+import { fmt } from '@/lib/date';
+import { TAG_ORDER } from '@/lib/tags';
+import { toast } from '@/lib/toast';
+import { isTauriRuntime } from '@/lib/storage';
+import { pickJsonFile, saveJsonFile } from '@/lib/fileio';
+import { confirmDialog } from '@/lib/confirm';
 
 export function SettingsView() {
   const settings = useAppStore((s) => s.settings);

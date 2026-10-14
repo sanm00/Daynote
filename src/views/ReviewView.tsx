@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useAppStore } from '../store';
-import { addDays, dayNames, dayOf, fmt, hmOf, parseDate, today, todayStr } from '../lib/date';
-import { TAG_STYLE } from '../lib/tags';
-import type { ReviewRange, Task } from '../types';
+import { useAppStore } from '@/store';
+import { addDays, dayNames, dayOf, fmt, hmOf, parseDate, today, todayStr } from '@/lib/date';
+import { TAG_STYLE } from '@/lib/tags';
+import type { ReviewRange, Task } from '@/types';
 
 interface Range {
   start: Date;
