@@ -6,7 +6,7 @@ import { ConfirmHost } from '@/components/ConfirmHost';
 import { PlanView } from '@/views/plan/PlanView';
 import { NotesView } from '@/views/notes/NotesView';
 import { ReviewView } from '@/views/review/ReviewView';
-import { SearchView } from '@/views/SearchView';
+import { SearchView } from '@/views/search/SearchView';
 import { SettingsView } from '@/views/SettingsView';
 import { HelpView } from '@/views/HelpView';
 
