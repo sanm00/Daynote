@@ -5,7 +5,7 @@ import { TAG_ORDER } from '@/lib/tags';
 import { mdToHtml, plainText, insertPair, toggleFence } from '@/lib/markdown';
 import { toast } from '@/lib/toast';
 import { confirmDialog } from '@/lib/confirm';
-import type { Note, Tag } from '@/types';
+import { getFilteredNotes } from '@/lib/selectors';
 
 const NOTE_ICON = (
   <>
@@ -13,12 +13,6 @@ const NOTE_ICON = (
     <path d="M8 9h8M8 13h8M8 17h5" />
   </>
 );
-
-function getFilteredNotes(notes: Note[], filter: Tag | 'all'): Note[] {
-  return notes
-    .filter((n) => filter === 'all' || n.tag === filter)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-}
 
 export function NotesView() {
   const notes = useAppStore((s) => s.notes);

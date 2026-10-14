@@ -4,6 +4,7 @@ import { dateLabelFor, todayStr } from '@/lib/date';
 import { escapeHtml, plainText } from '@/lib/markdown';
 import { relTime } from '@/lib/date';
 import { toast } from '@/lib/toast';
+import { SUGGEST_KEYWORDS } from '@/lib/constants';
 import type { SearchType } from '@/types';
 
 function highlight(text: string, q: string): string {
@@ -23,8 +24,6 @@ function snippetAround(text: string, q: string, radius: number): string {
   return (start > 0 ? '…' : '') + t.slice(start, end) + (end < t.length ? '…' : '');
 }
 
-const SUGGEST_KW = ['整理', '咖啡', '跑步', '周报', '需求'];
-
 export function SearchView() {
   const tasks = useAppStore((s) => s.tasks);
   const notes = useAppStore((s) => s.notes);
@@ -41,7 +40,7 @@ export function SearchView() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [suggestion] = useState(
-    () => SUGGEST_KW[Math.floor(Math.random() * SUGGEST_KW.length)],
+    () => SUGGEST_KEYWORDS[Math.floor(Math.random() * SUGGEST_KEYWORDS.length)],
   );
 
   useEffect(() => {

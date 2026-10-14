@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
-import type { Priority, Task } from '@/types';
+import type { Task } from '@/types';
 import {
   addDays,
   dateLabel,
@@ -15,19 +15,8 @@ import {
 } from '@/lib/date';
 import { TAG_DOT, TAG_ORDER } from '@/lib/tags';
 import { toast } from '@/lib/toast';
+import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled } from '@/lib/selectors';
 import { DatePop } from '@/components/DatePop';
-
-const pw: Record<Priority, number> = { high: 0, mid: 1, low: 2 };
-
-const getOverdue = (tasks: Task[]) => {
-  const tStr = todayStr();
-  return tasks.filter((t) => !t.done && t.date && t.date < tStr).sort((a, b) => b.date!.localeCompare(a.date!));
-};
-const getUnscheduled = (tasks: Task[]) =>
-  tasks
-    .filter((t) => t.date === null)
-    .sort((a, b) => Number(a.done) - Number(b.done) || (b.parsedAt || '').localeCompare(a.parsedAt || ''));
-const getPending = (tasks: Task[]) => tasks.filter((t) => !t.done);
 
 export function PlanView() {
   const tasks = useAppStore((s) => s.tasks);
