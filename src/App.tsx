@@ -3,7 +3,7 @@ import { useAppStore } from '@/store';
 import { Titlebar } from '@/components/Titlebar';
 import { Sidebar } from '@/components/Sidebar';
 import { ConfirmHost } from '@/components/ConfirmHost';
-import { PlanView } from '@/views/PlanView';
+import { PlanView } from '@/views/plan/PlanView';
 import { NotesView } from '@/views/notes/NotesView';
 import { ReviewView } from '@/views/review/ReviewView';
 import { SearchView } from '@/views/SearchView';
