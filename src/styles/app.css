@@ -1,0 +1,288 @@
+/*
+ * App-shell overrides.
+ * The demo rendered `.window` directly under <body>, which is a flex container
+ * that centers its children. React needs a mount node, so we make `#root`
+ * transparent to layout and let `.window` stay a direct flex item of <body>.
+ * This keeps the demo's sizing/centering pixel-identical.
+ */
+#root {
+  display: contents;
+}
+
+/*
+ * The demo dressed the page up as a floating macOS app: 14px of "desktop"
+ * around a rounded, shadowed `.window`. A real Tauri window already *is* that
+ * frame, so drop the mock chrome and let the layout fill the native window
+ * edge to edge. demo.css is kept verbatim, so the override lives here.
+ */
+body {
+  padding: 0;
+}
+
+.window {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
+ * macOS Overlay title bar: the native traffic lights now float over our custom
+ * bar, so inset the title past them. The bar itself is the drag region
+ * (`data-tauri-drag-region` in Titlebar.tsx).
+ */
+.titlebar {
+  padding-left: 84px;
+}
+
+/*
+ * Left/right window layout: the traffic-light strip only spans the first
+ * column (the sidebar); the content column runs the full window height.
+ */
+.app-body {
+  flex-direction: row;
+}
+
+.side-col {
+  width: 206px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  transition: background 0.3s;
+}
+
+/* Full-height divider lives on the column; the sidebar needs no own edge. */
+.side-col .sidebar {
+  flex: 1;
+  min-height: 0;
+  border-right: 0;
+}
+
+/* The strip is only as wide as the sidebar, so drop the full-width divider. */
+.side-col .titlebar {
+  border-bottom: 0;
+  box-sizing: content-box;
+  margin-right: -1px;
+}
+
+/* Full-width search entry sitting under the brand block, with its shortcut. */
+.sidebar .search-trigger {
+  width: 100%;
+  height: 28px;
+  padding: 0 6px 0 8px;
+  margin-top: -4px;
+}
+.sidebar .search-trigger span {
+  flex: 1;
+  text-align: left;
+}
+
+/* Shortcut hint: dimmed text linked to the label by a middle dot, no keycap. */
+.search-trigger .search-hint {
+  flex: none;
+  color: var(--muted-2);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+}
+.search-trigger .search-hint::before {
+  content: "·";
+  margin-right: 4px;
+}
+.search-trigger:hover .search-hint {
+  color: var(--primary);
+}
+
+/*
+ * The demo's list markers sit flush against `.note-render`'s left edge
+ * (padding-left:0), so the "1." / "2." digits get shaved by the container's
+ * overflow clip. Give lists room for their markers.
+ */
+.note-render ul,
+.note-render ol {
+  padding-left: 22px;
+}
+
+/*
+ * The demo sets `.note-render{flex:1 0 auto}`, which lets the rendered body grow
+ * to its full content height instead of filling the pane. Long notes then push
+ * past `.notes-main`(overflow:hidden) and the tail is clipped with no way to
+ * scroll. Let it shrink so its own overflow-y:auto scrolls within the pane.
+ */
+.note-render {
+  flex: 1 1 auto;
+}
+
+/* Shortcut hint on gradient primary buttons: dimmed text tied to the label by a
+ * middle dot, not a bordered keycap. */
+.btn.primary .btn-hint {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+}
+.btn.primary .btn-hint::before {
+  content: "·";
+  margin-right: 4px;
+}
+
+/* No focus ring at all while editing the note title/body. */
+.note-title-input:focus-visible,
+.note-content-input:focus-visible {
+  outline: none;
+}
+
+/*
+ * Code-friendly body editing: keep typed indentation aligned and let the
+ * textarea scroll horizontally instead of wrapping long code lines.
+ */
+.note-content-input {
+  tab-size: 2;
+  white-space: pre;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* Keyboard-shortcut reference on the help page: label on the left, keycaps on
+ * the right, grouped in a two-column grid. */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+}
+.shortcut-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shortcut-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+}
+.shortcut-group-title::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--primary);
+  flex: none;
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+}
+.shortcut-keys kbd {
+  font-family: inherit;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 6px;
+  background: var(--surface-2);
+  line-height: 1.5;
+}
+.shortcut-sep {
+  font-size: var(--fs-2xs);
+  color: var(--muted-2);
+  padding: 0 1px;
+}
+
+/* Help cards are static reference material; no hover affordance. */
+.help-card:hover {
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+
+/* Disabled action buttons read as inactive rather than clickable. */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---------- Confirm dialog (in-app replacement for window.confirm) ---------- */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(48, 47, 42, 0.26);
+  backdrop-filter: blur(1.5px);
+  animation: confirm-fade 0.14s var(--ease);
+}
+.confirm-dialog {
+  width: 328px;
+  max-width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 18px 48px rgba(48, 47, 42, 0.22), 0 2px 8px rgba(0, 0, 0, 0.06);
+  animation: confirm-pop 0.16s var(--ease);
+}
+.confirm-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.confirm-message {
+  font-size: var(--fs-base);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+.confirm-actions .btn {
+  padding: 6px 14px;
+}
+html[data-theme='dark'] .confirm-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+@keyframes confirm-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes confirm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+/* Main left-hand navigation reads a bit larger than the demo's default. */
+.nav-item {
+  font-size: var(--fs-base);
+}
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+}
