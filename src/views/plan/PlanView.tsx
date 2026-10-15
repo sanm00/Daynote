@@ -3,6 +3,7 @@ import { getOverdue, getPending, getUnscheduled } from '@/lib/selectors';
 import { useDatePop } from './useDatePop';
 import { QuickAddForm } from './QuickAddForm';
 import { CalendarCard } from './CalendarCard';
+import { TodayOverview } from './TodayOverview';
 import { TaskPanel } from './TaskPanel';
 
 export function PlanView() {
@@ -21,6 +22,7 @@ export function PlanView() {
         <div className="plan-side">
           <QuickAddForm datePop={datePop} />
           <CalendarCard />
+          <TodayOverview />
           <div className="metric-row">
             <button
               className={`metric-card overdue${!overdueList.length ? ' zero' : ''}${

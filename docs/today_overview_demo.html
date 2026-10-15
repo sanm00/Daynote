@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今日概览 · UI Demo</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f7f3ed;
+    --card: #fffdf9;
+    --card-soft: #fbf5ec;
+    --ink: #453b37;
+    --muted: #8d8179;
+    --line: #e7ddd3;
+    --brand: #e98670;
+    --brand-2: #f5b36f;
+    --brand-soft: #fff0e3;
+    --green: #77a977;
+    --green-soft: #edf5e8;
+    --red: #d95f5b;
+    --red-soft: #fff0ef;
+    --shadow: 0 5px 18px rgba(77, 55, 39, .07);
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --page: #171b22;
+    --card: #202630;
+    --card-soft: #292d35;
+    --ink: #f1e8df;
+    --muted: #aaa09a;
+    --line: #3d424a;
+    --brand: #f28d83;
+    --brand-2: #f3b36f;
+    --brand-soft: #392d2b;
+    --green: #91c48b;
+    --green-soft: #26372f;
+    --red: #ff8a88;
+    --red-soft: #3b292c;
+    --shadow: 0 7px 22px rgba(0, 0, 0, .2);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 34px 18px; background: var(--page); color: var(--ink);
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    transition: background .25s, color .25s;
+  }
+  .demo { max-width: 470px; margin: 0 auto; }
+  .toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .eyebrow { color:var(--muted); font-size:12px; letter-spacing:.08em; }
+  .theme-toggle {
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    padding:7px 11px; border-radius:999px; cursor:pointer; font:inherit;
+  }
+  .overview {
+    position:relative; overflow:hidden; padding:17px 17px 15px; border:1px solid var(--line);
+    border-radius:16px; background:var(--card); box-shadow:var(--shadow);
+    transition: border-color .2s, background .25s;
+  }
+  .overview.warning { border-color: color-mix(in srgb, var(--red) 55%, var(--line)); }
+  .head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .heading { display:flex; align-items:center; gap:9px; }
+  .sun { font-size:20px; width:25px; text-align:center; }
+  h2 { font-family: Georgia, "Songti SC", "STSong", serif; font-size:19px; font-weight:600; margin:0; letter-spacing:.03em; }
+  .clock { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+  .summary { margin-top:14px; color:var(--muted); font-size:13px; }
+  .summary strong { color:var(--ink); font-size:15px; font-weight:650; }
+  .summary .pct { margin-left:5px; color:var(--brand); font-weight:650; }
+  .warning .summary .pct { color:var(--red); }
+  .progress-wrap { position:relative; margin:17px 0 19px; }
+  .segments { display:flex; align-items:center; gap:5px; width:100%; }
+  .segment {
+    position:relative; flex:1 1 0; min-width:0; height:12px; border:1px solid var(--line);
+    border-radius:999px; background:transparent; cursor:pointer; padding:0; outline:none;
+    transition:background .25s, border-color .25s, transform .2s, box-shadow .2s;
+  }
+  .segment.done {
+    border-color:transparent;
+    background:linear-gradient(110deg, var(--brand-2), var(--brand));
+  }
+  .segment.next::before {
+    content:""; position:absolute; left:50%; top:-7px; transform:translateX(-50%);
+    width:6px; height:6px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 2px var(--card);
+  }
+  .segment.next::after {
+    content:"下一件"; position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%);
+    white-space:nowrap; padding:2px 6px; border-radius:5px; background:var(--ink); color:var(--card);
+    font-size:10px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .15s;
+  }
+  .segment.next:hover::after, .segment.next:focus-visible::after { opacity:1; }
+  .segment:focus-visible { box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 28%, transparent); }
+  .segment:hover { transform:translateY(-1px); }
+  .segment.all-done { background:linear-gradient(110deg, #a6cf91, var(--green)); border-color:transparent; }
+  .segment.alert-done { background:linear-gradient(110deg, #ffb17d, #ef6f7e); border-color:transparent; }
+  .notice {
+    display:flex; gap:10px; align-items:flex-start; padding:11px 12px; border-radius:11px;
+    background:var(--brand-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--brand) 10%, transparent);
+  }
+  .notice-icon { font-size:17px; line-height:1.35; flex:0 0 auto; }
+  .notice-title { font-size:13px; font-weight:650; margin-bottom:2px; }
+  .notice-copy { color:var(--muted); font-size:12px; line-height:1.6; }
+  .warning .notice { background:var(--red-soft); border-color:color-mix(in srgb, var(--red) 24%, transparent); }
+  .warning .notice-title, .warning .notice-copy, .warning .notice-icon { color:var(--red); }
+  .complete .notice { background:var(--green-soft); border-color:color-mix(in srgb, var(--green) 18%, transparent); }
+  .complete .notice-icon, .complete .notice-title { color:var(--green); }
+  .task-preview { margin-top:14px; }
+  .task-preview-head { display:flex; align-items:center; gap:7px; margin-bottom:7px; color:var(--muted); font-size:11px; }
+  .task-preview-head::before { content:""; width:4px; height:4px; border-radius:50%; background:var(--brand); }
+  .task-list { display:grid; gap:3px; }
+  .task {
+    display:flex; align-items:center; gap:9px; padding:5px 3px; border-radius:7px; font-size:12px;
+    transition:background .2s, box-shadow .2s;
+  }
+  .task-time { width:37px; color:var(--muted); font-variant-numeric:tabular-nums; flex:0 0 auto; }
+  .task-check { width:12px; height:12px; border:1px solid var(--brand); border-radius:50%; flex:0 0 auto; }
+  .task-name { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .task.highlight { background:var(--brand-soft); box-shadow:0 0 0 2px color-mix(in srgb, var(--brand) 28%, transparent); animation:flash 1.1s ease-in-out 2; }
+  @keyframes flash { 0%,100% { background:var(--brand-soft); } 50% { background:color-mix(in srgb, var(--brand) 23%, var(--card)); } }
+  .empty-tasks { display:none; padding:6px 2px 2px; color:var(--muted); font-size:12px; }
+  .footnote { margin-top:12px; text-align:right; font-size:10px; color:var(--muted); }
+  .controls { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+  .controls button {
+    border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--muted);
+    padding:6px 9px; cursor:pointer; font:inherit; font-size:11px;
+  }
+  .controls button:hover { color:var(--ink); border-color:var(--brand); }
+  .hint { margin-top:9px; font-size:11px; color:var(--muted); }
+  @media (max-width:420px) { body { padding:20px 12px; } .overview { padding:15px 13px 13px; } .segments { gap:4px; } }
+</style>
+</head>
+<body>
+<main class="demo" id="app">
+  <div class="toolbar">
+    <div>
+      <div class="eyebrow">计划 · 左侧栏组件</div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button">☾ 深色主题</button>
+  </div>
+
+  <section class="overview" id="overview" aria-label="今日概览">
+    <header class="head">
+      <div class="heading"><span class="sun" id="periodIcon">☀</span><h2>今日概览</h2></div>
+      <time class="clock" id="clock">--:--</time>
+    </header>
+
+    <div class="summary"><strong id="doneCount">3</strong> / <span id="totalCount">8</span> 项已完成 · <span class="pct" id="percentage">38%</span></div>
+
+    <div class="progress-wrap">
+      <div class="segments" id="segments" aria-label="任务完成进度"></div>
+    </div>
+
+    <div class="notice" id="notice" role="status">
+      <div class="notice-icon" id="noticeIcon">☀️</div>
+      <div>
+        <div class="notice-title" id="noticeTitle">上午好！</div>
+        <div class="notice-copy" id="noticeCopy">今天还有 5 项待完成，记得按计划推进哦～</div>
+      </div>
+    </div>
+
+    <div class="task-preview" id="taskPreview">
+      <div class="task-preview-head" id="taskPreviewHead">即将开始</div>
+      <div class="task-list" id="taskList"></div>
+    </div>
+    <div class="empty-tasks" id="emptyTasks">今天还没有安排</div>
+    <div class="footnote" id="footnote">点按进度段，定位并高亮对应任务</div>
+  </section>
+
+  <div class="controls" aria-label="演示状态">
+    <button data-state="morning">上午状态</button>
+    <button data-state="afternoon">下午状态</button>
+    <button data-state="evening">晚上状态</button>
+    <button data-state="complete">全部完成</button>
+    <button data-state="overdue">逾期警示</button>
+    <button data-state="empty">无任务</button>
+  </div>
+  <div class="hint">可悬停进度段查看任务标题；点击进度段会定位并高亮下方任务。时钟默认使用本机时间。</div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const tasks = [
+    { title: "整理今天的优先事项", time: "09:00", done: true },
+    { title: "回复重要邮件", time: "09:30", done: true },
+    { title: "团队会议", time: "10:30", done: true },
+    { title: "阅读半小时", time: "11:00", done: false },
+    { title: "项目评审", time: "15:00", done: false },
+    { title: "散步与休息", time: "16:30", done: false },
+    { title: "整理灵感笔记", time: "20:30", done: false },
+    { title: "准备明日计划", time: "21:00", done: false }
+  ];
+  let state = "morning";
+  let dark = false;
+  let currentTasks = tasks.map(t => ({...t}));
+  const configs = {
+    morning: { icon:"☀", noticeIcon:"☀️", title:"上午好！", copy:"今天还有 5 项待完成，记得按计划推进哦～", preview:true },
+    afternoon: { icon:"☁", noticeIcon:"⏰", title:"下午好！", copy:"剩余 3 项未完成，加油完成今天的计划吧。", preview:true },
+    evening: { icon:"☾", noticeIcon:"🌙", title:"晚上好！", copy:"今天还有 2 项未完成，早点休息，明天继续～", preview:true },
+    complete: { icon:"✓", noticeIcon:"☻", title:"太棒了！", copy:"今天的任务全部完成！好好犒劳一下自己吧～", preview:false },
+    overdue: { icon:"!", noticeIcon:"!", title:"有 2 项已逾期！", copy:"别着急，先挑一件最重要的继续推进。", preview:true },
+    empty: { icon:"☾", noticeIcon:"🍃", title:"留一点自由时间", copy:"可以从笔记里添加一些新计划～", preview:false }
+  };
+
+  function setState(next) {
+    state = next;
+    currentTasks = tasks.map(t => ({...t}));
+    if (next === "afternoon") currentTasks[3].done = currentTasks[4].done = true;
+    if (next === "evening") currentTasks.slice(0,6).forEach(t => t.done = true);
+    if (next === "complete") currentTasks.forEach(t => t.done = true);
+    if (next === "overdue") { currentTasks[3].overdue = true; currentTasks[4].overdue = true; }
+    if (next === "empty") currentTasks = [];
+    render();
+  }
+
+  function render() {
+    const cfg = configs[state];
+    const total = currentTasks.length;
+    const done = currentTasks.filter(t => t.done).length;
+    const remaining = total - done;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    $("periodIcon").textContent = cfg.icon;
+    $("doneCount").textContent = done;
+    $("totalCount").textContent = total;
+    $("percentage").textContent = pct + "%";
+    $("noticeIcon").textContent = cfg.noticeIcon;
+    $("noticeTitle").textContent = cfg.title;
+    $("noticeCopy").textContent = cfg.copy;
+    $("overview").classList.toggle("warning", state === "overdue");
+    $("overview").classList.toggle("complete", state === "complete");
+    $("taskPreview").style.display = cfg.preview && total ? "block" : "none";
+    $("emptyTasks").style.display = total ? "none" : "block";
+    $("footnote").style.display = total ? "block" : "none";
+    $("taskPreviewHead").textContent = state === "evening" ? "今晚安排" : "即将开始";
+
+    if (state === "morning") $("noticeCopy").textContent = `今天还有 ${remaining} 项待完成，记得按计划推进哦～`;
+    if (state === "afternoon") {
+      const pending = currentTasks.filter(t => !t.done).slice(0,2).map(t => t.title);
+      $("noticeCopy").textContent = `剩余 ${remaining} 项未完成${pending.length ? "：" + pending.join("、") : ""}，加油完成今天的计划吧。`;
+    }
+    if (state === "evening") $("noticeCopy").textContent = `今天还有 ${remaining} 项未完成，早点休息，明天继续～`;
+    if (state === "overdue") $("noticeCopy").textContent = `剩余 ${remaining} 项未完成。另有 ${currentTasks.filter(t=>t.overdue).length} 项已逾期。`;
+    if (state === "complete") $("noticeCopy").textContent = "今天的任务全部完成！好好犒劳一下自己吧～";
+    if (state === "empty") $("noticeCopy").textContent = "今天还没有安排，可以从笔记里添加一些新计划～";
+
+    const segs = $("segments");
+    segs.innerHTML = "";
+    const nextIndex = currentTasks.findIndex(t => !t.done);
+    currentTasks.forEach((task, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "segment";
+      if (task.done) b.classList.add(state === "complete" ? "all-done" : state === "overdue" ? "alert-done" : "done");
+      if (i === nextIndex && state !== "complete") b.classList.add("next");
+      b.title = task.title + (task.done ? "（已完成）" : "（未完成）");
+      b.setAttribute("aria-label", b.title);
+      b.addEventListener("click", () => {
+        const row = document.querySelector(`[data-task-index="${i}"]`);
+        if (row) {
+          row.scrollIntoView({ behavior:"smooth", block:"nearest" });
+          row.classList.remove("highlight");
+          void row.offsetWidth;
+          row.classList.add("highlight");
+          setTimeout(() => row.classList.remove("highlight"), 2600);
+        }
+      });
+      segs.appendChild(b);
+    });
+
+    const list = $("taskList");
+    list.innerHTML = "";
+    currentTasks.map((t,i)=>({...t, i})).filter(t=>!t.done).slice(0, state === "afternoon" ? 2 : 2).forEach(t => {
+      const row = document.createElement("div");
+      row.className = "task";
+      row.dataset.taskIndex = t.i;
+      row.innerHTML = `<span class="task-check"></span><span class="task-time">${t.time}</span><span class="task-name"></span>`;
+      row.querySelector(".task-name").textContent = t.title;
+      list.appendChild(row);
+    });
+    if (state === "overdue") {
+      const overdueTask = currentTasks.find(t=>t.overdue);
+      if (overdueTask) {
+        const row = [...list.children].find(el => el.querySelector(".task-name")?.textContent === overdueTask.title);
+        if (row) row.style.color = "var(--red)";
+      }
+    }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    $("clock").textContent = now.toLocaleTimeString("zh-CN", {hour:"2-digit", minute:"2-digit", hour12:false});
+  }
+  $("themeToggle").addEventListener("click", () => {
+    dark = !dark;
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    $("themeToggle").textContent = dark ? "☀ 浅色主题" : "☾ 深色主题";
+  });
+  document.querySelectorAll("[data-state]").forEach(btn => btn.addEventListener("click", () => setState(btn.dataset.state)));
+  updateClock();
+  setInterval(updateClock, 1000);
+  setState("morning");
+})();
+</script>
+</body>
+</html>

@@ -207,3 +207,37 @@ export function computeLogGroups(doneTasks: Task[]): LogGroup[] {
       items: items.sort((a, b) => (a.doneAt || '').localeCompare(b.doneAt || '')),
     }));
 }
+
+export interface RemainGroup {
+  ds: string;
+  late: boolean;
+  items: Task[];
+}
+
+/** Undone tasks scheduled inside the range, grouped by due date; overdue group first. */
+export function computeRemainGroups(tasks: Task[], r: Range): RemainGroup[] {
+  const s = fmt(r.start);
+  const e = fmt(r.end);
+  const tStr = todayStr();
+  const rem = tasks.filter((t) => !t.done && t.date !== null && t.date >= s && t.date <= e);
+  const byDate = new Map<string, Task[]>();
+  rem.forEach((t) => {
+    const d = t.date!;
+    if (!byDate.has(d)) byDate.set(d, []);
+    byDate.get(d)!.push(t);
+  });
+  return [...byDate.entries()]
+    .sort((a, b) => {
+      const la = a[0] < tStr;
+      const lb = b[0] < tStr;
+      if (la !== lb) return la ? -1 : 1;
+      return a[0].localeCompare(b[0]);
+    })
+    .map(([ds, items]) => ({ ds, late: ds < tStr, items }));
+}
+
+/** Count of overdue tasks among the given list. */
+export function countOverdue(tasks: Task[]): number {
+  const tStr = todayStr();
+  return tasks.filter((t) => !t.done && t.date !== null && t.date < tStr).length;
+}

@@ -3,8 +3,10 @@ import { useAppStore } from '@/store';
 import {
   computeChart,
   computeLogGroups,
+  computeRemainGroups,
   computeStats,
   computeTagEntries,
+  countOverdue,
   getRange,
   rangeLabel,
 } from '@/lib/stats';
@@ -36,6 +38,8 @@ export function ReviewView() {
   const chart = useMemo(() => computeChart(r, stats.doneTasks), [r, stats.doneTasks]);
   const tagEntries = useMemo(() => computeTagEntries(stats.doneTasks), [stats.doneTasks]);
   const logGroups = useMemo(() => computeLogGroups(stats.doneTasks), [stats.doneTasks]);
+  const remainGroups = useMemo(() => computeRemainGroups(tasks, r), [tasks, r]);
+  const overdueCount = useMemo(() => countOverdue(remainGroups.flatMap((g) => g.items)), [remainGroups]);
 
   const subtitle = chart.single
     ? `所在周 · ${rangeLabel({ start: chart.chartStart, end: chart.chartEnd })}`
@@ -71,7 +75,11 @@ export function ReviewView() {
           />
           <TagDistribution tagEntries={tagEntries} />
         </div>
-        <CompletionLog logGroups={logGroups} />
+        <CompletionLog
+          logGroups={logGroups}
+          remainGroups={remainGroups}
+          overdueCount={overdueCount}
+        />
       </div>
     </section>
   );

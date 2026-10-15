@@ -226,7 +226,7 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
   transition:background .3s;
 }
 .side-ring.full{background:conic-gradient(from -90deg, #4f8a63, var(--green) 100%)}
-.side-ring.full i{color:var(--green)}
+.side-ring.full i{color:var(--green);font-size:15px;line-height:1}
 .side-count{
   font-family:var(--font-serif);font-size:var(--fs-sm);color:var(--text-2);
   line-height:1.4;letter-spacing:.02em;
@@ -241,6 +241,69 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
   font-size:var(--fs-2xs);color:var(--muted);line-height:1.35;
 }
 .side-foot .spark{color:var(--primary-text);font-size:var(--fs-2xs);flex:none;line-height:1}
+
+.today-card{
+  position:relative;flex:none;
+  background:var(--card);border:0;border-radius:8px;
+  padding:8px 10px;display:flex;flex-direction:column;gap:8px;
+  transition:background .3s;
+}
+.today-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.today-heading{display:flex;align-items:center;gap:6px}
+.today-icon{font-size:var(--fs-lg);width:16px;text-align:center;flex:none;line-height:1}
+.today-title{
+  font-family:var(--font-serif);font-size:var(--fs-base);font-weight:600;
+  color:var(--text);letter-spacing:.03em;
+}
+.today-time{font-size:var(--fs-2xs);color:var(--muted);font-variant-numeric:tabular-nums}
+.today-sum{font-size:var(--fs-xs);color:var(--muted)}
+.today-sum b{
+  color:var(--text);font-size:var(--fs-base);font-weight:650;
+  font-variant-numeric:tabular-nums;letter-spacing:-.2px;
+}
+.today-sum .pct{margin-left:3px;color:var(--primary);font-weight:650}
+.today-card.warn .today-sum .pct{color:var(--red)}
+.today-segs{position:relative;display:flex;align-items:center;gap:4px;width:100%}
+.today-seg{
+  position:relative;flex:1 1 0;min-width:0;height:10px;padding:0;border:1px solid var(--line);
+  border-radius:999px;background:transparent;cursor:pointer;outline:none;
+  transition:background .25s var(--ease), border-color .25s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.today-seg.done{border-color:transparent;background:linear-gradient(110deg, #ca896b, var(--primary))}
+.today-seg.all-done{border-color:transparent;background:linear-gradient(110deg, #8bbf7d, var(--green))}
+.today-seg.alert-done{border-color:transparent;background:linear-gradient(110deg, #c78a42, var(--red))}
+.today-seg.next::before{
+  content:'';position:absolute;left:50%;top:-6px;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--primary);
+  box-shadow:0 0 0 2px var(--card);
+}
+.today-seg:hover{transform:translateY(-1px)}
+.today-seg:focus-visible{box-shadow:0 0 0 3px var(--primary-soft)}
+.today-tip{
+  position:absolute;z-index:5;max-width:calc(100% - 12px);box-sizing:border-box;
+  padding:4px 7px;border-radius:6px;
+  background:var(--text);color:var(--bg);
+  font-size:var(--fs-2xs);line-height:1.4;white-space:normal;word-break:break-word;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);
+  opacity:0;pointer-events:none;transition:opacity .15s var(--ease);
+}
+.today-tip.show{opacity:1}
+.today-notice{
+  display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:9px;
+  background:var(--primary-soft);color:var(--text);
+}
+.today-notice-icon{font-size:var(--fs-lg);line-height:1.35;flex:none}
+.today-notice-title{font-size:var(--fs-xs);font-weight:650;margin-bottom:1px}
+.today-notice-copy{color:var(--muted);font-size:var(--fs-2xs);line-height:1.6}
+.today-card.warn .today-notice{background:var(--red-soft)}
+.today-card.warn .today-notice-icon,
+.today-card.warn .today-notice-title,
+.today-card.warn .today-notice-copy{color:var(--red)}
+.today-card.complete .today-notice{background:var(--green-soft)}
+.today-card.complete .today-notice-icon,
+.today-card.complete .today-notice-title{color:var(--green)}
+.today-empty{font-size:var(--fs-2xs);color:var(--muted-2)}
+.today-foot{margin-top:2px;text-align:right;font-size:var(--fs-2xs);color:var(--muted-2)}
 
 .quote-card{
   position:relative;overflow:hidden;flex:none;
@@ -561,8 +624,8 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
   padding:0;
 }
 .check:hover{border-color:var(--primary)}
-.check svg{width:9px;height:9px;stroke:var(--on-primary);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;
-  animation:checkIn .18s var(--ease);}
+.check svg{width:9px;height:9px;stroke:var(--on-primary);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.task.just-checked .check svg{animation:checkIn .18s var(--ease)}
 @keyframes checkIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
 .task.is-done .check{
   background:var(--grad-check);border-color:#65785b;
@@ -767,6 +830,22 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 }
 .log-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
 .log-time{color:var(--muted);font-size:var(--fs-2xs);flex:none;font-variant-numeric:tabular-nums}
+
+.audit-sec{margin-bottom:12px}
+.audit-sec:last-child{margin-bottom:0}
+.audit-sec-title{
+  font-size:var(--fs-xs);font-weight:650;font-family:var(--font-serif);
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;
+}
+.audit-sec-title span{font-size:var(--fs-2xs);font-weight:500;color:var(--muted);font-style:normal}
+.log-item.todo{cursor:pointer}
+.log-dot.open{background:var(--muted-2);box-shadow:0 0 0 2px rgba(150,150,150,.12)}
+.log-dot.late{background:var(--red);box-shadow:0 0 0 2px rgba(200,80,70,.15)}
+.log-item.late .log-title{color:var(--red)}
+.audit-late-tag{
+  font-size:var(--fs-2xs);color:var(--red);background:var(--red-soft);
+  padding:1px 6px;border-radius:999px;flex:none;
+}
 
 @media (max-width:1120px){
   .stats-grid{grid-template-columns:repeat(3,1fr)}
@@ -1537,6 +1616,28 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
               </div>
             </div>
 
+            <div class="today-card" id="todayCard">
+              <div class="today-head">
+                <div class="today-heading">
+                  <span class="today-icon" id="todayIcon">☀</span>
+                  <span class="today-title">今日概览</span>
+                </div>
+                <span class="today-time" id="todayTime"></span>
+              </div>
+              <div class="today-sum" id="todaySum"></div>
+              <div class="today-segs" id="todaySegs"></div>
+              <div class="today-tip" id="todayTip"></div>
+              <div class="today-notice" id="todayNotice" role="status">
+                <span class="today-notice-icon" id="todayNoticeIcon">☀</span>
+                <div>
+                  <div class="today-notice-title" id="todayNoticeTitle"></div>
+                  <div class="today-notice-copy" id="todayNoticeCopy"></div>
+                </div>
+              </div>
+              <div class="today-empty" id="todayEmpty" hidden>今天还没有安排</div>
+              <div class="today-foot" id="todayFoot">点按进度段，定位并高亮对应任务</div>
+            </div>
+
             <div class="metric-row">
               <button class="metric-card overdue" id="viewOverdueCard" data-view="overdue" title="查看逾期未完成任务">
                 <span class="metric-num" id="overdueCount">0</span>
@@ -1656,8 +1757,15 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
           </div>
 
           <div class="card log-card">
-            <div class="card-title-row"><div class="card-title">完成记录</div></div>
-            <div id="logList"></div>
+            <div class="card-title-row"><div class="card-title">周期盘点</div></div>
+            <div class="audit-sec">
+              <div class="audit-sec-title">已完成 <span id="auditDoneCount"></span></div>
+              <div id="logList"></div>
+            </div>
+            <div class="audit-sec">
+              <div class="audit-sec-title">剩余未完成 <span id="auditTodoCount"></span></div>
+              <div id="auditTodoList"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -2472,8 +2580,9 @@ function renderSideStats(){
   const pct = total ? Math.round(doneN / total * 100) : 0;
   const ring = $('#sideRing');
   ring.style.setProperty('--p', pct);
-  ring.classList.toggle('full', total > 0 && doneN === total);
-  $('#sidePct').textContent = pct + '%';
+  const full = total > 0 && doneN === total;
+  ring.classList.toggle('full', full);
+  $('#sidePct').textContent = full ? '✓' : pct + '%';
   $('#sideDone').textContent = doneN;
   $('#sideTotal').textContent = total;
   const key = !total ? 'empty' : (doneN === total ? 'done' : 'doing');
@@ -2483,7 +2592,67 @@ function renderSideStats(){
   }
 }
 
-function renderPlan(){ renderCalendar(); renderMetrics(); renderTasks(); renderSideStats(); }
+function renderTodayCard(){
+  const el = $('#todayCard');
+  if(!el) return;
+  const tStr = todayStr();
+  const now = new Date();
+  const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  $('#todayTime').textContent = hhmm;
+
+  const ordered = [
+    ...tasks.filter(t => t.date === tStr && t.done),
+    ...tasks.filter(t => t.date === tStr && !t.done)
+      .sort((a, b) => pw[a.prio] - pw[b.prio]),
+  ];
+  const total = ordered.length;
+  const doneN = ordered.filter(t => t.done).length;
+  const remaining = total - doneN;
+  const pending = ordered.filter(t => !t.done);
+  const overdue = tasks.filter(t => !t.done && t.date && t.date < tStr);
+  const pct = total ? Math.round(doneN / total * 100) : 0;
+  const isComplete = total > 0 && doneN === total;
+  const warn = !isComplete && overdue.length > 0;
+  const h = now.getHours() + now.getMinutes() / 60;
+
+  el.classList.toggle('warn', warn);
+  el.classList.toggle('complete', isComplete);
+  $('#todaySum').innerHTML =
+    `<b>${doneN}</b> / <b>${total}</b> 项已完成` +
+    (total ? ` · <span class="pct">${pct}%</span>` : '');
+
+  const segsEl = $('#todaySegs');
+  segsEl.innerHTML = total
+    ? ordered.map((t, i) => {
+        const stateCls = !t.done ? '' : isComplete ? ' all-done' : warn ? ' alert-done' : ' done';
+        const nextCls = !t.done && i === doneN && !isComplete ? ' next' : '';
+        const tip = `${escapeHtml(t.title.split('\n')[0])}${t.done ? '（已完成）' : '（未完成）'}`;
+        return `<button type="button" class="today-seg${stateCls}${nextCls}"` +
+          ` data-id="${t.id}" data-tip="${tip}" title="${tip}"></button>`;
+      }).join('')
+    : '';
+
+  let icon = '☀', nIcon = '☀', title = '上午好！', copy = '';
+  if(isComplete){ icon = '✓'; nIcon = '☻'; title = '太棒了！'; copy = '今天的任务全部完成！好好犒劳一下自己吧～'; }
+  else if(warn){ icon = '!'; nIcon = '!'; title = `有 ${overdue.length} 项已逾期！`; copy = `剩余 ${remaining} 项未完成。先挑一件最重要的继续推进。`; }
+  else if(!total){ icon = '☾'; nIcon = '🍃'; title = '留一点自由时间'; copy = '今天还没有安排，可以从笔记里添加一些新计划～'; }
+  else if(h < 12){ copy = `今天还有 ${remaining} 项待完成，记得按计划推进哦～`; }
+  else if(h < 18){
+    icon = '☁'; nIcon = '⏰'; title = '下午好！';
+    const names = pending.slice(0, 2).map(t => t.title.split('\n')[0]).join('、');
+    copy = `剩余 ${remaining} 项未完成${names ? '：' + names : ''}，加油完成今天的计划吧。`;
+  }
+  else { icon = '☾'; nIcon = '🌙'; title = '晚上好！'; copy = `今天还有 ${remaining} 项未完成，早点休息，明天继续～`; }
+  $('#todayIcon').textContent = icon;
+  $('#todayNoticeIcon').textContent = nIcon;
+  $('#todayNoticeTitle').textContent = title;
+  $('#todayNoticeCopy').textContent = copy;
+
+  $('#todayEmpty').hidden = total > 0;
+  $('#todayFoot').hidden = total === 0;
+}
+
+function renderPlan(){ renderCalendar(); renderMetrics(); renderTasks(); renderSideStats(); renderTodayCard(); }
 
 function getRange(key){
   const t = new Date(today());
@@ -2727,6 +2896,7 @@ function renderReview(){
   const byDate = {};
   doneTasks.forEach(t => { const d = dayOf(t.doneAt); (byDate[d] = byDate[d] || []).push(t); });
   const dates = Object.keys(byDate).sort().reverse();
+  $('#auditDoneCount').textContent = `${doneTasks.length} 项`;
   $('#logList').innerHTML = dates.length
     ? dates.map(ds => {
         const d = parseDate(ds);
@@ -2749,6 +2919,44 @@ function renderReview(){
     : `<div class="empty-tip">
         <svg viewBox="0 0 24 24"><path d="M9 11.5l2 2 4-4.5"/><circle cx="12" cy="12" r="9"/></svg>
         <span>还没有完成记录</span>
+      </div>`;
+
+  const remainTasks = tasks.filter(t => !t.done && t.date !== null && t.date >= s && t.date <= e);
+  const remainOverdue = remainTasks.filter(t => t.date < todayStr());
+  $('#auditTodoCount').textContent = remainOverdue.length
+    ? `${remainTasks.length} 项 · 含逾期 ${remainOverdue.length}`
+    : `${remainTasks.length} 项`;
+  const remByDate = {};
+  remainTasks.forEach(t => { (remByDate[t.date] = remByDate[t.date] || []).push(t); });
+  const remDates = Object.keys(remByDate).sort((a,b) => {
+    const la = a < todayStr(), lb = b < todayStr();
+    if(la !== lb) return la ? -1 : 1;
+    return a.localeCompare(b);
+  });
+  $('#auditTodoList').innerHTML = remDates.length
+    ? remDates.map(ds => {
+        const d = parseDate(ds);
+        const isLate = ds < todayStr();
+        const items = remByDate[ds].slice().sort((a,b) => pw[a.prio] - pw[b.prio]);
+        const label = ds === todayStr() ? `今天 ${dayNames[d.getDay()]}` : `${d.getMonth()+1}月${d.getDate()}日 ${dayNames[d.getDay()]}`;
+        return `<div class="log-group">
+          <div class="log-date">
+            ${label}
+            <span>${items.length} 项</span>
+            ${isLate ? `<i class="audit-late-tag">已逾期</i>` : ''}
+          </div>
+          <div class="log-items">
+            ${items.map(t => `<div class="log-item todo${isLate ? ' late' : ''}" data-id="${t.id}">
+              <i class="log-dot ${isLate ? 'late' : 'open'}"></i>
+              <span class="log-title">${t.title}</span>
+              <span class="tag" data-tag="${t.tag}">${t.tag}</span>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty-tip">
+        <svg viewBox="0 0 24 24"><path d="M9 11.5l2 2 4-4.5"/><circle cx="12" cy="12" r="9"/></svg>
+        <span>周期内任务已全部完成 🎉</span>
       </div>`;
 }
 
@@ -3699,6 +3907,13 @@ $('#taskList').addEventListener('click', e => {
     else { t.doneAt = null; }
     state.reschedulingId = null;
     renderPlan();
+    if(t.done){
+      const row = document.querySelector(`.task[data-id="${t.id}"]`);
+      if(row){
+        row.classList.add('just-checked');
+        setTimeout(() => row.classList.remove('just-checked'), 300);
+      }
+    }
   } else if(btn.dataset.act === 'del'){
     tasks.splice(tasks.indexOf(t), 1);
     state.reschedulingId = null;
@@ -3736,6 +3951,22 @@ $('#reviewTabs').addEventListener('click', e => {
   state.reviewRange = tab.dataset.range;
   document.querySelectorAll('#reviewTabs .tab').forEach(t => t.classList.toggle('active', t === tab));
   renderReview();
+});
+
+$('#auditTodoList').addEventListener('click', e => {
+  const row = e.target.closest('.log-item.todo');
+  if(!row) return;
+  const t = tasks.find(x => x.id === Number(row.dataset.id));
+  if(!t) return;
+  state.page = 'plan';
+  state.planView = { kind: 'date' };
+  state.selectedDate = t.date;
+  state.calMonth = new Date(parseDate(t.date).getFullYear(), parseDate(t.date).getMonth(), 1);
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === 'plan'));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-plan'));
+  renderPlan();
+  flashTask(t.id);
+  document.querySelector(`.task[data-id="${t.id}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
 });
 
 $('#chartToggle').addEventListener('click', e => {
@@ -4040,7 +4271,8 @@ function applyImportedJson(text){
   document.querySelectorAll('#noteFilter .filter-chip').forEach(c => {
     c.classList.toggle('active', c.dataset.filter === 'all');
   });
-  renderPlan(); renderReview(); renderNotes(); renderSettings();
+renderPlan(); renderReview(); renderNotes(); renderSettings();
+setInterval(renderTodayCard, 60000);
   toast('数据已导入');
 }
 
@@ -4147,6 +4379,59 @@ try{
 }catch(e){}
 
 renderPlan(); renderReview(); renderNotes(); renderSettings();
+
+function showTodayTip(seg){
+  const tip = $('#todayTip'), card = $('#todayCard'), segs = $('#todaySegs');
+  if(!tip || !card || !segs) return;
+  tip.textContent = seg.dataset.tip || '';
+  tip.style.left = '0px';
+  tip.style.top = '0px';
+  tip.classList.add('show');
+  const cardRect = card.getBoundingClientRect();
+  const segRect = seg.getBoundingClientRect();
+  const pad = 6;
+  const maxW = card.clientWidth - pad * 2;
+  tip.style.maxWidth = maxW + 'px';
+  const tipW = Math.min(tip.offsetWidth, maxW);
+  const tipH = tip.offsetHeight;
+  const center = segRect.left - cardRect.left + segRect.width / 2;
+  let left = center - tipW / 2;
+  left = Math.max(pad, Math.min(left, card.clientWidth - pad - tipW));
+  let top = segs.getBoundingClientRect().top - cardRect.top - tipH - 7;
+  if(top < pad){
+    top = segs.getBoundingClientRect().bottom - cardRect.top + 7;
+  }
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function hideTodayTip(){ const tip = $('#todayTip'); if(tip) tip.classList.remove('show'); }
+$('#todaySegs').addEventListener('mouseover', e => {
+  const seg = e.target.closest('.today-seg');
+  if(seg) showTodayTip(seg);
+});
+$('#todaySegs').addEventListener('mouseout', e => {
+  if(e.target.closest('.today-seg')) hideTodayTip();
+});
+$('#todaySegs').addEventListener('focusin', e => {
+  const seg = e.target.closest('.today-seg');
+  if(seg) showTodayTip(seg);
+});
+$('#todaySegs').addEventListener('focusout', hideTodayTip);
+$('#todaySegs').addEventListener('click', e => {
+  const seg = e.target.closest('.today-seg');
+  if(!seg) return;
+  const t = tasks.find(x => x.id === Number(seg.dataset.id));
+  if(!t) return;
+  state.page = 'plan';
+  state.planView = { kind: 'date' };
+  state.selectedDate = t.date;
+  state.calMonth = new Date(parseDate(t.date).getFullYear(), parseDate(t.date).getMonth(), 1);
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === 'plan'));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-plan'));
+  renderPlan();
+  flashTask(t.id);
+  document.querySelector(`.task[data-id="${t.id}"]`)?.scrollIntoView({block:'center', behavior:'smooth'});
+});
 </script>
 </body>
 </html>

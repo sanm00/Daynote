@@ -160,7 +160,7 @@ export function Sidebar() {
             className={`side-ring${total > 0 && doneN === total ? ' full' : ''}`}
             style={{ ['--p' as string]: pct }}
           >
-            <i>{pct}%</i>
+            <i>{total > 0 && doneN === total ? '✓' : `${pct}%`}</i>
           </div>
         </div>
         <div className="side-count">

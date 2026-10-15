@@ -21,7 +21,21 @@ export function TaskRow({ t, datePop }: Props) {
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(t.title);
+  const [justChecked, setJustChecked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!justChecked) return;
+    const timer = window.setTimeout(() => setJustChecked(false), 300);
+    return () => window.clearTimeout(timer);
+  }, [justChecked]);
+
+  const onToggle = () => {
+    toggleTodo(t.id);
+    if (!t.done) {
+      setJustChecked(true);
+    }
+  };
 
   useEffect(() => {
     if (editing) {
@@ -155,14 +169,14 @@ export function TaskRow({ t, datePop }: Props) {
   return (
     <div
       key={t.id}
-      className={`task ${t.done ? 'is-done' : ''}${isUnsched ? ' inbound' : ''}`}
+      className={`task ${t.done ? 'is-done' : ''}${isUnsched ? ' inbound' : ''}${justChecked ? ' just-checked' : ''}`}
       data-id={t.id}
     >
       <button
         className="check"
         data-act="toggle"
         title={t.done ? '标记为未完成' : '标记完成'}
-        onClick={() => toggleTodo(t.id)}
+        onClick={onToggle}
       >
         {t.done && (
           <svg viewBox="0 0 24 24">
