@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { fmt, addDays, today } from './date';
-import { getFilteredNotes, getOverdue, getPending, getUnscheduled } from './selectors';
+import {
+  getFilteredNotes,
+  getOverdue,
+  getPending,
+  getUnscheduled,
+  isMultiDay,
+  isOverdue,
+  isUnscheduled,
+  occursOn,
+} from './selectors';
 import type { Note, Priority, Task } from '@/types';
 
 let seq = 0;
@@ -11,12 +20,15 @@ function task(partial: Partial<Task>): Task {
     title: `t${seq}`,
     tag: '工作',
     prio: 'mid' as Priority,
-    date: null,
+    beginDate: null,
+    endDate: null,
     done: false,
     doneAt: null,
     ...partial,
   };
 }
+
+const day = (n: number) => fmt(addDays(today(), n));
 
 function note(partial: Partial<Note>): Note {
   seq += 1;
@@ -33,39 +45,58 @@ function note(partial: Partial<Note>): Note {
 }
 
 describe('getOverdue', () => {
-  it('keeps only unfinished tasks dated before today', () => {
-    const yesterday = fmt(addDays(today(), -1));
-    const tomorrow = fmt(addDays(today(), 1));
+  it('keeps only unfinished tasks whose end day is before today', () => {
+    const yesterday = day(-1);
+    const tomorrow = day(1);
     const out = getOverdue([
-      task({ date: yesterday }),
-      task({ date: tomorrow }),
-      task({ date: yesterday, done: true }),
-      task({ date: null }),
+      task({ beginDate: yesterday, endDate: yesterday }),
+      task({ beginDate: tomorrow, endDate: tomorrow }),
+      task({ beginDate: yesterday, endDate: yesterday, done: true }),
+      task({ beginDate: null, endDate: null }),
+      // a span that ends tomorrow is not overdue even though it began before today
+      task({ beginDate: day(-2), endDate: tomorrow }),
     ]);
     expect(out).toHaveLength(1);
-    expect(out[0].date).toBe(yesterday);
+    expect(out[0].endDate).toBe(yesterday);
   });
 
-  it('sorts most recent date first', () => {
+  it('sorts most recent due date first', () => {
     const out = getOverdue([
-      task({ date: fmt(addDays(today(), -5)) }),
-      task({ date: fmt(addDays(today(), -1)) }),
-      task({ date: fmt(addDays(today(), -3)) }),
+      task({ beginDate: day(-5), endDate: day(-5) }),
+      task({ beginDate: day(-1), endDate: day(-1) }),
+      task({ beginDate: day(-3), endDate: day(-3) }),
     ]);
-    expect(out.map((t) => t.date)).toEqual([
-      fmt(addDays(today(), -1)),
-      fmt(addDays(today(), -3)),
-      fmt(addDays(today(), -5)),
-    ]);
+    expect(out.map((t) => t.endDate)).toEqual([day(-1), day(-3), day(-5)]);
+  });
+});
+
+describe('schedule helpers', () => {
+  it('classifies unscheduled, multi-day and overdue', () => {
+    expect(isUnscheduled(task({ beginDate: null, endDate: null }))).toBe(true);
+    expect(isUnscheduled(task({ beginDate: day(0), endDate: day(0) }))).toBe(false);
+    expect(isMultiDay(task({ beginDate: day(0), endDate: day(2) }))).toBe(true);
+    expect(isMultiDay(task({ beginDate: day(0), endDate: day(0) }))).toBe(false);
+    expect(isOverdue(task({ beginDate: day(-2), endDate: day(-1) }))).toBe(true);
+    expect(isOverdue(task({ beginDate: day(-2), endDate: day(-1), done: true }))).toBe(false);
+  });
+
+  it('occursOn matches every day inside the span', () => {
+    const t = task({ beginDate: day(0), endDate: day(2) });
+    expect(occursOn(t, day(-1))).toBe(false);
+    expect(occursOn(t, day(0))).toBe(true);
+    expect(occursOn(t, day(1))).toBe(true);
+    expect(occursOn(t, day(2))).toBe(true);
+    expect(occursOn(t, day(3))).toBe(false);
+    expect(occursOn(task({ beginDate: null, endDate: null }), day(0))).toBe(false);
   });
 });
 
 describe('getUnscheduled', () => {
   it('keeps undated tasks, unfinished first', () => {
     const out = getUnscheduled([
-      task({ date: null, done: true }),
-      task({ date: null, done: false }),
-      task({ date: fmt(today()) }),
+      task({ beginDate: null, endDate: null, done: true }),
+      task({ beginDate: null, endDate: null, done: false }),
+      task({ beginDate: day(0), endDate: day(0) }),
     ]);
     expect(out).toHaveLength(2);
     expect(out[0].done).toBe(false);

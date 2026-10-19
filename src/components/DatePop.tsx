@@ -1,34 +1,65 @@
 import { useEffect, useState } from 'react';
-import { addDays, fmt, parseDate, today, todayStr } from '@/lib/date';
+import { addDays, dateRangeLabel, fmt, parseDate, today, todayStr } from '@/lib/date';
+import type { TaskRange } from '@/types';
 
 export interface DatePopProps {
   open: boolean;
   anchorRect: DOMRect | null;
-  value: string;
+  value: TaskRange | null;
   allowClear?: boolean;
-  onPick: (ds: string) => void;
+  /** A picked inclusive span, or `null` when the user clears the schedule. */
+  onPick: (range: TaskRange | null) => void;
   onClose: () => void;
 }
 
-export function DatePop({ open, anchorRect, value, allowClear = true, onPick, onClose }: DatePopProps) {
+/** Highlighted span: the pending `begin` + hovered end, or the current value. */
+function activeRange(
+  pending: string | null,
+  hover: string | null,
+  value: TaskRange | null,
+): { lo: string; hi: string } | null {
+  if (pending) {
+    const b = hover || pending;
+    return pending <= b ? { lo: pending, hi: b } : { lo: b, hi: pending };
+  }
+  if (value && value.begin) {
+    return value.begin <= value.end
+      ? { lo: value.begin, hi: value.end }
+      : { lo: value.end, hi: value.begin };
+  }
+  return null;
+}
+
+export function DatePop({
+  open,
+  anchorRect,
+  value,
+  allowClear = true,
+  onPick,
+  onClose,
+}: DatePopProps) {
   const [popMonth, setPopMonth] = useState(() => {
     const t = today();
     return new Date(t.getFullYear(), t.getMonth(), 1);
   });
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+  const [pending, setPending] = useState<string | null>(null);
+  const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    const base = value ? parseDate(value) : today();
+    setPending(null);
+    setHover(null);
+    const base = value?.begin ? parseDate(value.begin) : today();
     setPopMonth(new Date(base.getFullYear(), base.getMonth(), 1));
-  }, [open, value]);
+  }, [open, value?.begin, value?.end]);
 
   useEffect(() => {
     if (!open || !anchorRect) return;
     const measure = () => {
       const r = anchorRect;
       const pw = 234;
-      const ph = 268;
+      const ph = 300;
       let left = Math.max(8, Math.min(r.right - pw, window.innerWidth - pw - 8));
       let top = r.bottom + 6;
       if (top + ph > window.innerHeight - 8) top = r.top - ph - 6;
@@ -52,11 +83,29 @@ export function DatePop({ open, anchorRect, value, allowClear = true, onPick, on
 
   if (!open) return null;
 
+  const commit = (begin: string, end: string | null) => {
+    if (!begin) {
+      onPick(null);
+      return;
+    }
+    onPick(begin <= (end || begin) ? { begin, end: end || begin } : { begin: end!, end: begin });
+  };
+
+  const pickDay = (ds: string) => {
+    if (!pending) {
+      setPending(ds);
+      return;
+    }
+    const a = pending;
+    commit(a <= ds ? a : ds, a <= ds ? ds : a);
+  };
+
   const y = popMonth.getFullYear();
   const m = popMonth.getMonth();
   const first = new Date(y, m, 1);
   const offset = (first.getDay() + 6) % 7;
   const start = addDays(first, -offset);
+  const range = activeRange(pending, hover, value);
   const days: JSX.Element[] = [];
   for (let i = 0; i < 42; i++) {
     const d = addDays(start, i);
@@ -64,13 +113,35 @@ export function DatePop({ open, anchorRect, value, allowClear = true, onPick, on
     const cls = ['day'];
     if (d.getMonth() !== m) cls.push('other');
     if (ds === todayStr()) cls.push('today');
-    if (ds === value) cls.push('selected');
+    if (range) {
+      if (ds === range.lo && ds === range.hi) cls.push('selected');
+      else if (ds === range.lo) cls.push('range-lo');
+      else if (ds === range.hi) cls.push('range-hi');
+      else if (ds > range.lo && ds < range.hi) cls.push('in-range');
+    }
     days.push(
-      <div key={ds} className={cls.join(' ')} data-pdate={ds} onClick={() => onPick(ds)}>
+      <div
+        key={ds}
+        className={cls.join(' ')}
+        data-pdate={ds}
+        onClick={(e) => {
+          e.stopPropagation();
+          pickDay(ds);
+        }}
+        onMouseOver={() => {
+          if (pending && hover !== ds) setHover(ds);
+        }}
+      >
         <span>{d.getDate()}</span>
       </div>,
     );
   }
+
+  const hint = pending
+    ? '再点一天作为结束日 · 同一天两次即为单日'
+    : value?.begin
+      ? dateRangeLabel(value.begin, value.end)
+      : '先点开始日，再点结束日可排成一整段';
 
   return (
     <div className="date-pop open" id="datePop" style={{ left: pos.left, top: pos.top }}>
@@ -107,19 +178,40 @@ export function DatePop({ open, anchorRect, value, allowClear = true, onPick, on
         <span>日</span>
       </div>
       <div className="cal-grid pop-grid">{days}</div>
+      <div className="pop-hint">{hint}</div>
       <div className="pop-foot" style={{ display: allowClear ? '' : 'none' }}>
-        <button type="button" className="pop-chip" data-preset="today" onClick={() => onPick(todayStr())}>
+        <button
+          type="button"
+          className="pop-chip"
+          data-preset="today"
+          onClick={(e) => {
+            e.stopPropagation();
+            commit(todayStr(), todayStr());
+          }}
+        >
           今天
         </button>
         <button
           type="button"
           className="pop-chip"
           data-preset="tomorrow"
-          onClick={() => onPick(fmt(addDays(today(), 1)))}
+          onClick={(e) => {
+            e.stopPropagation();
+            const t = fmt(addDays(today(), 1));
+            commit(t, t);
+          }}
         >
           明天
         </button>
-        <button type="button" className="pop-chip" data-preset="clear" onClick={() => onPick('')}>
+        <button
+          type="button"
+          className="pop-chip"
+          data-preset="clear"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPick(null);
+          }}
+        >
           待排期
         </button>
       </div>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { PRIORITY_WEIGHT as pw } from '@/lib/selectors';
-import { getOverdue } from '@/lib/selectors';
+import { getOverdue, occursOn } from '@/lib/selectors';
 import { todayStr } from '@/lib/date';
 import { toast } from '@/lib/toast';
 import type { Task } from '@/types';
@@ -25,9 +25,9 @@ export function TodayOverview() {
 
   const tStr = todayStr();
   const ordered = useMemo(() => {
-    const done = tasks.filter((t) => t.date === tStr && t.done);
+    const done = tasks.filter((t) => occursOn(t, tStr) && t.done);
     const todo = tasks
-      .filter((t) => t.date === tStr && !t.done)
+      .filter((t) => occursOn(t, tStr) && !t.done)
       .sort((a, b) => pw[a.prio] - pw[b.prio]);
     return [...done, ...todo];
   }, [tasks, tStr]);
@@ -97,10 +97,10 @@ export function TodayOverview() {
   const hideTip = () => tipRef.current?.classList.remove('show');
 
   const locate = (t: Task) => {
-    if (!t.date) return;
+    if (!t.beginDate) return;
     setPage('plan');
-    goToDate(t.date);
-    toast(`已定位到 ${t.date} 的任务`);
+    goToDate(t.beginDate);
+    toast(`已定位到 ${t.beginDate} 的任务`);
     const start = performance.now();
     const tick = () => {
       const row = document.querySelector<HTMLElement>(`.task[data-id="${t.id}"]`);

@@ -1,31 +1,29 @@
 import { useAppStore } from '@/store';
-import { hmOf, parseDate, todayStr } from '@/lib/date';
-import { dayNames } from '@/lib/date';
-import { PRIORITY_WEIGHT as pw } from '@/lib/selectors';
-import { mdLabel, type LogGroup, type RemainGroup } from '@/lib/stats';
+import { dateRangeLabel, hmOf, todayStr } from '@/lib/date';
+import { mdLabel, type LogGroup } from '@/lib/stats';
 import { toast } from '@/lib/toast';
+import type { Task } from '@/types';
 
 interface Props {
   logGroups: LogGroup[];
-  remainGroups: RemainGroup[];
+  remaining: Task[];
   overdueCount: number;
 }
 
-export function CompletionLog({ logGroups, remainGroups, overdueCount }: Props) {
+export function CompletionLog({ logGroups, remaining, overdueCount }: Props) {
   const tasks = useAppStore((s) => s.tasks);
   const setPage = useAppStore((s) => s.setPage);
   const goToDate = useAppStore((s) => s.goToDate);
 
   const doneTotal = logGroups.reduce((n, g) => n + g.items.length, 0);
-  const todoTotal = remainGroups.reduce((n, g) => n + g.items.length, 0);
   const tStr = todayStr();
 
   const locate = (id: number) => {
     const t = tasks.find((x) => x.id === id);
-    if (!t || !t.date) return;
+    if (!t || !t.beginDate) return;
     setPage('plan');
-    goToDate(t.date);
-    toast(`已定位到 ${t.date} 的任务`);
+    goToDate(t.beginDate);
+    toast(`已定位到 ${t.beginDate} 的任务`);
     const start = performance.now();
     const tick = () => {
       const row = document.querySelector<HTMLElement>(`.task[data-id="${id}"]`);
@@ -41,15 +39,6 @@ export function CompletionLog({ logGroups, remainGroups, overdueCount }: Props) 
     };
     requestAnimationFrame(tick);
   };
-
-  const labelFor = (ds: string) => {
-    const d = parseDate(ds);
-    const wd = dayNames[d.getDay()];
-    return ds === tStr ? `今天 ${wd}` : `${d.getMonth() + 1}月${d.getDate()}日 ${wd}`;
-  };
-
-  const sortedRemain = (items: import('@/types').Task[]) =>
-    items.slice().sort((a, b) => pw[a.prio] - pw[b.prio]);
 
   return (
     <div className="card log-card">
@@ -77,6 +66,9 @@ export function CompletionLog({ logGroups, remainGroups, overdueCount }: Props) 
                       <span className="tag" data-tag={t.tag}>
                         {t.tag}
                       </span>
+                      <span className="sched-label">
+                        计划于 {dateRangeLabel(t.beginDate, t.endDate)}
+                      </span>
                       <span className="log-time">{hmOf(t.doneAt)}</span>
                     </div>
                   ))}
@@ -99,36 +91,38 @@ export function CompletionLog({ logGroups, remainGroups, overdueCount }: Props) 
         <div className="audit-sec-title">
           剩余未完成{' '}
           <span>
-            {todoTotal} 项{overdueCount ? ` · 含逾期 ${overdueCount}` : ''}
+            {remaining.length} 项{overdueCount ? ` · 含逾期 ${overdueCount}` : ''}
           </span>
         </div>
         <div id="auditTodoList">
-          {remainGroups.length ? (
-            remainGroups.map(({ ds, late, items }) => (
-              <div className="log-group" key={ds}>
-                <div className="log-date">
-                  {labelFor(ds)}
-                  <span>{items.length} 项</span>
-                  {late && <i className="audit-late-tag">已逾期</i>}
-                </div>
-                <div className="log-items">
-                  {sortedRemain(items).map((t) => (
-                    <div
-                      className={`log-item todo${late ? ' late' : ''}`}
-                      key={t.id}
-                      data-id={t.id}
-                      onClick={() => locate(t.id)}
-                    >
-                      <i className={`log-dot ${late ? 'late' : 'open'}`} />
-                      <span className="log-title">{t.title}</span>
-                      <span className="tag" data-tag={t.tag}>
-                        {t.tag}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
+          {remaining.length ? (
+            <div className="log-items">
+              {remaining.map((t) => {
+                const late = t.endDate !== null && t.endDate < tStr;
+                return (
+                  <div
+                    className={`log-item todo${late ? ' late' : ''}`}
+                    key={t.id}
+                    data-id={t.id}
+                    onClick={() => locate(t.id)}
+                  >
+                    <i className={`log-dot ${late ? 'late' : 'open'}`} />
+                    <span className="log-title">{t.title}</span>
+                    <span className="tag" data-tag={t.tag}>
+                      {t.tag}
+                    </span>
+                    <span className="sched-label">
+                      计划于 {dateRangeLabel(t.beginDate, t.endDate)}
+                    </span>
+                    {late && (
+                      <i className="overdue-tag" title="已逾期">
+                        逾期
+                      </i>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <div className="empty-tip">
               <svg viewBox="0 0 24 24">

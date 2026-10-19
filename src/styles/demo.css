@@ -829,10 +829,6 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .log-dot.open{background:var(--muted-2);box-shadow:0 0 0 2px rgba(150,150,150,.12)}
 .log-dot.late{background:var(--red);box-shadow:0 0 0 2px rgba(200,80,70,.15)}
 .log-item.late .log-title{color:var(--red)}
-.audit-late-tag{
-  font-size:var(--fs-2xs);color:var(--red);background:var(--red-soft);
-  padding:1px 6px;border-radius:999px;flex:none;font-style:normal;
-}
 
 @media (max-width:1120px){
   .stats-grid{grid-template-columns:repeat(3,1fr)}

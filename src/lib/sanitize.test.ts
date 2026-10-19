@@ -39,6 +39,19 @@ describe('sanitizeTasks', () => {
   it('returns [] for non-arrays', () => {
     expect(sanitizeTasks({ not: 'an array' })).toEqual([]);
   });
+
+  it('normalizes the schedule range invariant', () => {
+    const [single, multi, reversed, unscheduled] = sanitizeTasks([
+      { title: 'a', beginDate: '2026-05-06' },
+      { title: 'b', beginDate: '2026-05-06', endDate: '2026-05-09' },
+      { title: 'c', beginDate: '2026-05-09', endDate: '2026-05-06' },
+      { title: 'd' },
+    ]);
+    expect([single.beginDate, single.endDate]).toEqual(['2026-05-06', '2026-05-06']);
+    expect([multi.beginDate, multi.endDate]).toEqual(['2026-05-06', '2026-05-09']);
+    expect([reversed.beginDate, reversed.endDate]).toEqual(['2026-05-09', '2026-05-09']);
+    expect([unscheduled.beginDate, unscheduled.endDate]).toEqual([null, null]);
+  });
 });
 
 describe('sanitizeNotes', () => {

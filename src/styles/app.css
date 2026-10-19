@@ -363,3 +363,49 @@ html[data-theme='dark'] .confirm-overlay {
     opacity: 0.3;
   }
 }
+
+/*
+ * Multi-day scheduling: range endpoints/among highlight in the date picker,
+ * the picker hint, and the review schedule label.
+ */
+.pop-hint {
+  font-size: var(--fs-2xs);
+  color: var(--muted-2);
+  text-align: center;
+  padding: 4px 0 1px;
+  line-height: 1.4;
+}
+.pop-grid .day.range-lo,
+.pop-grid .day.range-hi {
+  background: var(--grad-brand);
+  color: var(--on-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(92, 70, 50, 0.28);
+}
+.pop-grid .day.range-lo::after,
+.pop-grid .day.range-hi::after {
+  display: none;
+}
+.pop-grid .day.in-range {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+html[data-theme='dark'] .pop-grid .day.in-range {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.overdue-tag {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 4px;
+  padding: 0 5px;
+  line-height: 1.5;
+}
+.sched-label {
+  font-size: var(--fs-2xs);
+  color: var(--muted-2);
+  white-space: nowrap;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
-import { dateLabel, parseDate, todayStr } from '@/lib/date';
+import { dateLabel, dateRangeLabel } from '@/lib/date';
 import { TAG_DOT, TAG_ORDER } from '@/lib/tags';
 import { toast } from '@/lib/toast';
 import type { UseDatePop } from './useDatePop';
@@ -9,12 +9,13 @@ interface Props {
   datePop: UseDatePop;
 }
 
-/** Collapsible quick-add form (⌘I) with tag and date pickers. */
+/** Collapsible quick-add form (⌘I) with tag and date-range pickers. */
 export function QuickAddForm({ datePop }: Props) {
   const addTag = useAppStore((s) => s.addTag);
-  const addDate = useAppStore((s) => s.addDate);
+  const addBegin = useAppStore((s) => s.addBegin);
+  const addEnd = useAppStore((s) => s.addEnd);
   const setAddTag = useAppStore((s) => s.setAddTag);
-  const setAddDate = useAppStore((s) => s.setAddDate);
+  const setAddRange = useAppStore((s) => s.setAddRange);
   const newTodoPending = useAppStore((s) => s.newTodoPending);
   const consumeNewTodo = useAppStore((s) => s.consumeNewTodo);
   const submitQuickAdd = useAppStore((s) => s.submitQuickAdd);
@@ -68,12 +69,13 @@ export function QuickAddForm({ datePop }: Props) {
       inputRef.current?.focus();
       return;
     }
-    const date = addDate || null;
+    const begin = addBegin;
     submitQuickAdd(title);
     setText('');
-    if (date) {
-      const d = parseDate(date);
-      toast(`已排到 ${date === todayStr() ? '今天' : `${d.getMonth() + 1}月${d.getDate()}日`}`);
+    if (begin) {
+      toast(
+        `已排到 ${begin === addEnd ? dateLabel(begin) : dateRangeLabel(begin, addEnd)}`,
+      );
     } else toast('已存入待排期');
     datePop.close();
     inputRef.current?.focus();
@@ -159,8 +161,8 @@ export function QuickAddForm({ datePop }: Props) {
             <div className="date-select" id="dateSelect">
               <button
                 type="button"
-                className={`date-trigger${addDate ? ' set' : ''}`}
-                title="选择要安排的日期，留空则待排期"
+                className={`date-trigger${addBegin ? ' set' : ''}`}
+                title="选择要安排的日期区间，留空则待排期"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (datePop.isOpenFor(e.currentTarget)) {
@@ -168,18 +170,23 @@ export function QuickAddForm({ datePop }: Props) {
                     return;
                   }
                   setTagMenuOpen(false);
-                  datePop.open(e.currentTarget, addDate, true, (ds) => {
-                    setAddDate(ds);
-                    datePop.close();
-                    inputRef.current?.focus();
-                  });
+                  datePop.open(
+                    e.currentTarget,
+                    addBegin ? { begin: addBegin, end: addEnd || addBegin } : null,
+                    true,
+                    (range) => {
+                      setAddRange(range ? range.begin : '', range ? range.end : '');
+                      datePop.close();
+                      inputRef.current?.focus();
+                    },
+                  );
                 }}
               >
                 <svg viewBox="0 0 24 24">
                   <rect x="3" y="4.5" width="18" height="16.5" rx="2.5" />
                   <path d="M8 2.5v4M16 2.5v4M3 10h18" />
                 </svg>
-                <span className="dt-text">{dateLabel(addDate)}</span>
+                <span className="dt-text">{dateRangeLabel(addBegin || null, addEnd || null)}</span>
               </button>
             </div>
             <button type="submit" className="btn primary qn-submit">

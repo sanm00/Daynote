@@ -64,7 +64,7 @@ export function SearchView() {
             .sort(
               (a, b) =>
                 Number(a.done) - Number(b.done) ||
-                String(b.date || '').localeCompare(String(a.date || '')),
+                String(b.beginDate || '').localeCompare(String(a.beginDate || '')),
             );
     return { noteHits: nh, taskHits: th };
   }, [q, searchType, notes, tasks]);
@@ -80,14 +80,14 @@ export function SearchView() {
   const jumpToTask = (id: number) => {
     const t = tasks.find((x) => x.id === id);
     if (!t) return;
-    if (t.date === null) {
+    if (t.beginDate === null) {
       setPlanView('unscheduled');
       setPage('plan');
       toast('这是一条待排期任务');
     } else {
-      goToDate(t.date);
+      goToDate(t.beginDate);
       setPage('plan');
-      toast(`已定位到 ${t.date} 的任务`);
+      toast(`已定位到 ${t.beginDate} 的任务`);
     }
     window.setTimeout(() => {
       const row = document.querySelector(`.task[data-id="${id}"]`);

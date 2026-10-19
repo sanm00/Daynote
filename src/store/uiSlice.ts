@@ -10,7 +10,8 @@ function planTodayState() {
     selectedDate: t,
     calMonth: new Date(d.getFullYear(), d.getMonth(), 1),
     reschedulingId: null,
-    addDate: t,
+    addBegin: t,
+    addEnd: t,
   };
 }
 
@@ -22,7 +23,8 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   calMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   reviewRange: 'today',
   chartType: 'bar',
-  addDate: '',
+  addBegin: '',
+  addEnd: '',
   addTag: '工作',
   popMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   reschedulingId: null,
@@ -75,13 +77,14 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
       selectedDate: date,
       calMonth: new Date(d.getFullYear(), d.getMonth(), 1),
       reschedulingId: null,
-      addDate: syncAddDate ? date : s.addDate,
+      addBegin: syncAddDate ? date : s.addBegin,
+      addEnd: syncAddDate ? date : s.addEnd,
     }));
   },
   setCalMonth: (calMonth) => set({ calMonth }),
   setReviewRange: (reviewRange) => set({ reviewRange }),
   setChartType: (chartType) => set({ chartType }),
-  setAddDate: (addDate) => set({ addDate }),
+  setAddRange: (addBegin, addEnd) => set({ addBegin, addEnd }),
   setAddTag: (addTag) => set({ addTag }),
   setReschedulingId: (reschedulingId) => set({ reschedulingId }),
   setNoteFilter: (noteFilter) => set({ noteFilter }),

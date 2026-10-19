@@ -1,5 +1,6 @@
 import type { Note, ReviewRange, Tag, Task } from '@/types';
 import { addDays, dayNames, dayOf, fmt, parseDate, today, todayStr } from './date';
+import { PRIORITY_WEIGHT } from './selectors';
 
 export interface Range {
   start: Date;
@@ -68,12 +69,13 @@ export interface Stats {
 export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
   const s = fmt(r.start);
   const e = fmt(r.end);
-  const unscheduledCount = tasks.filter((t) => t.date === null).length;
+  const unscheduledCount = tasks.filter((t) => t.beginDate === null).length;
   const doneTasks = tasks.filter(
     (t) => t.done && t.doneAt !== null && dayOf(t.doneAt)! >= s && dayOf(t.doneAt)! <= e,
   );
   const doneN = doneTasks.length;
-  const inRange = tasks.filter((t) => t.date !== null && t.date! >= s && t.date! <= e);
+  // A task belongs to the period that contains its end day (its due date).
+  const inRange = tasks.filter((t) => t.endDate !== null && t.endDate >= s && t.endDate <= e);
   const total = inRange.length;
   const scheduledDoneN = inRange.filter((t) => t.done).length;
   const rate = total ? Math.round((scheduledDoneN / total) * 100) : 0;
@@ -81,8 +83,8 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
   const activeDays = new Set(doneTasks.map((t) => dayOf(t.doneAt))).size;
   const dayCount = Math.round((r.end.getTime() - r.start.getTime()) / 86400000) + 1;
 
-  const lateDone = (t: Task) => t.done && t.doneAt && t.date !== null && dayOf(t.doneAt)! > t.date!;
-  const overdueUndone = inRange.filter((t) => !t.done && t.date! < todayStr());
+  const lateDone = (t: Task) => t.done && t.doneAt && t.endDate !== null && dayOf(t.doneAt)! > t.endDate;
+  const overdueUndone = inRange.filter((t) => !t.done && t.endDate! < todayStr());
   const overdueDone = inRange.filter(lateDone);
   const overdueN = overdueUndone.length + overdueDone.length;
 
@@ -90,7 +92,7 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
   const prevEnd = addDays(r.start, -1);
   const ps = fmt(prevStart);
   const pe = fmt(prevEnd);
-  const prevInRange = tasks.filter((t) => t.date !== null && t.date! >= ps && t.date! <= pe);
+  const prevInRange = tasks.filter((t) => t.endDate !== null && t.endDate >= ps && t.endDate <= pe);
   const hasPrev = prevInRange.length > 0;
   const prevRate = hasPrev
     ? Math.round((prevInRange.filter((t) => t.done).length / prevInRange.length) * 100)
@@ -208,36 +210,26 @@ export function computeLogGroups(doneTasks: Task[]): LogGroup[] {
     }));
 }
 
-export interface RemainGroup {
-  ds: string;
-  late: boolean;
-  items: Task[];
-}
-
-/** Undone tasks scheduled inside the range, grouped by due date; overdue group first. */
-export function computeRemainGroups(tasks: Task[], r: Range): RemainGroup[] {
+/**
+ * Unfinished tasks whose end day falls inside the range, ordered overdue-first
+ * then by due date, then by priority. Kept flat (no date grouping).
+ */
+export function computeRemaining(tasks: Task[], r: Range): Task[] {
   const s = fmt(r.start);
   const e = fmt(r.end);
   const tStr = todayStr();
-  const rem = tasks.filter((t) => !t.done && t.date !== null && t.date >= s && t.date <= e);
-  const byDate = new Map<string, Task[]>();
-  rem.forEach((t) => {
-    const d = t.date!;
-    if (!byDate.has(d)) byDate.set(d, []);
-    byDate.get(d)!.push(t);
-  });
-  return [...byDate.entries()]
+  return tasks
+    .filter((t) => !t.done && t.endDate !== null && t.endDate >= s && t.endDate <= e)
     .sort((a, b) => {
-      const la = a[0] < tStr;
-      const lb = b[0] < tStr;
+      const la = a.endDate! < tStr;
+      const lb = b.endDate! < tStr;
       if (la !== lb) return la ? -1 : 1;
-      return a[0].localeCompare(b[0]);
-    })
-    .map(([ds, items]) => ({ ds, late: ds < tStr, items }));
+      return a.endDate!.localeCompare(b.endDate!) || PRIORITY_WEIGHT[a.prio] - PRIORITY_WEIGHT[b.prio];
+    });
 }
 
 /** Count of overdue tasks among the given list. */
 export function countOverdue(tasks: Task[]): number {
   const tStr = todayStr();
-  return tasks.filter((t) => !t.done && t.date !== null && t.date < tStr).length;
+  return tasks.filter((t) => !t.done && t.endDate !== null && t.endDate < tStr).length;
 }

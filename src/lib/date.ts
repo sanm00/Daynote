@@ -36,6 +36,14 @@ export const hmOf = (iso: string | null) => {
 
 export const dayOf = (iso: string | null) => (iso ? fmt(new Date(iso)) : null);
 
+/** Completion stamp for a task row: `今天 16:00` today, else `2026-10-15 16:00`. */
+export const doneAtLabel = (iso: string | null) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return fmt(d) === todayStr() ? `今天 ${time}` : `${fmt(d)} ${time}`;
+};
+
 export function relTime(iso: string): string {
   const d = new Date(iso);
   const now = new Date();
@@ -56,12 +64,11 @@ export function nearestWeekend(): Date {
   return addDays(t, (5 - dow + 7) % 7);
 }
 
-export function dateLabelFor(ds: string, done: boolean): string {
+export function dateLabelFor(ds: string, _done: boolean): string {
   const tStr = todayStr();
   if (ds === tStr) return '今天';
   if (ds === fmt(addDays(today(), 1))) return '明天';
   const d = parseDate(ds);
-  if (ds < tStr && !done) return `逾期 · ${d.getMonth() + 1}月${d.getDate()}日`;
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
@@ -72,4 +79,19 @@ export function dateLabel(ds: string | null): string {
   const d = parseDate(ds);
   if (ds === fmt(addDays(today(), 1))) return '明天';
   return `${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+/**
+ * Label for a task's schedule span: a single day reads `今天`/`明天`/`M月D日`,
+ * a multi-day span reads `M月D日–M月D日`. Overdue is signalled by the caller,
+ * not baked into the label.
+ */
+export function dateRangeLabel(begin: string | null, end: string | null): string {
+  if (!begin) return '待排期';
+  if (end && end !== begin) {
+    const b = parseDate(begin);
+    const e = parseDate(end);
+    return `${b.getMonth() + 1}月${b.getDate()}日–${e.getMonth() + 1}月${e.getDate()}日`;
+  }
+  return dateLabelFor(begin, false);
 }

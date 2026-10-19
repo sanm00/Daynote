@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, fmt, today } from './date';
-import { computeChart, computeLogGroups, computeStats, computeTagEntries, getRange } from './stats';
+import {
+  computeChart,
+  computeLogGroups,
+  computeRemaining,
+  computeStats,
+  computeTagEntries,
+  countOverdue,
+  getRange,
+} from './stats';
 import type { Note, Priority, Task } from '@/types';
 
 let seq = 0;
@@ -11,7 +19,8 @@ function task(partial: Partial<Task>): Task {
     title: `t${seq}`,
     tag: '工作',
     prio: 'mid' as Priority,
-    date: null,
+    beginDate: null,
+    endDate: null,
     done: false,
     doneAt: null,
     ...partial,
@@ -47,20 +56,22 @@ describe('getRange', () => {
 });
 
 describe('computeStats', () => {
-  it('computes completion rate within an explicit range', () => {
+  it('computes completion rate by end day within an explicit range', () => {
     const start = new Date(2026, 2, 1);
     const end = new Date(2026, 2, 31);
     const r = { start, end };
     const tasks = [
-      task({ date: '2026-03-10', done: true, doneAt: '2026-03-10T10:00:00.000Z' }),
-      task({ date: '2026-03-11', done: false }),
-      task({ date: '2026-03-12', done: true, doneAt: '2026-03-12T10:00:00.000Z' }),
-      task({ date: null }),
+      task({ beginDate: '2026-03-10', endDate: '2026-03-10', done: true, doneAt: '2026-03-10T10:00:00.000Z' }),
+      task({ beginDate: '2026-03-11', endDate: '2026-03-11', done: false }),
+      task({ beginDate: '2026-03-12', endDate: '2026-03-12', done: true, doneAt: '2026-03-12T10:00:00.000Z' }),
+      task({ beginDate: null, endDate: null }),
+      // spans into the month: belongs here because its end day (03-20) is inside
+      task({ beginDate: '2026-02-25', endDate: '2026-03-20', done: false }),
     ];
     const s = computeStats(tasks, [], r);
-    expect(s.total).toBe(3);
+    expect(s.total).toBe(4);
     expect(s.doneN).toBe(2);
-    expect(s.rate).toBe(67);
+    expect(s.rate).toBe(50);
     expect(s.unscheduledCount).toBe(1);
   });
 
@@ -68,6 +79,31 @@ describe('computeStats', () => {
     const r = { start: new Date(2026, 2, 1), end: new Date(2026, 2, 31) };
     const s = computeStats([], [note({ createdAt: '2026-03-15T00:00:00.000Z' })], r);
     expect(s.notesNew).toBe(1);
+  });
+});
+
+describe('computeRemaining', () => {
+  it('keeps unfinished tasks whose end day is inside the range', () => {
+    const start = new Date(2026, 2, 1);
+    const end = new Date(2026, 2, 31);
+    const tasks = [
+      task({ beginDate: '2026-02-20', endDate: '2026-02-28' }), // ends before range
+      task({ beginDate: '2026-03-05', endDate: '2026-03-05' }),
+      task({ beginDate: '2026-03-10', endDate: '2026-03-20' }),
+      task({ beginDate: '2026-03-10', endDate: '2026-03-20', done: true }),
+      task({ beginDate: null, endDate: null }),
+    ];
+    const out = computeRemaining(tasks, { start, end });
+    expect(out.map((t) => t.endDate)).toEqual(['2026-03-05', '2026-03-20']);
+  });
+});
+
+describe('countOverdue', () => {
+  it('counts unfinished tasks past their end day', () => {
+    const overdue = task({ beginDate: fmt(addDays(today(), -3)), endDate: fmt(addDays(today(), -1)) });
+    const span = task({ beginDate: fmt(addDays(today(), -2)), endDate: fmt(addDays(today(), 2)) });
+    const done = task({ beginDate: fmt(addDays(today(), -3)), endDate: fmt(addDays(today(), -1)), done: true });
+    expect(countOverdue([overdue, span, done])).toBe(1);
   });
 });
 

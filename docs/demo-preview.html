@@ -409,6 +409,10 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .date-pop.open{display:flex;animation:menuIn .14s var(--ease)}
 .pop-grid{gap:1px}
 .pop-grid .day{height:26px}
+.pop-hint{
+  font-size:var(--fs-2xs);color:var(--muted-2);text-align:center;
+  padding:4px 0 1px;line-height:1.4;
+}
 .pop-foot{
   display:flex;gap:5px;padding-top:7px;margin-top:1px;
   border-top:1px solid var(--line-2);
@@ -527,6 +531,17 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 }
 .day.selected::after{display:none}
 .day.selected .dot-sm{background:rgba(255,255,255,.95)}
+/* 区间选择：开始 / 结束端点 + 中间连接高亮 */
+.pop-grid .day.range-lo,
+.pop-grid .day.range-hi{
+  background:var(--grad-brand);color:var(--on-primary);font-weight:600;
+  box-shadow:0 2px 6px rgba(92,70,50,.28);
+}
+.pop-grid .day.range-lo::after,
+.pop-grid .day.range-hi::after{display:none}
+.pop-grid .day.in-range{
+  background:var(--primary-soft);color:var(--primary-text);font-weight:600;
+}
 .day-dots{position:absolute;bottom:4px;display:flex;gap:2px}
 .dot-sm{width:5px;height:5px;border-radius:50%;display:block}
 .dot-sm.done{
@@ -641,6 +656,11 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .resched-label{font-size:var(--fs-2xs);color:var(--muted-2)}
 .overdue-flag{color:var(--red);font-weight:500}
 .overdue-flag-strong{color:var(--red);font-weight:600}
+.overdue-tag{
+  font-size:var(--fs-2xs);font-weight:600;color:var(--red);
+  background:var(--red-soft);border-radius:4px;padding:0 5px;line-height:1.5;flex:none;font-style:normal;
+}
+.sched-label{font-size:var(--fs-2xs);color:var(--muted-2);white-space:nowrap}
 .prio{width:6px;height:6px;border-radius:50%;flex:none}
 .prio.high{background:var(--red)}
 .prio.mid{background:var(--orange)}
@@ -839,10 +859,6 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .log-dot.open{background:var(--muted-2);box-shadow:0 0 0 2px rgba(150,150,150,.12)}
 .log-dot.late{background:var(--red);box-shadow:0 0 0 2px rgba(200,80,70,.15)}
 .log-item.late .log-title{color:var(--red)}
-.audit-late-tag{
-  font-size:var(--fs-2xs);color:var(--red);background:var(--red-soft);
-  padding:1px 6px;border-radius:999px;flex:none;
-}
 
 @media (max-width:1120px){
   .stats-grid{grid-template-columns:repeat(3,1fr)}
@@ -881,6 +897,7 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .task.resched-row{display:block;background:var(--surface-2);border-color:var(--primary)}
 .resched-body{display:flex;flex-direction:column;gap:6px}
 .resched-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.resched-hint{font-size:var(--fs-2xs);color:var(--muted-2);line-height:1.4}
 .chip{
   border:1px solid var(--line);background:var(--card);color:var(--text-2);
   font-size:var(--fs-2xs);font-weight:500;padding:4px 6px;border-radius:5px;
@@ -1421,6 +1438,7 @@ html[data-theme="dark"] .btn.danger:hover{background:var(--red);border-color:var
 html[data-theme="dark"] .nav-item.active::before{background:var(--primary)}
 html[data-theme="dark"] .progress-line i{background:var(--grad-progress)}
 html[data-theme="dark"] .day.selected .dot-sm{background:rgba(13,23,21,.7);box-shadow:none}
+html[data-theme="dark"] .pop-grid .day.in-range{background:var(--primary-soft);color:var(--primary-text)}
 
 html[data-theme="dark"] .day.today::after{background:var(--primary)}
 html[data-theme="dark"] .day.today{color:var(--primary-text)}
@@ -1827,7 +1845,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
             <div class="card help-card">
               <div class="help-icon" style="background:var(--tag-work-bg)">📅</div>
               <div class="help-title">计划</div>
-              <div class="help-desc">在日历上选择任意日期，添加任务、设置标签、随时改期，逾期任务可以一键移到今天。</div>
+              <div class="help-desc">在日历上选择任意日期（可跨天），添加任务、设置标签、随时改期，逾期任务可以一键移到今天。</div>
             </div>
             <div class="card help-card">
               <div class="help-icon" style="background:var(--tag-study-bg)">📝</div>
@@ -1852,6 +1870,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
               <li><b>快速添加任务</b> — 在计划页输入内容后按回车即可创建，标签和日期在右侧选择</li>
               <li><b>给未来排计划</b> — 点添加行右侧的日期，或先切换到某个日期再添加</li>
               <li><b>任务改期</b> — 鼠标悬停任务行，点「改期」，一键选今天 / 明天 / 本周末 / 延后一周</li>
+              <li><b>跨天排期</b> — 排期不止一天时，在「选择日期」里先点开始日、再点结束日即可排成一段</li>
               <li><b>批量顺延</b> — 点面板顶部「顺延未完成」，把当天未完成的任务整体挪到第二天</li>
               <li><b>切换标签</b> — 直接点任务行上的标签，会循环切到下一个标签</li>
               <li><b>搜索笔记</b> — 在笔记页搜索框输入关键词，标题和正文内容都会匹配</li>
@@ -1869,7 +1888,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
               <div class="faq-a">在旧设备上打开设置页，点「导出」得到一个 JSON 文件；在新设备的设置页点「导入」并选择该文件即可恢复。</div>
             </div>
             <div class="faq-item">
-              <div class="faq-q">为什么有些任务显示「已逾期」？</div>
+              <div class="faq-q">为什么有些任务显示「逾期」？</div>
               <div class="faq-a">任务的安排日期已经过去但还没勾选完成，就会被标记为逾期。左侧「逾期未完成」卡片里可以一键把它移到今天。</div>
             </div>
             <div class="faq-item">
@@ -1898,6 +1917,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
     <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
   </div>
   <div class="cal-grid pop-grid" id="popGrid"></div>
+  <div class="pop-hint" id="popHint"></div>
   <div class="pop-foot" id="popFoot">
     <button type="button" class="pop-chip" data-preset="today">今天</button>
     <button type="button" class="pop-chip" data-preset="tomorrow">明天</button>
@@ -1914,9 +1934,27 @@ const parseDate = s => { const [y,m,d] = s.split('-').map(Number); return new Da
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 const TODAY_STR = fmt(TODAY);
 const hmOf = iso => { if(!iso) return ''; const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const doneAtLabel = iso => { if(!iso) return ''; const d = new Date(iso); const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; return fmt(d) === TODAY_STR ? `今天 ${time}` : `${fmt(d)} ${time}`; };
 const dayOf = iso => iso ? fmt(new Date(iso)) : null;
 const $ = s => document.querySelector(s);
 const pw = { high:0, mid:1, low:2 };
+
+/* ---- 排期区间模型：单日 beginDate === endDate；待排期两者皆 null；逾期以 endDate 为准 ---- */
+const isUnscheduled = t => t.beginDate === null;
+const occursOn = (t, ds) => t.beginDate !== null && ds >= t.beginDate && ds <= t.endDate;
+const isOverdueTask = t => !t.done && t.endDate !== null && t.endDate < TODAY_STR;
+/* 周期归属：任务的结束日（截止日）落在 [s,e] 内即算作该周期 */
+const inPeriod = (t, s, e) => t.endDate !== null && t.endDate >= s && t.endDate <= e;
+/* 排期文案：单日显示「今天/明天/M月D日」，跨天显示「M月D日–M月D日」；逾期由调用方以标签单独表示 */
+function dateRangeLabel(begin, end){
+  if(!begin) return '待排期';
+  if(end && end !== begin){
+    const b = parseDate(begin), e = parseDate(end);
+    return `${b.getMonth()+1}月${b.getDate()}日–${e.getMonth()+1}月${e.getDate()}日`;
+  }
+  return dateLabelFor(begin);
+}
+const taskLabel = t => `计划于 ${dateRangeLabel(t.beginDate, t.endDate)}`;
 
 const TAG_STYLE = {
   '工作': { bar:'linear-gradient(90deg, var(--tag-work), var(--tag-work-fg))' },
@@ -1956,7 +1994,7 @@ const TITLES = {
 const tasks = [];
 let uid = 1;
 
-function makeTask(dateStr, done, forced){
+function makeTask(beginStr, done, forced, endStr){
   const tag = forced?.tag ?? pick(TAG_ORDER);
   const title = forced?.title ?? pick(TITLES[tag]);
   const prio = forced?.prio ?? (tag==='工作'
@@ -1966,16 +2004,17 @@ function makeTask(dateStr, done, forced){
   if(done){
     const h = forced?.at ? Number(forced.at.slice(0,2)) : 9 + Math.floor(rnd()*12);
     const mi = forced?.at ? Number(forced.at.slice(3,5)) : Math.floor(rnd()*4)*15;
-    const dt = parseDate(dateStr); dt.setHours(h, mi, 0, 0);
+    const dt = parseDate(beginStr); dt.setHours(h, mi, 0, 0);
     doneAt = dt.toISOString();
   }
-  tasks.push({ id: uid++, title, tag, prio, date: dateStr, done, doneAt });
+  tasks.push({ id: uid++, title, tag, prio, beginDate: beginStr, endDate: endStr || beginStr, done, doneAt });
 }
 
-function makeUnscheduled(title, tag, prio, source = 'note', date = null){
+function makeUnscheduled(title, tag, prio, source = 'note', begin = null, end = null){
   tasks.push({
     id: uid++, title, tag, prio: prio ?? 'mid',
-    date: date ?? null, done: false, doneAt: null,
+    beginDate: begin ?? null, endDate: begin ? (end || begin) : null,
+    done: false, doneAt: null,
     source, parsedAt: new Date().toISOString(),
   });
 }
@@ -2002,6 +2041,10 @@ function generateDemoTasks(){
     {title:'季度目标拆解会', tag:'工作', prio:'high'},
     {title:'健身房训练',     tag:'健康', prio:'mid'},
   ].forEach(t => makeTask(fmt(addDays(TODAY,1)), false, t));
+  /* 跨天排期示例：一段连续多天的安排 */
+  makeTask(fmt(addDays(TODAY,2)), false, {title:'出差 · 杭州（三天）', tag:'工作', prio:'high'}, fmt(addDays(TODAY,4)));
+  makeTask(fmt(addDays(TODAY,-1)), false, {title:'读《深度工作》第 3–5 章', tag:'学习', prio:'mid'}, fmt(addDays(TODAY,1)));
+  makeTask(fmt(addDays(TODAY,-3)), true,  {title:'年度体检（含复查）', tag:'健康', prio:'mid'}, fmt(addDays(TODAY,-2)));
   for(let i = 2; i <= 7; i++){
     const ds = fmt(addDays(TODAY, i));
     const n = Math.floor(rnd()*3);
@@ -2141,7 +2184,8 @@ const state = {
   calMonth: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1),
   reviewRange: 'today',
   chartType: 'bar',
-  addDate: '',
+  addBegin: '',
+  addEnd: '',
   addTag: '工作',
   popMonth: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1),
   reschedulingId: null,
@@ -2180,9 +2224,7 @@ function toast(msg){
   toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 function toastScheduled(t){
-  const d = parseDate(t.date);
-  const label = t.date === TODAY_STR ? '今天' : `${d.getMonth()+1}月${d.getDate()}日`;
-  toast(`已排到 ${label}`);
+  toast(`已排到 ${t.beginDate === TODAY_STR && t.endDate === t.beginDate ? '今天' : dateRangeLabel(t.beginDate, t.endDate)}`);
 }
 function flashTask(id){
   const row = document.querySelector(`.task[data-id="${id}"]`);
@@ -2216,7 +2258,7 @@ function renderCalendar(){
   for(let i = 0; i < 42; i++){
     const d = addDays(start, i);
     const ds = fmt(d);
-    const dayTasks = tasks.filter(t => t.date === ds);
+    const dayTasks = tasks.filter(t => occursOn(t, ds));
     const doneN = dayTasks.filter(t => t.done).length;
     const undoneN = dayTasks.length - doneN;
     let dots = '';
@@ -2234,8 +2276,8 @@ function renderCalendar(){
   $('#calGrid').innerHTML = html;
 }
 
-const getOverdue = () => tasks.filter(t => !t.done && t.date && t.date < TODAY_STR).sort((a,b) => b.date.localeCompare(a.date));
-const getUnscheduled = () => tasks.filter(t => t.date === null).sort((a,b) => (a.done - b.done) || (b.parsedAt||'').localeCompare(a.parsedAt||''));
+const getOverdue = () => tasks.filter(t => isOverdueTask(t)).sort((a,b) => b.endDate.localeCompare(a.endDate));
+const getUnscheduled = () => tasks.filter(t => t.beginDate === null).sort((a,b) => (a.done - b.done) || (b.parsedAt||'').localeCompare(a.parsedAt||''));
 const getPending = () => tasks.filter(t => !t.done);
 
 function setPlanView(view){
@@ -2261,9 +2303,9 @@ function renderMetrics(){
 }
 
 function rowHTML(t, mode){
-  const isUnsched = t.date === null;
+  const isUnsched = isUnscheduled(t);
   if(state.reschedulingId === t.id){
-    const label = isUnsched ? '排期到' : '改期到';
+    const label = isUnsched ? '排期到' : '调整排期';
     return `<div class="task resched-row${isUnsched ? ' inbound' : ''}" data-id="${t.id}">
       <div class="resched-body">
         <div class="task-title">${t.title}</div>
@@ -2273,9 +2315,10 @@ function rowHTML(t, mode){
           <button class="chip" data-quick="tomorrow">明天</button>
           <button class="chip" data-quick="weekend">本周末</button>
           <button class="chip" data-quick="nextweek">延后一周</button>
-          <button type="button" class="chip resched-pick" data-act="pickdate" title="选择具体日期">选择日期</button>
+          <button type="button" class="chip resched-pick" data-act="pickdate" title="选择起止日期（可跨天）">选择日期</button>
           <button class="chip ghost" data-quick="cancel">取消</button>
         </div>
+        <div class="resched-hint">选择日期时先点开始日，再点结束日即可排成一段（同一天两次即为单日）。</div>
       </div>
     </div>`;
   }
@@ -2291,12 +2334,15 @@ function rowHTML(t, mode){
       </div>
     </div>`;
   }
-  const schedAt = !isUnsched && t.date < TODAY_STR;
+  const schedAt = !isUnsched && t.endDate < TODAY_STR;
   let metaExtra;
   if(isUnsched){
     metaExtra = `<i class="meta-dot"></i><span class="overdue-flag">未排期${t.source === 'note' ? ' · 来自笔记' : ''}</span>`;
+  } else if(t.done){
+    metaExtra = `<i class="meta-dot"></i><span>${taskLabel(t)}</span><i class="meta-dot"></i><span>完成于 ${doneAtLabel(t.doneAt)}</span>`;
   } else {
-    metaExtra = `<i class="meta-dot"></i><span class="${schedAt && !t.done ? 'overdue-flag' : ''}">${dateLabelFor(t.date, t.done)}</span>`;
+    const od = schedAt ? `<span class="overdue-tag" title="已逾期">逾期</span>` : '';
+    metaExtra = `<i class="meta-dot"></i><span>${taskLabel(t)}</span>${od}`;
   }
   return `<div class="task ${t.done ? 'is-done' : ''}${isUnsched ? ' inbound' : ''}" data-id="${t.id}">
     <button class="check" data-act="toggle" title="${t.done ? '标记为未完成' : '标记完成'}">
@@ -2306,7 +2352,6 @@ function rowHTML(t, mode){
       <div class="task-title">${t.title}</div>
       <div class="task-meta">
         <span class="tag clickable" data-act="tag" data-tag="${t.tag}" title="点击切换标签">${t.tag}</span>
-        ${t.done && t.doneAt ? `<i class="meta-dot"></i><span>完成于 ${hmOf(t.doneAt)}</span>` : ''}
         ${metaExtra}
       </div>
     </div>
@@ -2379,7 +2424,7 @@ function renderTasksBody(){
     const d = parseDate(ds);
     const isToday = ds === TODAY_STR;
     const isFuture = ds > TODAY_STR;
-    const list = tasks.filter(t => t.date === ds).sort((a,b) => (a.done - b.done) || (pw[a.prio] - pw[b.prio]));
+    const list = tasks.filter(t => occursOn(t, ds)).sort((a,b) => (a.done - b.done) || (pw[a.prio] - pw[b.prio]));
     const doneN = list.filter(t => t.done).length;
     $('#taskDateTitle').textContent =
       `${d.getMonth()+1}月${d.getDate()}日 ${dayNames[d.getDay()]}` + (isToday ? ' · 今天' : '');
@@ -2407,7 +2452,7 @@ function renderTasksBody(){
     $('#taskDateTitle').textContent = '逾期未完成';
     const oldest = list[list.length - 1];
     $('#taskSubtitle').textContent = list.length
-      ? `${list.length} 项 · 最早 ${oldest ? (parseDate(oldest.date).getMonth()+1) + '月' + (parseDate(oldest.date).getDate()) + '日' : ''}`
+      ? `${list.length} 项 · 最早 ${oldest ? (parseDate(oldest.endDate).getMonth()+1) + '月' + (parseDate(oldest.endDate).getDate()) + '日' : ''}`
       : '没有逾期任务，很好';
     summary.innerHTML = list.length
       ? `<span>这些任务过了截止日还没完成。</span><button class="batch-btn" id="allTodayBtn">全部移到今天</button>`
@@ -2425,10 +2470,10 @@ function renderTasksBody(){
 
   if(view.kind === 'pending'){
     const all = getPending();
-    const od = all.filter(t => t.date && t.date < TODAY_STR).sort((a,b) => a.date.localeCompare(b.date));
-    const td = all.filter(t => t.date === TODAY_STR).sort((a,b) => pw[a.prio] - pw[b.prio]);
-    const fut = all.filter(t => t.date && t.date > TODAY_STR).sort((a,b) => a.date.localeCompare(b.date));
-    const un = all.filter(t => t.date === null).sort((a,b) => (b.parsedAt||'').localeCompare(a.parsedAt||''));
+    const od = all.filter(t => t.endDate !== null && t.endDate < TODAY_STR).sort((a,b) => a.endDate.localeCompare(b.endDate));
+    const td = all.filter(t => occursOn(t, TODAY_STR) && t.endDate >= TODAY_STR).sort((a,b) => pw[a.prio] - pw[b.prio]);
+    const fut = all.filter(t => t.beginDate !== null && t.beginDate > TODAY_STR).sort((a,b) => a.beginDate.localeCompare(b.beginDate));
+    const un = all.filter(t => t.beginDate === null).sort((a,b) => (b.parsedAt||'').localeCompare(a.parsedAt||''));
     $('#taskDateTitle').textContent = '全部待处理';
     $('#taskSubtitle').textContent = all.length
       ? `${all.length} 项未完成 · 逾期 ${od.length} · 待排期 ${un.length}`
@@ -2476,7 +2521,7 @@ const SIDE_HINTS = {
 function pickFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 let sideHintKey = '';
 function renderSideStats(){
-  const todayTasks = tasks.filter(t => t.date === TODAY_STR);
+  const todayTasks = tasks.filter(t => occursOn(t, TODAY_STR));
   const doneN = todayTasks.filter(t => t.done).length;
   const total = todayTasks.length;
   const pct = total ? Math.round(doneN / total * 100) : 0;
@@ -2503,15 +2548,15 @@ function renderTodayCard(){
   $('#todayTime').textContent = hhmm;
 
   const ordered = [
-    ...tasks.filter(t => t.date === tStr && t.done),
-    ...tasks.filter(t => t.date === tStr && !t.done)
+    ...tasks.filter(t => occursOn(t, tStr) && t.done),
+    ...tasks.filter(t => occursOn(t, tStr) && !t.done)
       .sort((a, b) => pw[a.prio] - pw[b.prio]),
   ];
   const total = ordered.length;
   const doneN = ordered.filter(t => t.done).length;
   const remaining = total - doneN;
   const pending = ordered.filter(t => !t.done);
-  const overdue = tasks.filter(t => !t.done && t.date && t.date < tStr);
+  const overdue = tasks.filter(t => isOverdueTask(t));
   const pct = total ? Math.round(doneN / total * 100) : 0;
   const isComplete = total > 0 && doneN === total;
   const warn = !isComplete && overdue.length > 0;
@@ -2685,12 +2730,12 @@ function renderReview(){
   const r = getRange(state.reviewRange);
   const s = fmt(r.start), e = fmt(r.end);
   $('#rangeLabel').textContent = rangeLabel(r);
-  const unscheduledCount = tasks.filter(t => t.date === null).length;
+  const unscheduledCount = tasks.filter(t => t.beginDate === null).length;
   // 完成任务：完成日期（doneAt）落在所选周期内的任务
   const doneTasks = tasks.filter(t => t.done && t.doneAt !== null && dayOf(t.doneAt) >= s && dayOf(t.doneAt) <= e);
   const doneN = doneTasks.length;
-  // 完成率：分母 = 排期在周期内的任务数；分子 = 排期在周期内且已完成的任务数
-  const inRange = tasks.filter(t => t.date !== null && t.date >= s && t.date <= e);
+  // 完成率：分母 = 结束日（截止日）落在周期内的任务数；分子 = 其中已完成的任务数
+  const inRange = tasks.filter(t => inPeriod(t, s, e));
   const total = inRange.length;
   const scheduledDoneN = inRange.filter(t => t.done).length;
   const rate = total ? Math.round(scheduledDoneN / total * 100) : 0;
@@ -2699,10 +2744,10 @@ function renderReview(){
   const dayCount = Math.round((r.end - r.start) / 86400000) + 1;
 
   // 逾期任务：排期在周期内，且
-  //   a) 未完成并已过期（date < 今天），或
-  //   b) 已完成但迟于排期日完成（dayOf(doneAt) > date）
-  const lateDone = t => t.done && t.doneAt && t.date !== null && dayOf(t.doneAt) > t.date;
-  const overdueUndone = inRange.filter(t => !t.done && t.date < TODAY_STR);
+  //   a) 未完成且已过截止日（endDate < 今天），或
+  //   b) 已完成但迟于截止日完成（dayOf(doneAt) > endDate）
+  const lateDone = t => t.done && t.doneAt && t.endDate !== null && dayOf(t.doneAt) > t.endDate;
+  const overdueUndone = inRange.filter(t => !t.done && t.endDate < TODAY_STR);
   const overdueDone = inRange.filter(lateDone);
   const overdueN = overdueUndone.length + overdueDone.length;
   const overdueDoneN = overdueDone.length;
@@ -2710,7 +2755,7 @@ function renderReview(){
 
   const prevStart = addDays(r.start, -dayCount), prevEnd = addDays(r.start, -1);
   const ps = fmt(prevStart), pe = fmt(prevEnd);
-  const prevInRange = tasks.filter(t => t.date !== null && t.date >= ps && t.date <= pe);
+  const prevInRange = tasks.filter(t => inPeriod(t, ps, pe));
   const hasPrev = prevInRange.length > 0;
   const prevRate = hasPrev ? Math.round(prevInRange.filter(t => t.done).length / prevInRange.length * 100) : 0;
   const delta = rate - prevRate;
@@ -2813,6 +2858,7 @@ function renderReview(){
               <i class="log-dot"></i>
               <span class="log-title">${t.title}</span>
               <span class="tag" data-tag="${t.tag}">${t.tag}</span>
+              <span class="sched-label">${taskLabel(t)}</span>
               <span class="log-time">${hmOf(t.doneAt)}</span>
             </div>`).join('')}
           </div>
@@ -2823,40 +2869,29 @@ function renderReview(){
         <span>还没有完成记录</span>
       </div>`;
 
-  const remainTasks = tasks.filter(t => !t.done && t.date !== null && t.date >= s && t.date <= e);
-  const remainOverdue = remainTasks.filter(t => t.date < TODAY_STR);
-  const remainUpcoming = remainTasks.filter(t => t.date >= TODAY_STR);
+  const remainTasks = tasks.filter(t => !t.done && inPeriod(t, s, e));
+  const remainOverdue = remainTasks.filter(t => t.endDate < TODAY_STR);
   $('#auditTodoCount').textContent = remainOverdue.length
     ? `${remainTasks.length} 项 · 含逾期 ${remainOverdue.length}`
     : `${remainTasks.length} 项`;
-  const remByDate = {};
-  remainTasks.forEach(t => { (remByDate[t.date] = remByDate[t.date] || []).push(t); });
-  const remDates = Object.keys(remByDate).sort((a,b) => {
-    const la = a < TODAY_STR, lb = b < TODAY_STR;
+  const remainSorted = remainTasks.slice().sort((a,b) => {
+    const la = a.endDate < TODAY_STR, lb = b.endDate < TODAY_STR;
     if(la !== lb) return la ? -1 : 1;
-    return a.localeCompare(b);
+    return a.endDate.localeCompare(b.endDate) || pw[a.prio] - pw[b.prio];
   });
-  $('#auditTodoList').innerHTML = remDates.length
-    ? remDates.map(ds => {
-        const d = parseDate(ds);
-        const isLate = ds < TODAY_STR;
-        const items = remByDate[ds].slice().sort((a,b) => b.priority - a.priority);
-        const label = ds === TODAY_STR ? `今天 ${dayNames[d.getDay()]}` : `${d.getMonth()+1}月${d.getDate()}日 ${dayNames[d.getDay()]}`;
-        return `<div class="log-group">
-          <div class="log-date">
-            ${label}
-            <span>${items.length} 项</span>
-            ${isLate ? `<i class="audit-late-tag">已逾期</i>` : ''}
-          </div>
-          <div class="log-items">
-            ${items.map(t => `<div class="log-item todo${isLate ? ' late' : ''}" data-id="${t.id}">
-              <i class="log-dot ${isLate ? 'late' : 'open'}"></i>
-              <span class="log-title">${t.title}</span>
-              <span class="tag" data-tag="${t.tag}">${t.tag}</span>
-            </div>`).join('')}
-          </div>
-        </div>`;
-      }).join('')
+  $('#auditTodoList').innerHTML = remainSorted.length
+    ? `<div class="log-items">
+        ${remainSorted.map(t => {
+          const isLate = t.endDate < TODAY_STR;
+          return `<div class="log-item todo${isLate ? ' late' : ''}" data-id="${t.id}">
+            <i class="log-dot ${isLate ? 'late' : 'open'}"></i>
+            <span class="log-title">${t.title}</span>
+            <span class="tag" data-tag="${t.tag}">${t.tag}</span>
+            <span class="sched-label">${taskLabel(t)}</span>
+            ${isLate ? `<i class="overdue-tag">逾期</i>` : ''}
+          </div>`;
+        }).join('')}
+      </div>`
     : `<div class="empty-tip">
         <svg viewBox="0 0 24 24"><path d="M9 11.5l2 2 4-4.5"/><circle cx="12" cy="12" r="9"/></svg>
         <span>周期内任务已全部完成 🎉</span>
@@ -3260,7 +3295,8 @@ function planToToday(){
   state.selectedDate = TODAY_STR;
   state.calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
   state.reschedulingId = null;
-  state.addDate = TODAY_STR;
+  state.addBegin = TODAY_STR;
+  state.addEnd = TODAY_STR;
 }
 function showPage(page){
   if(page !== 'notes' && state.findOpen) nfClose();
@@ -3298,11 +3334,10 @@ function snippetAround(text, q, radius){
   const end = Math.min(t.length, i + q.length + radius);
   return (start > 0 ? '…' : '') + t.slice(start, end) + (end < t.length ? '…' : '');
 }
-function dateLabelFor(ds, done){
+function dateLabelFor(ds){
   if(ds === TODAY_STR) return '今天';
   if(ds === fmt(addDays(TODAY, 1))) return '明天';
   const d = parseDate(ds);
-  if(ds < TODAY_STR && !done) return `逾期 · ${d.getMonth()+1}月${d.getDate()}日`;
   return `${d.getMonth()+1}月${d.getDate()}日`;
 }
 function renderGlobalSearch(){
@@ -3333,7 +3368,7 @@ function renderGlobalSearch(){
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const taskHits = type === 'note' ? [] : tasks
     .filter(t => (t.title || '').toLowerCase().includes(lc))
-    .sort((a, b) => (a.done - b.done) || String(b.date || '').localeCompare(String(a.date || '')));
+    .sort((a, b) => (a.done - b.done) || String(b.beginDate || '').localeCompare(String(a.beginDate || '')));
 
   const total = noteHits.length + taskHits.length;
   summary.innerHTML = total
@@ -3374,7 +3409,7 @@ function renderGlobalSearch(){
     html += `<div class="search-group">
       <div class="search-group-head">待办 <span class="cnt">${taskHits.length}</span></div>
       ${taskHits.map(t => {
-        const overdue = !t.done && t.date && t.date < TODAY_STR;
+        const overdue = isOverdueTask(t);
         return `<button class="search-hit" data-kind="task" data-id="${t.id}">
           <span class="hit-icon task">
             <svg viewBox="0 0 24 24">${t.done ? '<path d="M4 12.5l5 5L20 6.5"/>' : '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8"/>'}</svg>
@@ -3383,8 +3418,9 @@ function renderGlobalSearch(){
             <span class="hit-title" ${t.done ? 'style="color:var(--muted-2);text-decoration:line-through"' : ''}>${highlight(t.title, q)}</span>
             <span class="hit-meta">
               <span class="tag" data-tag="${t.tag}">${t.tag}</span>
-              <span class="${overdue ? 'overdue-flag-strong' : ''}">${t.date === null ? '待排期' : dateLabelFor(t.date, t.done)}</span>
-              ${t.done ? '<span>· 已完成</span>' : ''}
+              <span>${isUnscheduled(t) ? '未排期' : taskLabel(t)}</span>
+              ${overdue ? '<span class="overdue-tag">逾期</span>' : ''}
+              ${t.done ? `<span>· 完成于 ${doneAtLabel(t.doneAt)}</span>` : ''}
             </span>
           </span>
         </button>`;
@@ -3438,17 +3474,17 @@ $('#globalSearchResults').addEventListener('click', e => {
     const t = tasks.find(x => x.id === id);
     if(!t) return;
     prevPage = 'plan';
-    if(t.date === null){
+    if(t.beginDate === null){
       state.planView = { kind: 'unscheduled' };
       showPage('plan');
       flashTask(t.id);
       toast('这是一条待排期任务');
     } else {
-      state.selectedDate = t.date;
-      const d = parseDate(t.date);
+      state.selectedDate = t.beginDate;
+      const d = parseDate(t.beginDate);
       state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
       showPage('plan');
-      toast(`已定位到 ${t.date} 的任务`);
+      toast(`已定位到 ${dateRangeLabel(t.beginDate, t.endDate)} 的任务`);
     }
   }
 });
@@ -3491,30 +3527,30 @@ $('#quickNewBtn').addEventListener('click', () => {
     dpClose();
   }
 });
-function dateLabel(ds){
-  if(!ds) return '待排期';
-  if(ds === TODAY_STR) return '今天';
-  const d = parseDate(ds);
-  const tom = fmt(addDays(TODAY, 1));
-  if(ds === tom) return '明天';
-  return `${d.getMonth()+1}月${d.getDate()}日`;
-}
-/* ---- 公用日期选择器：新建表单与任务改期共用同一组件 ---- */
-state.datePicker = { anchor: null, value: '', allowClear: true, onPick: null };
+/* ---- 公用日期选择器：新建表单与任务改期共用；支持跨天区间 ---- */
+state.datePicker = { anchor: null, begin: '', end: '', allowClear: true, onPick: null, pending: null, hover: null };
 function dpOpen(anchor, opts){
   opts = opts || {};
   state.datePicker.anchor = anchor;
-  state.datePicker.value = opts.value || '';
+  state.datePicker.begin = opts.begin || '';
+  state.datePicker.end = opts.end || opts.begin || '';
   state.datePicker.allowClear = opts.allowClear !== false;
   state.datePicker.onPick = opts.onPick || null;
-  const base = state.datePicker.value ? parseDate(state.datePicker.value) : TODAY;
+  state.datePicker.pending = null;
+  state.datePicker.hover = null;
+  const base = state.datePicker.begin ? parseDate(state.datePicker.begin) : TODAY;
   state.popMonth = new Date(base.getFullYear(), base.getMonth(), 1);
   $('#popFoot').style.display = state.datePicker.allowClear ? '' : 'none';
   renderDatePop();
   $('#datePop').classList.add('open');
   positionDatePop();
 }
-function dpClose(){ $('#datePop').classList.remove('open'); state.datePicker.anchor = null; }
+function dpClose(){
+  $('#datePop').classList.remove('open');
+  state.datePicker.anchor = null;
+  state.datePicker.pending = null;
+  state.datePicker.hover = null;
+}
 function positionDatePop(){
   const pop = $('#datePop'), a = state.datePicker.anchor;
   if(!a) return;
@@ -3527,10 +3563,30 @@ function positionDatePop(){
   pop.style.left = left + 'px';
   pop.style.top = top + 'px';
 }
+/* 当前应高亮的区间：已定区间，或「已选开始日 + 悬停结束日」的预览 */
+function calRange(){
+  const dp = state.datePicker;
+  if(dp.pending){
+    const a = dp.pending, b = dp.hover || dp.pending;
+    return a <= b ? { lo:a, hi:b } : { lo:b, hi:a };
+  }
+  if(dp.begin && dp.end) return dp.begin <= dp.end ? { lo:dp.begin, hi:dp.end } : { lo:dp.end, hi:dp.begin };
+  if(dp.begin) return { lo:dp.begin, hi:dp.begin };
+  return null;
+}
+function updatePopHint(){
+  const el = $('#popHint');
+  if(!el) return;
+  const dp = state.datePicker;
+  if(dp.pending) el.textContent = '再点一天作为结束日 · 同一天两次即为单日';
+  else if(dp.begin) el.textContent = dateRangeLabel(dp.begin, dp.end);
+  else el.textContent = '先点开始日，再点结束日可排成一整段';
+}
 function renderDatePop(){
   const y = state.popMonth.getFullYear();
   const m = state.popMonth.getMonth();
   $('#popTitle').textContent = `${y}年${m+1}月`;
+  const c = calRange();
   const first = new Date(y, m, 1);
   const offset = (first.getDay() + 6) % 7;
   const start = addDays(first, -offset);
@@ -3541,15 +3597,31 @@ function renderDatePop(){
     const cls = ['day'];
     if(d.getMonth() !== m) cls.push('other');
     if(ds === TODAY_STR) cls.push('today');
-    if(ds === state.datePicker.value) cls.push('selected');
+    if(c){
+      if(ds === c.lo && ds === c.hi) cls.push('selected');
+      else if(ds === c.lo) cls.push('range-lo');
+      else if(ds === c.hi) cls.push('range-hi');
+      else if(ds > c.lo && ds < c.hi) cls.push('in-range');
+    }
     html += `<div class="${cls.join(' ')}" data-pdate="${ds}"><span>${d.getDate()}</span></div>`;
   }
   $('#popGrid').innerHTML = html;
+  updatePopHint();
 }
-function dpPick(ds){
+function dpCommit(begin, end){
   const cb = state.datePicker.onPick;
   dpClose();
-  if(cb) cb(ds);
+  if(cb) cb(begin || null, end || begin || null);
+}
+function dpPick(ds){
+  const dp = state.datePicker;
+  if(!dp.pending){
+    dp.pending = ds;          // 第一次点击：记为开始日，等待结束日
+    renderDatePop();
+  } else {
+    const a = dp.pending;
+    dpCommit(a <= ds ? a : ds, a <= ds ? ds : a);
+  }
 }
 function syncAddControls(){
   const dot = $('#tagDot');
@@ -3557,8 +3629,8 @@ function syncAddControls(){
   document.querySelectorAll('#tagMenu button').forEach(b => b.classList.toggle('active', b.dataset.tag === state.addTag));
   const trig = $('#dateTrigger'), txt = $('#dateText');
   if(trig && txt){
-    trig.classList.toggle('set', !!state.addDate);
-    txt.textContent = dateLabel(state.addDate);
+    trig.classList.toggle('set', !!state.addBegin);
+    txt.textContent = state.addBegin ? dateRangeLabel(state.addBegin, state.addEnd) : '待排期';
   }
 }
 $('#tagTrigger').addEventListener('click', e => {
@@ -3578,14 +3650,26 @@ $('#dateTrigger').addEventListener('click', e => {
   if(pop.classList.contains('open') && state.datePicker.anchor === e.currentTarget){ dpClose(); return; }
   $('#tagMenu').classList.remove('open');
   dpOpen(e.currentTarget, {
-    value: state.addDate,
+    begin: state.addBegin,
+    end: state.addEnd,
     allowClear: true,
-    onPick: ds => { state.addDate = ds; syncAddControls(); $('#quickNewInput').focus(); }
+    onPick: (b, en) => { state.addBegin = b || ''; state.addEnd = en || ''; syncAddControls(); $('#quickNewInput').focus(); }
   });
 });
 $('#popGrid').addEventListener('click', e => {
   const cell = e.target.closest('[data-pdate]');
-  if(cell) dpPick(cell.dataset.pdate);
+  if(!cell) return;
+  e.stopPropagation();
+  dpPick(cell.dataset.pdate);
+});
+$('#popGrid').addEventListener('mouseover', e => {
+  if(!state.datePicker.pending) return;
+  const cell = e.target.closest('[data-pdate]');
+  if(!cell) return;
+  if(state.datePicker.hover !== cell.dataset.pdate){
+    state.datePicker.hover = cell.dataset.pdate;
+    renderDatePop();
+  }
 });
 $('#popPrev').addEventListener('click', e => {
   e.stopPropagation();
@@ -3604,7 +3688,9 @@ $('#popFoot').addEventListener('click', e => {
   if(!chip) return;
   e.stopPropagation();
   const p = chip.dataset.preset;
-  dpPick(p === 'today' ? TODAY_STR : p === 'tomorrow' ? fmt(addDays(TODAY, 1)) : '');
+  if(p === 'clear') dpCommit(null, null);
+  else if(p === 'today') dpCommit(TODAY_STR, TODAY_STR);
+  else { const t = fmt(addDays(TODAY, 1)); dpCommit(t, t); }
 });
 document.addEventListener('click', e => {
   if(!e.target.closest('#tagSelect')) $('#tagMenu').classList.remove('open');
@@ -3619,12 +3705,14 @@ $('#quickNewForm').addEventListener('submit', e => {
   const input = $('#quickNewInput');
   const title = input.value.trim();
   if(!title){ input.focus(); return; }
-  const date = state.addDate || null;
-  makeUnscheduled(title, state.addTag || TAG_ORDER[0], 'mid', 'quick', date);
+  const begin = state.addBegin || null;
+  const end = state.addEnd || begin;
+  makeUnscheduled(title, state.addTag || TAG_ORDER[0], 'mid', 'quick', begin, end);
   renderPlan();
-  toast(date ? `已排到 ${dateLabel(date)}` : '已存入待排期');
+  toast(begin ? `已排到 ${dateRangeLabel(begin, end)}` : '已存入待排期');
   input.value = '';
-  state.addDate = '';
+  state.addBegin = '';
+  state.addEnd = '';
   dpClose();
   syncAddControls();
   input.focus();
@@ -3657,7 +3745,13 @@ $('#postponeBtn').addEventListener('click', () => {
   const from = state.selectedDate;
   const to = fmt(addDays(parseDate(from), 1));
   let n = 0;
-  tasks.forEach(t => { if(t.date === from && !t.done){ t.date = to; n++; } });
+  tasks.forEach(t => {
+    if(t.endDate === from && !t.done){
+      t.beginDate = fmt(addDays(parseDate(t.beginDate), 1));
+      t.endDate = to;
+      n++;
+    }
+  });
   if(!n){ toast('这一天没有未完成的任务'); return; }
   renderPlan();
   toast(`已把 ${n} 项未完成任务顺延到 ${to}`);
@@ -3667,19 +3761,20 @@ $('#viewSummary').addEventListener('click', e => {
   if(!e.target.closest('#allTodayBtn')) return;
   const list = state.planView.kind === 'overdue' ? getOverdue() : getUnscheduled().filter(t => !t.done);
   if(!list.length){ toast('没有需要处理的任务'); return; }
-  list.forEach(t => { t.date = TODAY_STR; });
+  list.forEach(t => { t.beginDate = TODAY_STR; t.endDate = TODAY_STR; });
   renderPlan();
   toast(`已把 ${list.length} 项安排到今天`);
 });
 
-function applyReschedule(t, ds){
-  const wasInbound = t.date === null;
-  t.date = ds || null;
+function applyReschedule(t, begin, end){
+  const wasInbound = t.beginDate === null;
+  t.beginDate = begin || null;
+  t.endDate = begin ? (end || begin) : null;
   state.reschedulingId = null;
   renderPlan();
-  if(!ds) toast('已移回待排期');
+  if(!begin) toast('已移回待排期');
   else if(wasInbound) toastScheduled(t);
-  else toast(`已改期到 ${dateLabel(ds)}`);
+  else toast(`已改期到 ${dateRangeLabel(t.beginDate, t.endDate)}`);
 }
 
 $('#taskList').addEventListener('click', e => {
@@ -3696,8 +3791,8 @@ $('#taskList').addEventListener('click', e => {
     if(q === 'today') ds = TODAY_STR;
     else if(q === 'tomorrow') ds = fmt(addDays(TODAY, 1));
     else if(q === 'weekend') ds = fmt(nearestWeekend());
-    else if(q === 'nextweek') ds = fmt(addDays(parseDate(t.date || TODAY_STR), 7));
-    applyReschedule(t, ds);
+    else if(q === 'nextweek') ds = fmt(addDays(parseDate(t.beginDate || TODAY_STR), 7));
+    applyReschedule(t, ds, ds);
     return;
   }
   const btn = e.target.closest('[data-act]');
@@ -3731,10 +3826,12 @@ $('#taskList').addEventListener('click', e => {
     }
   } else if(btn.dataset.act === 'pickdate'){
     e.stopPropagation();
+    state.datePicker.hover = null;
     dpOpen(btn, {
-      value: t.date || '',
+      begin: t.beginDate || '',
+      end: t.endDate || '',
       allowClear: true,
-      onPick: ds => applyReschedule(t, ds)
+      onPick: (b, en) => applyReschedule(t, b, en)
     });
   } else if(btn.dataset.act === 'tag'){
     const i = TAG_ORDER.indexOf(t.tag);
@@ -3761,8 +3858,8 @@ $('#auditTodoList').addEventListener('click', e => {
   if(!t) return;
   state.page = 'plan';
   state.planView = { kind: 'date' };
-  state.selectedDate = t.date;
-  state.calMonth = new Date(parseDate(t.date).getFullYear(), parseDate(t.date).getMonth(), 1);
+  state.selectedDate = t.beginDate;
+  state.calMonth = new Date(parseDate(t.beginDate).getFullYear(), parseDate(t.beginDate).getMonth(), 1);
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === 'plan'));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-plan'));
   renderPlan();
@@ -4094,7 +4191,7 @@ $('#todaySegs').addEventListener('click', e => {
   if(!t) return;
   state.page = 'plan';
   state.planView = { kind: 'date' };
-  state.selectedDate = t.date;
+  state.selectedDate = t.beginDate;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === 'plan'));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-plan'));
   renderPlan();

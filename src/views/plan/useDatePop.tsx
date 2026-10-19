@@ -1,33 +1,44 @@
 import { useCallback, useState } from 'react';
+import type { TaskRange } from '@/types';
 import { DatePop } from '@/components/DatePop';
 
 interface PopState {
   open: boolean;
   anchorEl: HTMLElement | null;
-  value: string;
+  value: TaskRange | null;
   allowClear: boolean;
-  onPick: (ds: string) => void;
+  onPick: (range: TaskRange | null) => void;
 }
 
 export interface UseDatePop {
   isOpenFor: (el: HTMLElement) => boolean;
-  open: (anchor: HTMLElement, value: string, allowClear: boolean, onPick: (ds: string) => void) => void;
+  open: (
+    anchor: HTMLElement,
+    value: TaskRange | null,
+    allowClear: boolean,
+    onPick: (range: TaskRange | null) => void,
+  ) => void;
   close: () => void;
   host: JSX.Element;
 }
 
-/** Single floating date picker shared by the quick-add form and task rows. */
+/** Single floating date-range picker shared by the quick-add form and task rows. */
 export function useDatePop(): UseDatePop {
   const [pop, setPop] = useState<PopState>({
     open: false,
     anchorEl: null,
-    value: '',
+    value: null,
     allowClear: true,
     onPick: () => {},
   });
 
   const open = useCallback(
-    (anchor: HTMLElement, value: string, allowClear: boolean, onPick: (ds: string) => void) => {
+    (
+      anchor: HTMLElement,
+      value: TaskRange | null,
+      allowClear: boolean,
+      onPick: (range: TaskRange | null) => void,
+    ) => {
       setPop({ open: true, anchorEl: anchor, value, allowClear, onPick });
     },
     [],

@@ -36,15 +36,19 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
     }));
   },
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
-  rescheduleTask: (id, date) =>
+  rescheduleTask: (id, range) =>
     set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, date } : t)),
+      tasks: s.tasks.map((t) =>
+        t.id === id
+          ? { ...t, beginDate: range ? range.begin : null, endDate: range ? range.end : null }
+          : t,
+      ),
       reschedulingId: null,
     })),
   submitQuickAdd: (title) => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    const { addDate, addTag } = get();
+    const { addBegin, addEnd, addTag } = get();
     set((s) => ({
       tasks: [
         ...s.tasks,
@@ -53,26 +57,34 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
           title: trimmed,
           tag: addTag,
           prio: 'mid' as Priority,
-          date: addDate || null,
+          beginDate: addBegin || null,
+          endDate: addBegin ? addEnd || addBegin : null,
           done: false,
           doneAt: null,
           source: 'quick',
           parsedAt: new Date().toISOString(),
         },
       ],
-      addDate: '',
+      addBegin: '',
+      addEnd: '',
     }));
   },
   postponeUnfinished: () => {
     const from = get().selectedDate;
-    const to = fmt(addDays(parseDate(from), 1));
+    const shift = (ds: string) => fmt(addDays(parseDate(ds), 1));
     set((s) => ({
-      tasks: s.tasks.map((t) => (t.date === from && !t.done ? { ...t, date: to } : t)),
+      tasks: s.tasks.map((t) =>
+        t.endDate === from && !t.done
+          ? { ...t, beginDate: t.beginDate ? shift(t.beginDate) : null, endDate: shift(t.endDate) }
+          : t,
+      ),
     }));
   },
   moveAllToToday: (ids) =>
     set((s) => ({
-      tasks: s.tasks.map((t) => (ids.includes(t.id) ? { ...t, date: todayStr() } : t)),
+      tasks: s.tasks.map((t) =>
+        ids.includes(t.id) ? { ...t, beginDate: todayStr(), endDate: todayStr() } : t,
+      ),
     })),
 
   createNote: () => {

@@ -23,8 +23,8 @@ export function StatCards({ stats, trendCls, trendTxt }: Props) {
           </div>
           <div className="stat-sub">
             {stats.unscheduledCount
-              ? `共安排 ${stats.total} 项 · 另有 ${stats.unscheduledCount} 项待排期`
-              : `共安排 ${stats.total} 项`}
+              ? `共安排 ${stats.total} 项（按截止日）· 另有 ${stats.unscheduledCount} 项待排期`
+              : `共安排 ${stats.total} 项（按截止日）`}
           </div>
         </div>
       </div>

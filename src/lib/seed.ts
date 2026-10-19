@@ -31,7 +31,7 @@ export function generateDemoTasks(): Task[] {
   const tasks: Task[] = [];
   let uid = 1;
 
-  const makeTask = (dateStr: string, done: boolean, forced?: ForcedTask) => {
+  const makeTask = (beginStr: string, done: boolean, forced?: ForcedTask, endStr?: string) => {
     const tag = forced?.tag ?? pick(TAG_ORDER);
     const title = forced?.title ?? pick(TITLES[tag]);
     const prio =
@@ -51,11 +51,20 @@ export function generateDemoTasks(): Task[] {
     if (done) {
       const h = forced?.at ? Number(forced.at.slice(0, 2)) : 9 + Math.floor(rnd() * 12);
       const mi = forced?.at ? Number(forced.at.slice(3, 5)) : Math.floor(rnd() * 4) * 15;
-      const dt = parseDate(dateStr);
+      const dt = parseDate(beginStr);
       dt.setHours(h, mi, 0, 0);
       doneAt = dt.toISOString();
     }
-    tasks.push({ id: uid++, title, tag, prio, date: dateStr, done, doneAt });
+    tasks.push({
+      id: uid++,
+      title,
+      tag,
+      prio,
+      beginDate: beginStr,
+      endDate: endStr || beginStr,
+      done,
+      doneAt,
+    });
   };
 
   const makeUnscheduled = (title: string, tag: Tag, prio: Priority, source: 'note' | 'quick' = 'note') => {
@@ -64,7 +73,8 @@ export function generateDemoTasks(): Task[] {
       title,
       tag,
       prio: prio ?? 'mid',
-      date: null,
+      beginDate: null,
+      endDate: null,
       done: false,
       doneAt: null,
       source,
@@ -97,6 +107,26 @@ export function generateDemoTasks(): Task[] {
       { title: '健身房训练', tag: '健康', prio: 'mid' },
     ] as ForcedTask[]
   ).forEach((t) => makeTask(fmt(addDays(today(), 1)), false, t));
+
+  // A few multi-day spans so the range schedule is visible out of the box.
+  makeTask(
+    fmt(addDays(today(), -1)),
+    false,
+    { title: '出差 · 杭州', tag: '工作', prio: 'high' },
+    fmt(addDays(today(), 1)),
+  );
+  makeTask(
+    fmt(addDays(today(), -4)),
+    true,
+    { title: '读完《慢思考》', tag: '学习', prio: 'mid', at: '21:30' },
+    fmt(addDays(today(), -2)),
+  );
+  makeTask(
+    fmt(addDays(today(), 2)),
+    false,
+    { title: '年度体检 + 复查', tag: '健康', prio: 'mid' },
+    fmt(addDays(today(), 4)),
+  );
 
   for (let i = 2; i <= 7; i++) {
     const ds = fmt(addDays(today(), i));

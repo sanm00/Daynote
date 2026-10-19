@@ -7,13 +7,21 @@ export interface Task {
   title: string;
   tag: Tag;
   prio: Priority;
-  /** `YYYY-MM-DD`, or `null` when unscheduled. */
-  date: string | null;
+  /** `YYYY-MM-DD` start day, or `null` when unscheduled. */
+  beginDate: string | null;
+  /** `YYYY-MM-DD` end day (`>= beginDate`), or `null` when unscheduled. */
+  endDate: string | null;
   done: boolean;
   /** Full ISO timestamp of completion, or `null`. */
   doneAt: string | null;
   source?: TodoSource;
   parsedAt?: string;
+}
+
+/** An inclusive `YYYY-MM-DD` span used when (re)scheduling a task. */
+export interface TaskRange {
+  begin: string;
+  end: string;
 }
 
 export interface Note {

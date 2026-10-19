@@ -9,6 +9,7 @@ import type {
   Settings,
   Tag,
   Task,
+  TaskRange,
   ThemeMode,
 } from '@/types';
 import type { StorageKind } from '@/lib/storage';
@@ -35,7 +36,7 @@ export interface DataSlice {
   cycleTag: (id: number) => void;
   updateTask: (id: number, patch: Partial<Pick<Task, 'title'>>) => void;
   deleteTask: (id: number) => void;
-  rescheduleTask: (id: number, date: string | null) => void;
+  rescheduleTask: (id: number, range: TaskRange | null) => void;
   submitQuickAdd: (title: string) => void;
   postponeUnfinished: () => void;
   moveAllToToday: (ids: number[]) => void;
@@ -57,7 +58,8 @@ export interface UiSlice {
   calMonth: Date;
   reviewRange: ReviewRange;
   chartType: ChartType;
-  addDate: string;
+  addBegin: string;
+  addEnd: string;
   addTag: Tag;
   popMonth: Date;
   reschedulingId: number | null;
@@ -85,7 +87,7 @@ export interface UiSlice {
   setCalMonth: (d: Date) => void;
   setReviewRange: (r: ReviewRange) => void;
   setChartType: (t: ChartType) => void;
-  setAddDate: (d: string) => void;
+  setAddRange: (begin: string, end: string) => void;
   setAddTag: (t: Tag) => void;
   setReschedulingId: (id: number | null) => void;
   setNoteFilter: (f: Tag | 'all') => void;

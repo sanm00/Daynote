@@ -165,7 +165,8 @@ mod tests {
                 title: "写周报".to_string(),
                 tag: "工作".to_string(),
                 prio: "high".to_string(),
-                date: Some("2026-10-13".to_string()),
+                begin_date: Some("2026-10-13".to_string()),
+                end_date: Some("2026-10-15".to_string()),
                 done: false,
                 done_at: None,
                 source: Some("quick".to_string()),
@@ -204,6 +205,8 @@ mod tests {
         assert_eq!(loaded.settings.default_tag, "学习");
         assert_eq!(loaded.tasks.len(), 1);
         assert_eq!(loaded.tasks[0].title, "写周报");
+        assert_eq!(loaded.tasks[0].begin_date.as_deref(), Some("2026-10-13"));
+        assert_eq!(loaded.tasks[0].end_date.as_deref(), Some("2026-10-15"));
         assert_eq!(loaded.tasks[0].source.as_deref(), Some("quick"));
         assert_eq!(loaded.notes.len(), 1);
         assert_eq!(loaded.notes[0].content, "# 标题\n正文");

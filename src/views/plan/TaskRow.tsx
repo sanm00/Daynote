@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
-import type { Task } from '@/types';
-import { addDays, dateLabel, dateLabelFor, fmt, hmOf, nearestWeekend, today, todayStr } from '@/lib/date';
+import type { Task, TaskRange } from '@/types';
+import {
+  addDays,
+  dateLabel,
+  dateRangeLabel,
+  doneAtLabel,
+  fmt,
+  nearestWeekend,
+  today,
+  todayStr,
+} from '@/lib/date';
 import { toast } from '@/lib/toast';
 import type { UseDatePop } from './useDatePop';
 
@@ -9,6 +18,9 @@ interface Props {
   t: Task;
   datePop: UseDatePop;
 }
+
+const rangeText = (r: TaskRange) =>
+  r.begin === r.end ? dateLabel(r.begin) : dateRangeLabel(r.begin, r.end);
 
 export function TaskRow({ t, datePop }: Props) {
   const reschedulingId = useAppStore((s) => s.reschedulingId);
@@ -67,17 +79,15 @@ export function TaskRow({ t, datePop }: Props) {
   };
 
   const tStr = todayStr();
-  const isUnsched = t.date === null;
+  const isUnsched = t.beginDate === null;
 
-  const applyReschedule = (ds: string | null) => {
-    const wasInbound = t.date === null;
-    rescheduleTask(t.id, ds || null);
+  const applyReschedule = (range: TaskRange | null) => {
+    const wasInbound = isUnsched;
+    rescheduleTask(t.id, range);
     datePop.close();
-    if (!ds) toast('已移回待排期');
-    else if (wasInbound) {
-      const d = new Date(ds + 'T00:00:00');
-      toast(`已排到 ${ds === tStr ? '今天' : `${d.getMonth() + 1}月${d.getDate()}日`}`);
-    } else toast(`已改期到 ${dateLabel(ds)}`);
+    if (!range) toast('已移回待排期');
+    else if (wasInbound) toast(`已排到 ${rangeText(range)}`);
+    else toast(`已改期到 ${rangeText(range)}`);
   };
 
   if (reschedulingId === t.id) {
@@ -88,27 +98,50 @@ export function TaskRow({ t, datePop }: Props) {
           <div className="task-title">{t.title}</div>
           <div className="resched-actions">
             <span className="resched-label">{label}</span>
-            <button className="chip" onClick={() => applyReschedule(tStr)}>
+            <button className="chip" onClick={() => applyReschedule({ begin: tStr, end: tStr })}>
               今天
             </button>
-            <button className="chip" onClick={() => applyReschedule(fmt(addDays(today(), 1)))}>
+            <button
+              className="chip"
+              onClick={() => {
+                const d = fmt(addDays(today(), 1));
+                applyReschedule({ begin: d, end: d });
+              }}
+            >
               明天
             </button>
-            <button className="chip" onClick={() => applyReschedule(fmt(nearestWeekend()))}>
+            <button
+              className="chip"
+              onClick={() => {
+                const d = fmt(nearestWeekend());
+                applyReschedule({ begin: d, end: d });
+              }}
+            >
               本周末
             </button>
-            <button className="chip" onClick={() => applyReschedule(fmt(addDays(today(), 7)))}>
+            <button
+              className="chip"
+              onClick={() => {
+                const d = fmt(addDays(today(), 7));
+                applyReschedule({ begin: d, end: d });
+              }}
+            >
               延后一周
             </button>
             <button
               type="button"
               className="chip resched-pick"
-              title="选择具体日期"
+              title="选择具体日期，可跨天"
               onClick={(e) => {
                 e.stopPropagation();
-                datePop.open(e.currentTarget, t.date || '', false, (ds) => {
-                  if (ds) applyReschedule(ds);
-                });
+                datePop.open(
+                  e.currentTarget,
+                  isUnsched ? null : { begin: t.beginDate!, end: t.endDate! },
+                  false,
+                  (range) => {
+                    if (range) applyReschedule(range);
+                  },
+                );
               }}
             >
               选择日期
@@ -165,7 +198,7 @@ export function TaskRow({ t, datePop }: Props) {
       {isUnsched ? '排期' : '改期'}
     </button>
   );
-  const schedAt = !isUnsched && t.date! < tStr;
+  const schedAt = !isUnsched && t.endDate! < tStr;
   return (
     <div
       key={t.id}
@@ -196,19 +229,31 @@ export function TaskRow({ t, datePop }: Props) {
           >
             {t.tag}
           </span>
-          {t.done && t.doneAt && (
+          {t.done && t.doneAt ? (
             <>
               <i className="meta-dot" />
-              <span>完成于 {hmOf(t.doneAt)}</span>
+              {!isUnsched && (
+                <span>计划于 {dateRangeLabel(t.beginDate, t.endDate)}</span>
+              )}
+              <i className="meta-dot" />
+              <span>完成于 {doneAtLabel(t.doneAt)}</span>
             </>
-          )}
-          <i className="meta-dot" />
-          {isUnsched ? (
-            <span className="overdue-flag">未排期{t.source === 'note' ? ' · 来自笔记' : ''}</span>
           ) : (
-            <span className={schedAt && !t.done ? 'overdue-flag' : ''}>
-              {dateLabelFor(t.date!, t.done)}
-            </span>
+            <>
+              <i className="meta-dot" />
+              {isUnsched ? (
+                <span className="overdue-flag">未排期{t.source === 'note' ? ' · 来自笔记' : ''}</span>
+              ) : (
+                <>
+                  <span>计划于 {dateRangeLabel(t.beginDate, t.endDate)}</span>
+                  {schedAt && !t.done && (
+                    <span className="overdue-tag" title="已逾期">
+                      逾期
+                    </span>
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>

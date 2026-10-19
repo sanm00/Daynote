@@ -1,5 +1,6 @@
 import { useAppStore } from '@/store';
 import { addDays, fmt, todayStr } from '@/lib/date';
+import { occursOn } from '@/lib/selectors';
 
 export function CalendarCard() {
   const tasks = useAppStore((s) => s.tasks);
@@ -18,7 +19,7 @@ export function CalendarCard() {
   for (let i = 0; i < 42; i++) {
     const d = addDays(gridStart, i);
     const ds = fmt(d);
-    const dayTasks = tasks.filter((t) => t.date === ds);
+    const dayTasks = tasks.filter((t) => occursOn(t, ds));
     const doneN = dayTasks.filter((t) => t.done).length;
     const undoneN = dayTasks.length - doneN;
     const cls = ['day'];

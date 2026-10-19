@@ -1,4 +1,4 @@
-import { dateLabelFor, relTime, todayStr } from '@/lib/date';
+import { dateRangeLabel, doneAtLabel, relTime, todayStr } from '@/lib/date';
 import { plainText } from '@/lib/markdown';
 import type { Note, Task } from '@/types';
 import { highlight, snippetAround } from '@/lib/search';
@@ -93,7 +93,7 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                   待办 <span className="cnt">{taskHits.length}</span>
                 </div>
                 {taskHits.map((t) => {
-                  const overdue = !t.done && t.date && t.date < todayStr();
+                  const overdue = !t.done && t.endDate !== null && t.endDate < todayStr();
                   return (
                     <button
                       key={t.id}
@@ -128,10 +128,9 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                           <span className="tag" data-tag={t.tag}>
                             {t.tag}
                           </span>
-                          <span className={overdue ? 'overdue-flag-strong' : ''}>
-                            {t.date === null ? '待排期' : dateLabelFor(t.date, t.done)}
-                          </span>
-                          {t.done && <span>· 已完成</span>}
+                          <span>{t.beginDate !== null && `计划于 ${dateRangeLabel(t.beginDate, t.endDate)}`}{t.beginDate === null && '未排期'}</span>
+                          {overdue && <span className="overdue-tag">逾期</span>}
+                          {t.done && <span>· 完成于 {doneAtLabel(t.doneAt)}</span>}
                         </span>
                       </span>
                     </button>

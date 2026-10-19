@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useAppStore } from '@/store';
-import { todayStr } from '@/lib/date';
+import { addDays, doneAtLabel, fmt, today, todayStr } from '@/lib/date';
 
 function resetStore() {
   useAppStore.setState({
@@ -23,13 +23,13 @@ describe('importData', () => {
   it('drops malformed task rows and coerces fields', () => {
     useAppStore.getState().importData({
       tasks: [
-        { id: 1, title: '好任务', tag: '学习', prio: 'high', date: '2026-10-20', done: false },
+        { id: 1, title: '好任务', tag: '学习', prio: 'high', beginDate: '2026-10-20', endDate: '2026-10-22', done: false },
         { id: 1, title: '重复 id' },
         { title: '缺少 id' },
         { id: 'oops', title: '坏 id' },
         { id: 5, title: '   ' },
         'not-an-object',
-        { id: 7, title: '坏字段', tag: '不存在', prio: 'urgent', date: '2026/1/1', done: true },
+        { id: 7, title: '坏字段', tag: '不存在', prio: 'urgent', beginDate: '2026/1/1', done: true },
       ],
       notes: [],
     });
@@ -42,10 +42,21 @@ describe('importData', () => {
     expect(ids.every((id) => Number.isInteger(id) && id > 0)).toBe(true);
 
     const first = tasks[0];
-    expect([first.tag, first.prio, first.date]).toEqual(['学习', 'high', '2026-10-20']);
+    expect([first.tag, first.prio, first.beginDate, first.endDate]).toEqual([
+      '学习',
+      'high',
+      '2026-10-20',
+      '2026-10-22',
+    ]);
 
     const bad = tasks[4];
-    expect([bad.tag, bad.prio, bad.date, bad.doneAt]).toEqual(['工作', 'mid', null, null]);
+    expect([bad.tag, bad.prio, bad.beginDate, bad.endDate, bad.doneAt]).toEqual([
+      '工作',
+      'mid',
+      null,
+      null,
+      null,
+    ]);
   });
 
   it('drops empty notes, guarantees unique ids and defaults timestamps', () => {
@@ -114,7 +125,7 @@ describe('importData', () => {
 
   it('only replaces slices whose array is provided', () => {
     useAppStore.setState({
-      tasks: [{ id: 1, title: '原有任务', tag: '工作', prio: 'mid', date: null, done: false, doneAt: null }],
+      tasks: [{ id: 1, title: '原有任务', tag: '工作', prio: 'mid', beginDate: null, endDate: null, done: false, doneAt: null }],
       notes: [{ id: 2, title: '原有笔记', content: '正文', tag: '工作', createdAt: '', updatedAt: '' }],
     });
     // A partial file carrying only tasks must not wipe the notes.
@@ -129,7 +140,7 @@ describe('resetAll', () => {
 
   it('clears data and transient state but keeps settings', () => {
     useAppStore.setState({
-      tasks: [{ id: 1, title: 'a', tag: '工作', prio: 'mid', date: null, done: false, doneAt: null }],
+      tasks: [{ id: 1, title: 'a', tag: '工作', prio: 'mid', beginDate: null, endDate: null, done: false, doneAt: null }],
       notes: [{ id: 2, title: '标题', content: '正文', tag: '工作', createdAt: '', updatedAt: '' }],
       settings: { theme: 'dark', defaultTag: '学习' },
       currentNoteId: 2,
@@ -154,7 +165,7 @@ describe('updateTask', () => {
     resetStore();
     useAppStore.setState({
       tasks: [
-        { id: 1, title: '原任务', tag: '工作', prio: 'mid', date: null, done: false, doneAt: null },
+        { id: 1, title: '原任务', tag: '工作', prio: 'mid', beginDate: null, endDate: null, done: false, doneAt: null },
       ],
     });
   });
@@ -172,6 +183,68 @@ describe('updateTask', () => {
   it('is a no-op for an unknown id', () => {
     useAppStore.getState().updateTask(99, { title: 'x' });
     expect(useAppStore.getState().tasks.map((t) => t.title)).toEqual(['原任务']);
+  });
+});
+
+describe('scheduling', () => {
+  beforeEach(() => {
+    resetStore();
+    useAppStore.setState({
+      tasks: [
+        {
+          id: 1,
+          title: '出差 · 杭州',
+          tag: '工作',
+          prio: 'mid',
+          beginDate: fmt(addDays(today(), -1)),
+          endDate: fmt(addDays(today(), 1)),
+          done: false,
+          doneAt: null,
+        },
+      ],
+    });
+  });
+
+  it('reschedules to an inclusive range', () => {
+    useAppStore.getState().rescheduleTask(1, { begin: '2026-05-01', end: '2026-05-04' });
+    const t = useAppStore.getState().tasks[0];
+    expect([t.beginDate, t.endDate]).toEqual(['2026-05-01', '2026-05-04']);
+  });
+
+  it('clears the schedule when the range is null', () => {
+    useAppStore.getState().rescheduleTask(1, null);
+    const t = useAppStore.getState().tasks[0];
+    expect([t.beginDate, t.endDate]).toEqual([null, null]);
+  });
+
+  it('postpones a span that ends on the selected day by one day, keeping its length', () => {
+    const from = fmt(addDays(today(), 1));
+    const end = fmt(addDays(today(), 3));
+    useAppStore.setState({
+      selectedDate: end,
+      tasks: [
+        { id: 1, title: 'x', tag: '工作', prio: 'mid', beginDate: from, endDate: end, done: false, doneAt: null },
+      ],
+    });
+    useAppStore.getState().postponeUnfinished();
+    const t = useAppStore.getState().tasks[0];
+    expect([t.beginDate, t.endDate]).toEqual([fmt(addDays(today(), 2)), fmt(addDays(today(), 4))]);
+  });
+
+  it('moves tasks to today as a single day', () => {
+    useAppStore.getState().moveAllToToday([1]);
+    const t = useAppStore.getState().tasks[0];
+    expect([t.beginDate, t.endDate]).toEqual([todayStr(), todayStr()]);
+  });
+});
+
+describe('doneAtLabel', () => {
+  it('prefixes 今天 for today and uses the full date otherwise', () => {
+    const now = new Date();
+    now.setHours(16, 0, 0, 0);
+    expect(doneAtLabel(now.toISOString())).toBe('今天 16:00');
+    const past = new Date(2026, 9, 15, 9, 5, 0);
+    expect(doneAtLabel(past.toISOString())).toBe('2026-10-15 09:05');
   });
 });
 

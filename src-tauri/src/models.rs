@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const SCHEMA_VERSION: u32 = 1;
+pub const SCHEMA_VERSION: u32 = 2;
 
 fn default_version() -> u32 {
     SCHEMA_VERSION
@@ -20,7 +20,8 @@ pub struct Task {
     pub title: String,
     pub tag: String,
     pub prio: String,
-    pub date: Option<String>,
+    pub begin_date: Option<String>,
+    pub end_date: Option<String>,
     pub done: bool,
     pub done_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store';
 import type { Task } from '@/types';
-import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled } from '@/lib/selectors';
+import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, occursOn } from '@/lib/selectors';
 import { addDays, dayNames, fmt, parseDate, todayStr } from '@/lib/date';
 import { toast } from '@/lib/toast';
 import { emptyTip, groupedRows, overdueSubtitle, pendingSubtitle, PendingList } from './TaskLists';
@@ -28,7 +28,7 @@ export function TaskPanel({ datePop }: Props) {
   const isToday = selectedDate === tStr;
   const isFuture = selectedDate > tStr;
   const dateList = tasks
-    .filter((t) => t.date === selectedDate)
+    .filter((t) => occursOn(t, selectedDate))
     .sort((a, b) => Number(a.done) - Number(b.done) || pw[a.prio] - pw[b.prio]);
   const dateDoneN = dateList.filter((t) => t.done).length;
 
@@ -135,7 +135,7 @@ export function TaskPanel({ datePop }: Props) {
                 className="btn ghost sm"
                 title="把这一天未完成的任务移到下一天"
                 onClick={() => {
-                  const before = tasks.filter((t) => t.date === selectedDate && !t.done).length;
+                  const before = tasks.filter((t) => t.endDate === selectedDate && !t.done).length;
                   postponeUnfinished();
                   if (before) toast(`已把 ${before} 项未完成任务顺延到 ${fmt(addDays(selD, 1))}`);
                   else toast('这一天没有未完成的任务');

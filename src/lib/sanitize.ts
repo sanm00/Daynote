@@ -47,12 +47,19 @@ export function sanitizeTasks(input: unknown): Task[] {
     }
     seen.add(id);
     const done = !!t.done;
+    const begin = coerceDate(t.beginDate);
+    let end = coerceDate(t.endDate);
+    // Keep the schedule invariant: unscheduled has both null; otherwise the end
+    // day falls back to the begin day and never precedes it.
+    if (begin === null) end = null;
+    else if (end === null || end < begin) end = begin;
     out.push({
       id,
       title,
       tag: coerceTag(t.tag),
       prio: coercePriority(t.prio),
-      date: coerceDate(t.date),
+      beginDate: begin,
+      endDate: end,
       done,
       doneAt: done ? coerceOptionalISO(t.doneAt) : null,
       ...(t.source === 'note' || t.source === 'quick' ? { source: t.source } : {}),
