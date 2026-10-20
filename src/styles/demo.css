@@ -729,6 +729,21 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .bar.zero{background:var(--surface-3);height:2px !important;box-shadow:none}
 .bar-label{font-size:var(--fs-2xs);color:var(--muted);height:15px;line-height:15px;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
 
+/* 双序列：完成（实心渐变）+ 排期（中性描边），同一纵轴比例 */
+.bar-pair{display:flex;align-items:flex-end;justify-content:center;gap:3px;width:100%;height:100%}
+.bar-pair .bar{width:38%;max-width:16px}
+.bar-sched{
+  background:var(--surface-3);
+  border:1px solid var(--line-2);
+  box-shadow:none;
+}
+
+.chart-legend{display:flex;gap:12px;margin-top:4px;font-size:var(--fs-2xs);color:var(--muted)}
+.chart-legend span{display:flex;align-items:center;gap:5px}
+.chart-legend i{width:8px;height:8px;border-radius:2px;flex:none}
+.chart-legend .dot-done{background:linear-gradient(180deg, var(--chart-bar-top), var(--chart-bar))}
+.chart-legend .dot-sched{background:var(--surface-3);border:1px solid var(--line-2)}
+
 .chart-subtitle{font-size:var(--fs-2xs);color:var(--muted-2);margin-top:1px;letter-spacing:.1px}
 
 .chart-toggle{
@@ -752,10 +767,6 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .chart-toggle-btn:not(.active):hover{color:var(--text)}
 .chart-toggle-btn.active{color:var(--on-primary)}
 
-/* 所选日：柔和列底高亮，不改变柱体本身样式 */
-.bar-col.selected .bar-track{background:rgba(202,137,107,.12);border-radius:6px}
-.bar-col.selected .bar-label,
-.bar-col.selected .bar-val{color:var(--primary-text);font-weight:700}
 /* 周末标签弱化 */
 .bar-col.weekend .bar-label{color:var(--muted-2)}
 /* 今天：标签用主色标记 */
@@ -765,13 +776,12 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .line-area{fill:var(--primary-soft);opacity:.45}
 .line-path{fill:none;stroke:var(--chart-bar);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .line-dot{fill:var(--card);stroke:var(--chart-bar);stroke-width:1.6}
-.line-dot.selected{fill:var(--chart-bar);stroke:var(--primary-text)}
-.line-guide{stroke:var(--primary-text);stroke-width:1;stroke-dasharray:3 3;opacity:.5}
+/* 排期折线：中性色 + 虚线，与完成折线区分 */
+.line-path-sched{stroke:var(--muted-2);stroke-width:1.6;stroke-dasharray:4 3}
+.line-dot-sched{fill:var(--card);stroke:var(--muted-2);stroke-width:1.4}
 .line-val{font-size:10px;fill:var(--muted-2);text-anchor:middle;font-variant-numeric:tabular-nums}
-.line-val.selected{fill:var(--primary-text);font-weight:700}
 .line-axis{stroke:var(--line);stroke-width:1}
 .line-xlab{font-size:10px;fill:var(--muted);text-anchor:middle;font-variant-numeric:tabular-nums}
-.line-xlab.selected{fill:var(--primary-text);font-weight:700}
 .line-xlab.weekend{fill:var(--muted-2)}
 .line-xlab.today{fill:var(--primary-text);font-weight:600}
 
@@ -1126,6 +1136,64 @@ mark.nf-hit.active{background:var(--primary);color:var(--on-primary);box-shadow:
   background:transparent;color:var(--text-2);padding:0;font-size:var(--fs-sm);
   line-height:1.5;white-space:pre;
 }
+/* highlight.js token colors — a warm palette that tracks the app theme. */
+.note-render pre code .hljs-comment,
+.note-render pre code .hljs-quote{color:#8f8a7c;font-style:italic}
+.note-render pre code .hljs-keyword,
+.note-render pre code .hljs-selector-tag,
+.note-render pre code .hljs-tag,
+.note-render pre code .hljs-name,
+.note-render pre code .hljs-deletion{color:#a8432b}
+.note-render pre code .hljs-string,
+.note-render pre code .hljs-regexp,
+.note-render pre code .hljs-addition,
+.note-render pre code .hljs-symbol,
+.note-render pre code .hljs-bullet{color:#5c7a4e}
+.note-render pre code .hljs-number,
+.note-render pre code .hljs-literal,
+.note-render pre code .hljs-attr,
+.note-render pre code .hljs-attribute,
+.note-render pre code .hljs-variable,
+.note-render pre code .hljs-template-variable{color:#9a6a2e}
+.note-render pre code .hljs-title,
+.note-render pre code .hljs-title.function_,
+.note-render pre code .hljs-section{color:#955239}
+.note-render pre code .hljs-type,
+.note-render pre code .hljs-built_in,
+.note-render pre code .hljs-class .hljs-title,
+.note-render pre code .hljs-title.class_{color:#6f68b0}
+.note-render pre code .hljs-meta{color:#8f8a7c}
+.note-render pre code .hljs-emphasis{font-style:italic}
+.note-render pre code .hljs-strong{font-weight:650}
+html[data-theme="dark"] .note-render pre code{
+  background:transparent;color:var(--text-2);
+}
+html[data-theme="dark"] .note-render pre code .hljs-comment,
+html[data-theme="dark"] .note-render pre code .hljs-quote{color:#6f7482}
+html[data-theme="dark"] .note-render pre code .hljs-keyword,
+html[data-theme="dark"] .note-render pre code .hljs-selector-tag,
+html[data-theme="dark"] .note-render pre code .hljs-tag,
+html[data-theme="dark"] .note-render pre code .hljs-name,
+html[data-theme="dark"] .note-render pre code .hljs-deletion{color:#e0876a}
+html[data-theme="dark"] .note-render pre code .hljs-string,
+html[data-theme="dark"] .note-render pre code .hljs-regexp,
+html[data-theme="dark"] .note-render pre code .hljs-addition,
+html[data-theme="dark"] .note-render pre code .hljs-symbol,
+html[data-theme="dark"] .note-render pre code .hljs-bullet{color:#8fbf7a}
+html[data-theme="dark"] .note-render pre code .hljs-number,
+html[data-theme="dark"] .note-render pre code .hljs-literal,
+html[data-theme="dark"] .note-render pre code .hljs-attr,
+html[data-theme="dark"] .note-render pre code .hljs-attribute,
+html[data-theme="dark"] .note-render pre code .hljs-variable,
+html[data-theme="dark"] .note-render pre code .hljs-template-variable{color:#e0a45e}
+html[data-theme="dark"] .note-render pre code .hljs-title,
+html[data-theme="dark"] .note-render pre code .hljs-title.function_,
+html[data-theme="dark"] .note-render pre code .hljs-section{color:#d9a184}
+html[data-theme="dark"] .note-render pre code .hljs-type,
+html[data-theme="dark"] .note-render pre code .hljs-built_in,
+html[data-theme="dark"] .note-render pre code .hljs-class .hljs-title,
+html[data-theme="dark"] .note-render pre code .hljs-title.class_{color:#a9a3e8}
+html[data-theme="dark"] .note-render pre code .hljs-meta{color:#6f7482}
 .note-render blockquote{
   border-left:2px solid var(--primary);
   padding:6px 10px;color:var(--text-2);
@@ -1135,6 +1203,17 @@ mark.nf-hit.active{background:var(--primary);color:var(--on-primary);box-shadow:
 .note-render blockquote p{margin:6px 0;font-size:var(--fs-base)}
 .note-render hr{border:0;border-top:1px solid var(--line);margin:14px 0}
 .note-render img{max-width:100%;border-radius:8px;margin:6px 0;display:block}
+.note-render table{
+  border-collapse:collapse;margin:10px 0;width:100%;display:block;overflow-x:auto;
+  font-size:var(--fs-sm);color:var(--text);
+}
+.note-render th,.note-render td{
+  border:1px solid var(--line);padding:6px 10px;text-align:left;line-height:1.5;
+}
+.note-render thead th{
+  background:var(--surface-2);font-weight:650;white-space:nowrap;
+}
+.note-render tbody tr:nth-child(even){background:var(--surface-2)}
 
 .note-inline-tasks{
   border:1px solid var(--line-2);border-radius:12px;padding:6px 6px;margin:10px 0;

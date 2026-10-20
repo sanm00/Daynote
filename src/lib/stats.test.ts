@@ -108,12 +108,11 @@ describe('countOverdue', () => {
 });
 
 describe('computeChart', () => {
-  it('expands a single day to its calendar week', () => {
+  it('spans exactly the range (a single day yields one bucket)', () => {
     const d = new Date(2026, 2, 18); // Wednesday
     const chart = computeChart({ start: d, end: d }, []);
-    expect(chart.single).toBe(true);
-    expect(chart.buckets).toHaveLength(7);
-    expect(chart.buckets.filter((b) => b.selected)).toHaveLength(1);
+    expect(chart.buckets).toHaveLength(1);
+    expect(chart.buckets[0].ds).toBe('2026-03-18');
   });
 
   it('buckets completed tasks per day', () => {
@@ -124,6 +123,34 @@ describe('computeChart', () => {
     const bucket = chart.buckets.find((b) => b.ds === '2026-03-18');
     expect(bucket?.value).toBe(1);
     expect(chart.max).toBe(1);
+  });
+
+  it('counts scheduled tasks for every day their span overlaps', () => {
+    const start = new Date(2026, 2, 16);
+    const end = new Date(2026, 2, 22);
+    const span = task({ beginDate: '2026-03-17', endDate: '2026-03-19' });
+    const outside = task({ beginDate: '2026-03-30', endDate: '2026-03-31' });
+    const chart = computeChart({ start, end }, [span, outside]);
+    const sched = Object.fromEntries(chart.buckets.map((b) => [b.ds, b.scheduled]));
+    expect(sched['2026-03-17']).toBe(1);
+    expect(sched['2026-03-18']).toBe(1);
+    expect(sched['2026-03-19']).toBe(1);
+    expect(sched['2026-03-16']).toBe(0);
+    expect(sched['2026-03-20']).toBe(0);
+    // shared y-axis scale reflects the larger of the two series
+    expect(chart.max).toBe(1);
+  });
+
+  it('scales both series on one axis', () => {
+    const start = new Date(2026, 2, 16);
+    const end = new Date(2026, 2, 22);
+    const tasks = [
+      task({ done: true, doneAt: '2026-03-18T09:00:00.000Z' }),
+      task({ beginDate: '2026-03-18', endDate: '2026-03-18' }),
+      task({ beginDate: '2026-03-18', endDate: '2026-03-18' }),
+    ];
+    const chart = computeChart({ start, end }, tasks);
+    expect(chart.max).toBe(2);
   });
 });
 

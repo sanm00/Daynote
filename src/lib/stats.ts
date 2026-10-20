@@ -1,6 +1,6 @@
 import type { Note, ReviewRange, Tag, Task } from '@/types';
 import { addDays, dayNames, dayOf, fmt, parseDate, today, todayStr } from './date';
-import { PRIORITY_WEIGHT } from './selectors';
+import { occursOn, PRIORITY_WEIGHT } from './selectors';
 
 export interface Range {
   start: Date;
@@ -129,54 +129,41 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
 export interface Bucket {
   ds: string;
   label: string;
+  /** Tasks completed on this day (by `doneAt`). */
   value: number;
+  /** Tasks whose schedule span overlaps this day (`beginDate <= day <= endDate`). */
+  scheduled: number;
   weekend: boolean;
   today: boolean;
-  selected: boolean;
 }
 
 export interface Chart {
-  single: boolean;
-  chartStart: Date;
-  chartEnd: Date;
   buckets: Bucket[];
   max: number;
 }
 
 /**
- * Daily completion buckets. A single-day range expands to its calendar week so
- * the chart always has a meaningful x-axis; `selected` marks the picked day.
+ * Per-day buckets for the selected range: completions (`value`, by `doneAt`)
+ * alongside scheduled tasks overlapping the day (`scheduled`). The chart spans
+ * exactly the range — a single day yields a single bucket.
  */
-export function computeChart(r: Range, doneTasks: Task[]): Chart {
-  const single = fmt(r.start) === fmt(r.end);
-  let chartStart = r.start;
-  let chartEnd = r.end;
-  let selectedDs: string | null = null;
-  if (single) {
-    const dow = (r.start.getDay() + 6) % 7;
-    chartStart = addDays(r.start, -dow);
-    chartEnd = addDays(chartStart, 6);
-    selectedDs = fmt(r.start);
-  }
+export function computeChart(r: Range, tasks: Task[]): Chart {
   const days: Date[] = [];
-  for (let d = new Date(chartStart); d <= chartEnd; d = addDays(d, 1)) days.push(new Date(d));
+  for (let d = new Date(r.start); d <= r.end; d = addDays(d, 1)) days.push(new Date(d));
   const buckets: Bucket[] = days.map((d) => {
     const ds = fmt(d);
     return {
       ds,
       label: `${d.getDate()}`,
-      value: doneTasks.filter((t) => dayOf(t.doneAt) === ds).length,
+      value: tasks.filter((t) => t.done && dayOf(t.doneAt) === ds).length,
+      scheduled: tasks.filter((t) => occursOn(t, ds)).length,
       weekend: d.getDay() === 0 || d.getDay() === 6,
       today: ds === todayStr(),
-      selected: ds === selectedDs,
     };
   });
   return {
-    single,
-    chartStart,
-    chartEnd,
     buckets,
-    max: Math.max(1, ...buckets.map((b) => b.value)),
+    max: Math.max(1, ...buckets.map((b) => Math.max(b.value, b.scheduled))),
   };
 }
 

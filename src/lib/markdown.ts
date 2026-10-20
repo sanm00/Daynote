@@ -1,3 +1,5 @@
+import { highlightCode } from './highlight';
+
 export function escapeHtml(s: string): string {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -124,6 +126,17 @@ function inlineMd(input: string): string {
 
 type ListItem = { task: boolean; checked?: boolean; text: string };
 
+const splitRow = (l: string): string[] =>
+  l
+    .trim()
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split(/(?<!\\)\|/)
+    .map((c) => c.trim().replace(/\\\|/g, '|'));
+
+const isTableSep = (l: string): boolean =>
+  /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\+?\|?\s*$/.test(l) && l.includes('-');
+
 /** Ported verbatim from the demo so rendered HTML (and its CSS) matches exactly. */
 export function mdToHtml(src: string): string {
   src = (src || '').replace(/\r\n?/g, '\n');
@@ -145,8 +158,12 @@ export function mdToHtml(src: string): string {
         i++;
       }
       if (i < lines.length) i++; // consume closing fence when present
+      const code = buf.join('\n');
+      const highlighted = lang ? highlightCode(code, lang) : null;
       out.push(
-        `<pre${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}><code>${escapeHtml(buf.join('\n'))}</code></pre>`,
+        `<pre${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}><code${highlighted ? ' class="hljs"' : ''}>${
+          highlighted ?? escapeHtml(code)
+        }</code></pre>`,
       );
       continue;
     }
@@ -157,6 +174,34 @@ export function mdToHtml(src: string): string {
     if (isHr(line)) {
       out.push('<hr>');
       i++;
+      continue;
+    }
+    if (line.includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+      const headers = splitRow(line);
+      const aligns = splitRow(lines[i + 1]).map((c) => {
+        const l = c.startsWith(':');
+        const r = c.endsWith(':');
+        return l && r ? 'center' : r ? 'right' : l ? 'left' : '';
+      });
+      i += 2;
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim()) {
+        rows.push(splitRow(lines[i]));
+        i++;
+      }
+      const cell = (tag: 'th' | 'td', text: string, idx: number) => {
+        const al = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
+        return `<${tag}${al}>${inlineMd(text)}</${tag}>`;
+      };
+      out.push(
+        '<table><thead><tr>' +
+          headers.map((h, idx) => cell('th', h, idx)).join('') +
+          '</tr></thead><tbody>' +
+          rows
+            .map((r) => '<tr>' + headers.map((_h, idx) => cell('td', r[idx] ?? '', idx)).join('') + '</tr>')
+            .join('') +
+          '</tbody></table>',
+      );
       continue;
     }
     const hm = line.match(/^(#{1,6})\s+(.*)$/);
@@ -222,7 +267,8 @@ export function mdToHtml(src: string): string {
       !/^\s*>/.test(lines[i]) &&
       !isList(lines[i]) &&
       !/^\s*```/.test(lines[i]) &&
-      !isHr(lines[i])
+      !isHr(lines[i]) &&
+      !(lines[i].includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1]))
     ) {
       buf.push(lines[i]);
       i++;
@@ -243,6 +289,8 @@ export function plainText(md: string): string {
     .replace(/^\s{0,3}>\s?/gm, '')
     .replace(/^\s{0,3}[-*+]\s+\[[ xX]\]\s+/gm, '')
     .replace(/^\s{0,3}([-*+]|\d+\.)\s+/gm, '')
+    .replace(/^\s*\|?[\s:|-]+\|[\s:|-]*$/gm, ' ')
+    .replace(/\|/g, ' ')
     .replace(/[*_~`#>]/g, '')
     .replace(/\s+/g, ' ')
     .trim();

@@ -8,7 +8,7 @@ interface Props {
   subtitle: string;
 }
 
-/** Daily completion chart with a bar/line toggle and a hover tooltip. */
+/** Per-day completion + schedule chart with a bar/line toggle and a tooltip. */
 export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
@@ -42,6 +42,8 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
   };
 
   const step = Math.ceil(chart.buckets.length / 14);
+  const tipOf = (ds: string, done: number, sched: number) =>
+    `${mdLabel(ds)} · 完成 ${done} / 排期 ${sched}`;
 
   const renderLine = () => {
     const W = Math.max(lineSize.w, 240);
@@ -56,44 +58,34 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
     const baseY = padT + innerH;
     const xAt = (i: number) => (n === 1 ? W / 2 : padL + (innerW * i) / (n - 1));
     const yAt = (v: number) => padT + innerH * (1 - v / chart.max);
-    const pts = chart.buckets.map((b, i) => ({ x: xAt(i), y: yAt(b.value), b }));
-    const linePath = pts
-      .map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`)
-      .join(' ');
-    const areaPath = `${linePath} L${pts[pts.length - 1].x.toFixed(2)},${baseY.toFixed(2)} L${pts[0].x.toFixed(2)},${baseY.toFixed(2)} Z`;
+    const pts = chart.buckets.map((b, i) => ({ x: xAt(i), y: yAt(b.value), sy: yAt(b.scheduled), b }));
+    const linePath = (pick: (p: (typeof pts)[number]) => number) =>
+      pts.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(2)},${pick(p).toFixed(2)}`).join(' ');
+    const donePath = linePath((p) => p.y);
+    const schedPath = linePath((p) => p.sy);
+    const areaPath = `${donePath} L${pts[pts.length - 1].x.toFixed(2)},${baseY.toFixed(2)} L${pts[0].x.toFixed(2)},${baseY.toFixed(2)} Z`;
 
     return (
       <svg className="line-svg" viewBox={`0 0 ${W} ${H}`}>
         <line className="line-axis" x1={padL} y1={padT} x2={W - padR} y2={padT} />
         <line className="line-axis" x1={padL} y1={baseY} x2={W - padR} y2={baseY} />
-        {pts
-          .filter((p) => p.b.selected)
-          .map((p) => (
-            <line
-              key={`g-${p.b.ds}`}
-              className="line-guide"
-              x1={p.x.toFixed(2)}
-              y1={padT}
-              x2={p.x.toFixed(2)}
-              y2={baseY.toFixed(2)}
-            />
-          ))}
         <path className="line-area" d={areaPath} />
-        <path className="line-path" d={linePath} />
+        <path className="line-path line-path-sched" d={schedPath} />
+        <path className="line-path" d={donePath} />
+        {pts.map((p) => (
+          <g key={`s-${p.b.ds}`}>
+            <circle className="line-dot line-dot-sched" cx={p.x.toFixed(2)} cy={p.sy.toFixed(2)} r="2.2" />
+          </g>
+        ))}
         {pts.map((p) => (
           <g key={p.b.ds}>
-            <circle
-              className={`line-dot${p.b.selected ? ' selected' : ''}`}
-              cx={p.x.toFixed(2)}
-              cy={p.y.toFixed(2)}
-              r={p.b.selected ? 3.6 : 2.6}
-            />
+            <circle className="line-dot" cx={p.x.toFixed(2)} cy={p.y.toFixed(2)} r="2.6" />
             <circle
               className="line-hit"
               cx={p.x.toFixed(2)}
               cy={p.y.toFixed(2)}
               r="11"
-              data-tip={`${mdLabel(p.b.ds)} · 完成 ${p.b.value} 项`}
+              data-tip={tipOf(p.b.ds, p.b.value, p.b.scheduled)}
             />
           </g>
         ))}
@@ -101,19 +93,14 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
           const b = p.b;
           if (!(b.value > 0 || n <= 16 || i % step === 0)) return null;
           return (
-            <text
-              key={`v-${b.ds}`}
-              className={`line-val${b.selected ? ' selected' : ''}`}
-              x={p.x.toFixed(2)}
-              y={(p.y - 7).toFixed(2)}
-            >
+            <text key={`v-${b.ds}`} className="line-val" x={p.x.toFixed(2)} y={(p.y - 7).toFixed(2)}>
               {b.value || ''}
             </text>
           );
         })}
         {chart.buckets.map((b, i) => {
-          if (!(n <= 16 || i % step === 0 || b.selected || b.today)) return null;
-          const cls = ['line-xlab', b.weekend && 'weekend', b.selected && 'selected', b.today && 'today']
+          if (!(n <= 16 || i % step === 0 || b.today)) return null;
+          const cls = ['line-xlab', b.weekend && 'weekend', b.today && 'today']
             .filter(Boolean)
             .join(' ');
           return (
@@ -155,6 +142,16 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
           </button>
         </div>
       </div>
+      <div className="chart-legend">
+        <span>
+          <i className="dot-done" />
+          完成
+        </span>
+        <span>
+          <i className="dot-sched" />
+          排期
+        </span>
+      </div>
       <div
         className="chart"
         ref={chartRef}
@@ -166,19 +163,30 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
         ) : (
           <div className="bars">
             {chart.buckets.map((b, i) => {
-              const pct = Math.round((b.value / chart.max) * 100);
+              const donePct = Math.round((b.value / chart.max) * 100);
+              const schedPct = Math.round((b.scheduled / chart.max) * 100);
               const showLabel = b.value > 0 || chart.buckets.length <= 16 || i % step === 0;
-              const cls = ['bar-col', b.weekend && 'weekend', b.selected && 'selected', b.today && 'today']
+              const cls = ['bar-col', b.weekend && 'weekend', b.today && 'today']
                 .filter(Boolean)
                 .join(' ');
               return (
-                <div key={b.ds} className={cls} data-tip={`${mdLabel(b.ds)} · 完成 ${b.value} 项`}>
+                <div
+                  key={b.ds}
+                  className={cls}
+                  data-tip={tipOf(b.ds, b.value, b.scheduled)}
+                >
                   <div className="bar-val">{b.value || ''}</div>
                   <div className="bar-track">
-                    <div
-                      className={`bar${b.value ? '' : ' zero'}`}
-                      style={{ height: b.value ? `${Math.max(pct, 5)}%` : 0 }}
-                    />
+                    <div className="bar-pair">
+                      <div
+                        className={`bar${b.value ? '' : ' zero'}`}
+                        style={{ height: b.value ? `${Math.max(donePct, 5)}%` : 0 }}
+                      />
+                      <div
+                        className={`bar bar-sched${b.scheduled ? '' : ' zero'}`}
+                        style={{ height: b.scheduled ? `${Math.max(schedPct, 5)}%` : 0 }}
+                      />
+                    </div>
                   </div>
                   <div className="bar-label">{showLabel ? b.label : ''}</div>
                 </div>

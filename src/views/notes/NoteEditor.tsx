@@ -207,7 +207,8 @@ export function NoteEditor({ note, find, dirty }: Props) {
 
       <div className="note-editor-hint" style={{ display: noteMode === 'edit' ? '' : 'none' }}>
         输入 Markdown 实时渲染：<b>#</b> 标题 · <b>-</b> 列表 · <b>- [ ]</b> 待办 · <b>&gt;</b> 引用 ·{' '}
-        <b>`</b> 代码 · <b>**</b> 加粗 · <b>⌘/</b> 代码块 · <b>⌘\`</b> 行内代码 · <b>Tab</b> 缩进
+        <b>|</b> 表格 · <b>`</b> 代码 · <b>**</b> 加粗 · <b>⌘/</b> 代码块 · <b>⌘\`</b> 行内代码 ·{' '}
+        <b>Tab</b> 缩进
       </div>
       <textarea
         ref={find.editRef}

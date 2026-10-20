@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { insertPair, mdToHtml, toggleFence } from './markdown';
 
 describe('mdToHtml fenced code', () => {
-  it('renders a closed fence as one <pre> with the language badge', () => {
+  it('renders a closed fence as one <pre> with the language badge and highlight spans', () => {
     const html = mdToHtml('```js\nconst a = 1;\n```\n');
-    expect(html).toContain('<pre data-lang="js"><code>const a = 1;</code></pre>');
+    expect(html).toContain('<pre data-lang="js"><code class="hljs">');
+    expect(html).toContain('hljs-keyword');
+    expect(html).toContain('hljs-number');
     expect(html.match(/<pre/g)).toHaveLength(1);
   });
 
@@ -12,11 +14,49 @@ describe('mdToHtml fenced code', () => {
     const html = mdToHtml('```ts\ninterface A {\n\n}\n');
     expect(html.match(/<pre/g)).toHaveLength(1);
     expect(html).toContain('<pre data-lang="ts">');
-    expect(html).toContain('interface A {\n\n}');
+    expect(html).toContain('interface');
   });
 
   it('escapes markup inside fences verbatim', () => {
     expect(mdToHtml('```\n<b>x</b> & y\n```')).toContain('&lt;b&gt;x&lt;/b&gt; &amp; y');
+  });
+
+  it('escapes when the language is unknown', () => {
+    const html = mdToHtml('```nope\n<b>x</b>\n```');
+    expect(html).toContain('<code>&lt;b&gt;x&lt;/b&gt;</code>');
+    expect(html).not.toContain('class="hljs"');
+  });
+});
+
+describe('mdToHtml tables', () => {
+  const table = ['| 项 | 决策 |', '|---|---|', '| 范围 | 后端 |', '| 层级 | 5 层 |'].join('\n');
+
+  it('renders a header and body table', () => {
+    const html = mdToHtml(table);
+    expect(html).toContain('<table><thead><tr><th>项</th><th>决策</th></tr></thead><tbody>');
+    expect(html).toContain('<tr><td>范围</td><td>后端</td></tr>');
+    expect(html).toContain('<tr><td>层级</td><td>5 层</td></tr>');
+  });
+
+  it('supports alignment markers', () => {
+    const html = mdToHtml(['| a | b | c |', '|:--|:-:|--:|', '| 1 | 2 | 3 |'].join('\n'));
+    expect(html).toContain('<th style="text-align:left">a</th>');
+    expect(html).toContain('<th style="text-align:center">b</th>');
+    expect(html).toContain('<th style="text-align:right">c</th>');
+  });
+
+  it('applies inline markdown inside cells', () => {
+    const html = mdToHtml(['| a |', '|--|', '| `code` **b** |'].join('\n'));
+    expect(html).toContain('<td><code>code</code> <strong>b</strong></td>');
+  });
+
+  it('keeps literal pipes escaped in cells', () => {
+    const html = mdToHtml(['| a |', '|--|', '| x \\| y |'].join('\n'));
+    expect(html).toContain('<td>x | y</td>');
+  });
+
+  it('does not treat a lone pipe line as a table', () => {
+    expect(mdToHtml('a | b')).toContain('<p>a | b</p>');
   });
 });
 

@@ -35,15 +35,13 @@ export function ReviewView() {
 
   const r = useMemo(() => getRange(reviewRange), [reviewRange]);
   const stats = useMemo(() => computeStats(tasks, notes, r), [tasks, notes, r]);
-  const chart = useMemo(() => computeChart(r, stats.doneTasks), [r, stats.doneTasks]);
+  const chart = useMemo(() => computeChart(r, tasks), [r, tasks]);
   const tagEntries = useMemo(() => computeTagEntries(stats.doneTasks), [stats.doneTasks]);
   const logGroups = useMemo(() => computeLogGroups(stats.doneTasks), [stats.doneTasks]);
   const remaining = useMemo(() => computeRemaining(tasks, r), [tasks, r]);
   const overdueCount = useMemo(() => countOverdue(remaining), [remaining]);
 
-  const subtitle = chart.single
-    ? `所在周 · ${rangeLabel({ start: chart.chartStart, end: chart.chartEnd })}`
-    : rangeLabel(r);
+  const subtitle = rangeLabel(r);
   const trendCls = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
   const trendTxt = stats.delta > 0 ? `+${stats.delta}%` : `${stats.delta}%`;
 
