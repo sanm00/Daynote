@@ -9,6 +9,7 @@ function resetStore() {
     settings: { theme: 'light', defaultTag: '工作' },
     addTag: '工作',
     currentNoteId: null,
+    noteDraft: null,
     noteFilter: 'all',
     noteMode: 'preview',
     findOpen: false,
@@ -255,6 +256,83 @@ describe('persistNow', () => {
     useAppStore.setState({ saveState: 'saving' });
     await useAppStore.getState().persistNow();
     expect(useAppStore.getState().saveState).toBe('saved');
+  });
+});
+
+describe('note draft (manual save)', () => {
+  const seedNote = () => {
+    resetStore();
+    useAppStore.setState({
+      notes: [
+        { id: 1, title: '原标题', content: '原正文', tag: '工作', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+      ],
+      currentNoteId: 1,
+    });
+  };
+
+  beforeEach(seedNote);
+
+  it('buffers edits in the draft without touching the saved note', () => {
+    useAppStore.getState().editDraft({ content: '改成新正文' });
+    expect(useAppStore.getState().notes[0].content).toBe('原正文');
+    expect(useAppStore.getState().noteDraft?.content).toBe('改成新正文');
+    // Title mirrors the body until the user types one.
+    expect(useAppStore.getState().noteDraft?.title).toBe('改成新正文');
+  });
+
+  it('commits existing-note edits to the saved note', () => {
+    useAppStore.getState().editDraft({ title: '新标题' });
+    useAppStore.getState().commitDraft();
+    const s = useAppStore.getState();
+    expect(s.notes[0].title).toBe('新标题');
+    expect(s.noteDraft).toBeNull();
+  });
+
+  it('creates a new note only on commit, with a real id', () => {
+    useAppStore.getState().newNoteDraft();
+    const draft = useAppStore.getState().noteDraft;
+    expect(draft?.id).toBeLessThan(0);
+    expect(useAppStore.getState().notes).toHaveLength(1);
+
+    useAppStore.getState().editDraft({ content: '新笔记正文' });
+    useAppStore.getState().commitDraft();
+    const s = useAppStore.getState();
+    expect(s.notes).toHaveLength(2);
+    expect(s.notes[0].title).toBe('新笔记正文');
+    expect(s.currentNoteId).toBe(s.notes[0].id);
+  });
+
+  it('drops an abandoned blank new note on commit', () => {
+    useAppStore.getState().newNoteDraft();
+    useAppStore.getState().commitDraft();
+    const s = useAppStore.getState();
+    expect(s.notes).toHaveLength(1);
+    expect(s.noteDraft).toBeNull();
+    expect(s.currentNoteId).toBe(1);
+  });
+
+  it('discards the draft, reverting to the last saved content', () => {
+    useAppStore.getState().editDraft({ content: '临时改动' });
+    useAppStore.getState().discardDraft();
+    const s = useAppStore.getState();
+    expect(s.noteDraft).toBeNull();
+    expect(s.notes[0].content).toBe('原正文');
+    expect(s.currentNoteId).toBe(1);
+  });
+
+  it('leaves a note with changes via selectNote, saving the draft', () => {
+    useAppStore.getState().editDraft({ content: '离开时保存' });
+    useAppStore.setState({
+      notes: [
+        useAppStore.getState().notes[0],
+        { id: 2, title: '第二条', content: '', tag: '工作', createdAt: '', updatedAt: '' },
+      ],
+    });
+    useAppStore.getState().selectNote(2);
+    const s = useAppStore.getState();
+    expect(s.notes[0].content).toBe('离开时保存');
+    expect(s.noteDraft).toBeNull();
+    expect(s.currentNoteId).toBe(2);
   });
 });
 

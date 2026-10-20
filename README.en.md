@@ -9,7 +9,7 @@ A **local-first** desktop app for notes and todos: schedule on the calendar, jot
 ## ✨ Features
 
 - **Plan** — Pick any date on the month calendar, add tasks with tags and priority, and reschedule to tomorrow / this weekend / next week at any time. Move overdue tasks to today in one click, or bulk-postpone everything still unfinished.
-- **Notes** — Live Markdown rendering (headings, lists, todos, quotes, code blocks, bold, inline code) with autosave as you type; tag filtering and in-body find (⌘F).
+- **Notes** — Live Markdown rendering (headings, lists, todos, quotes, code blocks, bold, inline code); save explicitly with the button or ⌘S, and edits are also saved when you leave the note; tag filtering and in-body find (⌘F).
 - **Review** — Completion count, rate, overdue, productive days and tag distribution for today / yesterday / this week / last week / this month / last month, with bar and line chart modes.
 - **Search** — ⌘K global search across note titles, note bodies and tasks, with highlighted matches and click-to-jump.
 - **Appearance & data** — Light / dark / follow-system themes; a default tag; export / import JSON backups; clear all data.
@@ -120,7 +120,7 @@ Writes use "write temp file + atomic rename", and unchanged content is neither r
 | Plan | `Shift Enter` | Newline within the task |
 | Plan | `Esc` | Collapse the quick-add input |
 | Notes | `⌘ E` | Enter edit mode |
-| Notes | `Esc` | Exit edit / cancel new note |
+| Notes | `Esc` | Cancel edit (revert unsaved changes) / cancel new note |
 | Notes | `⌘ F` | Find in body |
 | Notes | `⌘ B` | Bold the selection |
 | Notes | `` ⌘ ` `` | Inline code |

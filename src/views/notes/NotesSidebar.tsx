@@ -62,7 +62,10 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
               className={`note-item${n.id === currentNoteId ? ' active' : ''}`}
               onClick={() => onSelect(n.id)}
             >
-              <div className="note-item-title">{n.title || '无标题'}</div>
+              <div className="note-item-title">
+                {n.title || '无标题'}
+                {n.id < 0 && <span className="note-item-draft">草稿</span>}
+              </div>
               <div className="note-item-snippet">{plainText(n.content).slice(0, 60) || '暂无内容'}</div>
               <div className="note-item-foot">
                 <span className="tag" data-tag={n.tag}>

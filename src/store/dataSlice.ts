@@ -1,9 +1,9 @@
-import type { Note, Priority } from '@/types';
+import type { Priority } from '@/types';
 import { nextTag } from '@/lib/tags';
 import { addDays, fmt, parseDate, todayStr } from '@/lib/date';
 import { sanitizeNotes, sanitizeSettings, sanitizeTasks } from '@/lib/sanitize';
 import { storage } from '@/lib/storage';
-import { deriveTitle, isBlankNote, touchedTitles } from './noteTitle';
+import { touchedTitles } from './noteTitle';
 import type { DataSlice, SliceCreator } from './types';
 
 export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
@@ -87,55 +87,21 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
       ),
     })),
 
-  createNote: () => {
-    const now = new Date().toISOString();
-    const note: Note = {
-      id: Math.max(0, ...get().notes.map((n) => n.id)) + 1,
-      title: '',
-      content: '',
-      tag: get().settings.defaultTag,
-      createdAt: now,
-      updatedAt: now,
-    };
-    set((s) => ({ notes: [note, ...s.notes], currentNoteId: note.id, noteFilter: 'all' }));
-  },
-  updateNote: (id, patch) => {
-    if (patch.title !== undefined) touchedTitles.add(id);
-    set((s) => ({
-      notes: s.notes.map((n) => {
-        if (n.id !== id) return n;
-        const next: Note = { ...n, ...patch, updatedAt: new Date().toISOString() };
-        // Until the user touches the title, it mirrors the body: typing names
-        // the note (first 50 chars of plain text), clearing the body empties it.
-        if (patch.content !== undefined && !touchedTitles.has(id)) {
-          next.title = deriveTitle(next.content);
-        }
-        return next;
-      }),
-    }));
-  },
   deleteNote: (id) =>
     set((s) => {
       touchedTitles.delete(id);
       const notes = s.notes.filter((n) => n.id !== id);
       const currentNoteId =
         s.currentNoteId === id ? (notes.length ? notes[0].id : null) : s.currentNoteId;
-      return { notes, currentNoteId };
+      const noteDraft = s.noteDraft?.id === id ? null : s.noteDraft;
+      return { notes, currentNoteId, noteDraft };
     }),
-  finalizeNote: (id) => {
-    if (id == null) return;
-    const note = get().notes.find((n) => n.id === id);
-    if (!note) return;
-    if (isBlankNote(note)) {
-      // Abandoned new note: drop it entirely.
-      get().deleteNote(id);
-    }
-  },
   resetAll: () => {
     touchedTitles.clear();
     set({
       tasks: [],
       notes: [],
+      noteDraft: null,
       currentNoteId: null,
       noteFilter: 'all',
       noteMode: 'preview',
@@ -158,6 +124,7 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
       notes,
       settings,
       addTag: settings.defaultTag,
+      noteDraft: null,
       currentNoteId: notes.length ? notes[0].id : null,
       noteFilter: 'all',
       noteMode: 'preview',

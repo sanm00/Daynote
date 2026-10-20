@@ -1201,7 +1201,10 @@ mark.nf-hit.active{background:var(--primary);color:var(--on-primary);box-shadow:
 }
 .note-task:last-child{border-bottom:0}
 .note-check{
-  width:16px;height:16px;border-radius:5px;flex:none;margin-top:4px;
+  width:16px;height:16px;border-radius:5px;flex:none;
+  /* Center the box on the first text line: line-height is 1.5, so the line
+     center sits .75em down; subtract half the 16px box. */
+  margin-top:calc(.75 * var(--fs-base) - 8px);
   border:1.4px solid var(--muted-2);display:grid;place-items:center;
   font-size:var(--fs-2xs);font-weight:700;color:var(--on-primary);
 }

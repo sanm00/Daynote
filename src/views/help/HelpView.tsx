@@ -31,7 +31,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     title: '笔记页',
     items: [
       { keys: ['⌘', 'E'], label: '进入编辑，光标落在正文末尾' },
-      { keys: ['Esc'], label: '退出编辑 / 取消新建，回到预览' },
+      { keys: ['Esc'], label: '取消编辑（回滚未保存改动）/ 取消新建，回到预览' },
       { keys: ['⌘', 'F'], label: '在正文中查找' },
       { keys: ['Enter', '/', 'Shift', 'Enter'], label: '查找时跳到下一个 / 上一个匹配' },
       { keys: ['⌘', 'B'], label: '加粗选中文字' },
@@ -70,7 +70,7 @@ export function HelpView() {
               📝
             </div>
             <div className="help-title">笔记</div>
-            <div className="help-desc">随手记录想法、会议要点、读书摘抄，支持搜索和标签筛选，输入即保存。</div>
+            <div className="help-desc">随手记录想法、会议要点、读书摘抄，支持搜索和标签筛选；编辑后点「保存」或按 ⌘S，离开笔记时也会自动保存。</div>
           </div>
           <div className="card help-card">
             <div className="help-icon" style={{ background: 'var(--tag-health-bg)' }}>

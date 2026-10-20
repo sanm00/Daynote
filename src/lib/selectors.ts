@@ -45,3 +45,27 @@ export function getFilteredNotes(notes: Note[], filter: Tag | 'all'): Note[] {
     .filter((n) => filter === 'all' || n.tag === filter)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
+
+/** A new (unsaved) note draft carries a negative id so it never collides with
+ * a committed note. */
+export const isNewDraft = (draft: Note) => draft.id < 0;
+
+/** Whether the draft carries edits worth writing back. A brand-new draft is
+ * always unsaved until committed; an existing one is dirty once it diverges
+ * from the committed note. */
+export function isDraftDirty(draft: Note, notes: Note[]): boolean {
+  if (isNewDraft(draft)) return true;
+  const base = notes.find((n) => n.id === draft.id);
+  if (!base) return true;
+  return (
+    draft.title !== base.title || draft.content !== base.content || draft.tag !== base.tag
+  );
+}
+
+/** Notes for the sidebar: the in-memory draft (if any) replaces the committed
+ * note it edits, and a brand-new draft is prepended so it shows up immediately. */
+export function withDraft(notes: Note[], draft: Note | null): Note[] {
+  if (!draft) return notes;
+  if (isNewDraft(draft)) return [draft, ...notes];
+  return notes.map((n) => (n.id === draft.id ? draft : n));
+}

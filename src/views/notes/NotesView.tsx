@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useAppStore } from '@/store';
 import { confirmDialog } from '@/lib/confirm';
 import { toast } from '@/lib/toast';
-import { getFilteredNotes } from '@/lib/selectors';
+import { getFilteredNotes, isDraftDirty, withDraft } from '@/lib/selectors';
 import { NotesSidebar, NOTE_ICON } from './NotesSidebar';
 import { NoteEditor } from './NoteEditor';
 import { useNoteFind, useEditShortcut } from './useNoteFind';
@@ -10,41 +10,38 @@ import { useNoteFind, useEditShortcut } from './useNoteFind';
 export function NotesView() {
   const notes = useAppStore((s) => s.notes);
   const currentNoteId = useAppStore((s) => s.currentNoteId);
+  const noteDraft = useAppStore((s) => s.noteDraft);
   const noteFilter = useAppStore((s) => s.noteFilter);
   const newNotePending = useAppStore((s) => s.newNotePending);
   const consumeNewNote = useAppStore((s) => s.consumeNewNote);
   const setNoteMode = useAppStore((s) => s.setNoteMode);
   const selectNote = useAppStore((s) => s.selectNote);
-  const createNote = useAppStore((s) => s.createNote);
+  const newNoteDraft = useAppStore((s) => s.newNoteDraft);
+  const commitDraft = useAppStore((s) => s.commitDraft);
   const deleteNote = useAppStore((s) => s.deleteNote);
-  const finalizeNote = useAppStore((s) => s.finalizeNote);
 
-  const list = useMemo(() => getFilteredNotes(notes, noteFilter), [notes, noteFilter]);
-  const note = notes.find((n) => n.id === currentNoteId) ?? null;
+  const list = useMemo(
+    () => getFilteredNotes(withDraft(notes, noteDraft), noteFilter),
+    [notes, noteFilter, noteDraft],
+  );
 
-  // Drafting state lives here: the id of the note being created. It is dropped
-  // when the user leaves it untouched (Esc / switch / leave page) or when the
-  // store removes it; content makes it a real note (see finalizeNote).
-  const newRef = useRef<number | null>(null);
-  const editRef = useRef<HTMLTextAreaElement>(null);
+  // The editor shows the in-memory draft when it belongs to the selected note,
+  // otherwise the last committed version.
+  const note =
+    noteDraft && noteDraft.id === currentNoteId
+      ? noteDraft
+      : (notes.find((n) => n.id === currentNoteId) ?? null);
+  const dirty = noteDraft && noteDraft.id === currentNoteId ? isDraftDirty(noteDraft, notes) : false;
 
   const handleCreate = () => {
-    createNote();
-    newRef.current = useAppStore.getState().currentNoteId;
+    commitDraft();
+    newNoteDraft();
     setNoteMode('edit');
-    window.setTimeout(() => editRef.current?.focus(), 0);
-  };
-
-  const exitNewNote = () => {
-    if (newRef.current == null) return;
-    const id = newRef.current;
-    newRef.current = null;
-    finalizeNote(id);
+    window.setTimeout(() => find.editRef.current?.focus(), 0);
   };
 
   const handleSelect = (id: number) => {
     if (id === currentNoteId) return;
-    exitNewNote();
     selectNote(id);
   };
 
@@ -71,27 +68,34 @@ export function NotesView() {
   const find = useNoteFind(note?.content, { onDelete: handleDelete });
   useEditShortcut(find.editRef);
 
-  // Esc leaves editing (or a fresh new note) and returns to preview mode.
-  // A still-empty draft is discarded along the way. Registered with no deps so
-  // StrictMode's double-mount does not stack duplicate listeners.
+  // Esc cancels editing: it throws the draft away, so the note rolls back to
+  // its last saved content and nothing is pending when you switch away. Saving
+  // happens only via the save button / ⌘S, or when leaving a note with edits
+  // still pending.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       const st = useAppStore.getState();
       if (st.noteMode !== 'edit') return;
       e.preventDefault();
-      if (newRef.current != null) {
-        const id = newRef.current;
-        newRef.current = null;
-        st.finalizeNote(id);
-      } else {
-        st.finalizeNote(st.currentNoteId);
-      }
+      st.discardDraft();
       st.setNoteMode('preview');
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save the current note from anywhere on the page (⌘S / Ctrl+S).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 's') return;
+      const ta = e.target as HTMLElement | null;
+      if (ta && (ta.id === 'noteFindInput' || ta.id === 'globalSearchInput')) return;
+      e.preventDefault();
+      useAppStore.getState().commitDraft();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
   // ⌘N from anywhere: create a new note. Consume the pending flag once handled
@@ -109,21 +113,6 @@ export function NotesView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newNotePending, consumeNewNote]);
 
-  // Leaving the notes page drops or names a still-untouched new note. Only act
-  // when the page actually changed: StrictMode's dev remount would otherwise
-  // fire this cleanup while still on the notes page.
-  const pageAtMount = useRef(useAppStore.getState().page);
-  useEffect(
-    () => () => {
-      if (newRef.current == null || pageAtMount.current !== 'notes') return;
-      const st = useAppStore.getState();
-      if (st.page === 'notes') return;
-      st.finalizeNote(newRef.current);
-      newRef.current = null;
-    },
-    [],
-  );
-
   return (
     <section className="page active" id="page-notes">
       <div className="notes-layout">
@@ -136,7 +125,7 @@ export function NotesView() {
               <div className="hint">想到什么就记下来，不打断思路</div>
             </div>
           ) : (
-            <NoteEditor note={note} find={find} />
+            <NoteEditor note={note} find={find} dirty={dirty} />
           )}
         </div>
       </div>

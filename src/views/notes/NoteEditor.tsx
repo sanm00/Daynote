@@ -9,17 +9,19 @@ import type { NoteFind } from './useNoteFind';
 interface Props {
   note: Note;
   find: NoteFind;
+  dirty: boolean;
 }
 
-export function NoteEditor({ note, find }: Props) {
+export function NoteEditor({ note, find, dirty }: Props) {
   const noteMode = useAppStore((s) => s.noteMode);
   const setNoteMode = useAppStore((s) => s.setNoteMode);
-  const updateNote = useAppStore((s) => s.updateNote);
+  const editDraft = useAppStore((s) => s.editDraft);
+  const commitDraft = useAppStore((s) => s.commitDraft);
 
   const rendered = useMemo(() => mdToHtml(note.content), [note.content]);
 
   const applyEdit = (result: { text: string; start: number; end: number }) => {
-    updateNote(note.id, { content: result.text });
+    editDraft({ content: result.text });
     window.requestAnimationFrame(() => {
       const el = find.editRef.current;
       if (el) {
@@ -91,7 +93,7 @@ export function NoteEditor({ note, find }: Props) {
         className="note-title-input"
         value={note.title}
         placeholder="笔记标题"
-        onChange={(e) => updateNote(note.id, { title: e.target.value })}
+        onChange={(e) => editDraft({ title: e.target.value })}
       />
       <div className="note-editor-meta">
         <div className="note-tags">
@@ -100,13 +102,13 @@ export function NoteEditor({ note, find }: Props) {
               key={tag}
               className={`note-tag-chip${tag === note.tag ? ' active' : ''}`}
               data-tag={tag}
-              onClick={() => updateNote(note.id, { tag })}
+              onClick={() => editDraft({ tag })}
             >
               {tag}
             </button>
           ))}
         </div>
-        <SaveStatus updatedAt={note.updatedAt} />
+        <SaveStatus updatedAt={note.updatedAt} dirty={dirty} onSave={commitDraft} />
         <div className="view-switch" data-mode={noteMode}>
           <span className="view-switch-thumb" />
           <button
@@ -217,7 +219,7 @@ export function NoteEditor({ note, find }: Props) {
         autoCorrect="off"
         autoCapitalize="off"
         autoComplete="off"
-        onChange={(e) => updateNote(note.id, { content: e.target.value })}
+        onChange={(e) => editDraft({ content: e.target.value })}
         onKeyDown={onContentKeyDown}
         onBeforeInput={onContentBeforeInput}
       />

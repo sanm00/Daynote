@@ -18,7 +18,11 @@ void useAppStore
   .hydrateFromStorage()
   .finally(() => {
     setupAutoPersist();
-    window.addEventListener('beforeunload', flushPersist);
+    const onBeforeUnload = () => {
+      useAppStore.getState().commitDraft();
+      flushPersist();
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') flushPersist();
     });

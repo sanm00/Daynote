@@ -41,10 +41,7 @@ export interface DataSlice {
   postponeUnfinished: () => void;
   moveAllToToday: (ids: number[]) => void;
 
-  createNote: () => void;
-  updateNote: (id: number, patch: Partial<Pick<Note, 'title' | 'content' | 'tag'>>) => void;
   deleteNote: (id: number) => void;
-  finalizeNote: (id: number | null) => void;
   resetAll: () => void;
   importData: (data: { tasks?: unknown; notes?: unknown; settings?: unknown }) => void;
 }
@@ -66,6 +63,9 @@ export interface UiSlice {
   noteFilter: Tag | 'all';
   noteMode: 'preview' | 'edit';
   currentNoteId: number | null;
+  /** Uncommitted note buffer. Lives only in memory (never persisted) so editing
+   * and new notes are written to disk only on explicit save or when leaving. */
+  noteDraft: Note | null;
   searchQuery: string;
   searchType: SearchType;
   findOpen: boolean;
@@ -93,6 +93,12 @@ export interface UiSlice {
   setNoteFilter: (f: Tag | 'all') => void;
   setNoteMode: (m: 'preview' | 'edit') => void;
   selectNote: (id: number) => void;
+  newNoteDraft: () => void;
+  editDraft: (patch: Partial<Pick<Note, 'title' | 'content' | 'tag'>>) => void;
+  /** Commit the draft into `notes` (or drop an abandoned blank new note). */
+  commitDraft: () => void;
+  /** Throw the draft away, reverting the note to its last saved content. */
+  discardDraft: () => void;
   setSearchQuery: (q: string) => void;
   setSearchType: (t: SearchType) => void;
   setTheme: (t: ThemeMode) => void;
