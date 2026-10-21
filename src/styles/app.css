@@ -411,10 +411,6 @@ html[data-theme='dark'] .confirm-overlay {
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(92, 70, 50, 0.28);
 }
-.pop-grid .day.range-lo::after,
-.pop-grid .day.range-hi::after {
-  display: none;
-}
 .pop-grid .day.in-range {
   background: var(--primary-soft);
   color: var(--primary-text);

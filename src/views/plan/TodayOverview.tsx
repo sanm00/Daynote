@@ -99,8 +99,8 @@ export function TodayOverview() {
   const locate = (t: Task) => {
     if (!t.beginDate) return;
     setPage('plan');
-    goToDate(t.beginDate);
-    toast(`已定位到 ${t.beginDate} 的任务`);
+    goToDate(tStr);
+    toast(`已定位到 ${tStr} 的任务`);
     const start = performance.now();
     const tick = () => {
       const row = document.querySelector<HTMLElement>(`.task[data-id="${t.id}"]`);
