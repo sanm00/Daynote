@@ -157,7 +157,10 @@ export function TaskPanel({ datePop }: Props) {
 
       {isDate && (
         <div className="progress-line">
-          <i style={{ width: `${dateList.length ? (dateDoneN / dateList.length) * 100 : 0}%` }} />
+          <i
+            className={dateList.length > 0 && dateDoneN === dateList.length ? 'full' : undefined}
+            style={{ width: `${dateList.length ? (dateDoneN / dateList.length) * 100 : 0}%` }}
+          />
         </div>
       )}
 
