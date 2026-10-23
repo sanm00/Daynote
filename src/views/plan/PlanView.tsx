@@ -9,6 +9,7 @@ import { TaskPanel } from './TaskPanel';
 export function PlanView() {
   const tasks = useAppStore((s) => s.tasks);
   const planView = useAppStore((s) => s.planView);
+  const selectedDate = useAppStore((s) => s.selectedDate);
   const setPlanView = useAppStore((s) => s.setPlanView);
   const datePop = useDatePop();
 
@@ -17,7 +18,7 @@ export function PlanView() {
   const pendingList = getPending(tasks);
 
   return (
-    <section className="page active" id="page-plan">
+    <section className="page active" id="page-plan" data-position-key={`${planView.kind}:${selectedDate}`}>
       <div className="plan-layout">
         <div className="plan-side">
           <QuickAddForm datePop={datePop} />

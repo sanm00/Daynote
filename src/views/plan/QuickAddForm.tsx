@@ -37,6 +37,7 @@ export function QuickAddForm({ datePop }: Props) {
     if (handledNewTodo.current) return;
     handledNewTodo.current = true;
     setOpen(true);
+    inputRef.current?.focus();
     consumeNewTodo();
   }, [newTodoPending, consumeNewTodo]);
 
@@ -115,7 +116,7 @@ export function QuickAddForm({ datePop }: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
                 e.preventDefault();
                 submit();
               } else if (e.key === 'Escape') {

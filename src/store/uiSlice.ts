@@ -7,20 +7,6 @@ import type { SliceCreator, UiSlice } from './types';
  * note and stay easy to spot. */
 const nextDraftId = (notes: Note[]) => Math.min(0, ...notes.map((n) => n.id)) - 1;
 
-/** Plan page always opens on today, regardless of where the user left it. */
-function planTodayState() {
-  const t = todayStr();
-  const d = today();
-  return {
-    planView: { kind: 'date' as const },
-    selectedDate: t,
-    calMonth: new Date(d.getFullYear(), d.getMonth(), 1),
-    reschedulingId: null,
-    addBegin: t,
-    addEnd: t,
-  };
-}
-
 export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   page: 'plan',
   prevPage: 'plan',
@@ -29,8 +15,8 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   calMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   reviewRange: 'today',
   chartType: 'bar',
-  addBegin: '',
-  addEnd: '',
+  addBegin: todayStr(),
+  addEnd: todayStr(),
   addTag: '工作',
   popMonth: new Date(today().getFullYear(), today().getMonth(), 1),
   reschedulingId: null,
@@ -51,7 +37,7 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
     const s = get();
     if (s.page === 'notes' && page !== 'notes') s.commitDraft();
     const base = { page, prevPage: page === 'search' ? s.prevPage : s.page };
-    set(page === 'plan' ? { ...base, ...planTodayState() } : base);
+    set({ ...base, reschedulingId: null });
   },
   openSearch: () => {
     const s = get();
@@ -62,13 +48,13 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   closeSearch: () => {
     const { prevPage } = get();
     const target = prevPage === 'search' ? 'plan' : prevPage;
-    set(target === 'plan' ? { page: target, ...planTodayState() } : { page: target });
+    set({ page: target });
   },
   requestNewTodo: () => {
     const s = get();
     if (s.page === 'notes') s.commitDraft();
     set({
-      ...planTodayState(),
+      reschedulingId: null,
       page: 'plan',
       newTodoPending: true,
     });

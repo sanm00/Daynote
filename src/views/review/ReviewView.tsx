@@ -43,7 +43,7 @@ export function ReviewView() {
 
   const subtitle = rangeLabel(r);
   const trendCls = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
-  const trendTxt = stats.delta > 0 ? `+${stats.delta}%` : `${stats.delta}%`;
+  const trendTxt = `${stats.delta > 0 ? '+' : ''}${stats.delta} 个百分点`;
 
   return (
     <section className="page active" id="page-review">
@@ -64,6 +64,9 @@ export function ReviewView() {
 
       <div className="review-scroll">
         <StatCards stats={stats} trendCls={trendCls} trendTxt={trendTxt} />
+        <p className="review-basis">
+          完成任务按实际完成日统计；完成率 {stats.total - stats.undoneN}/{stats.total}，按截止日在周期内的任务统计；有产出指当天完成过任务。
+        </p>
         <div className="charts-row">
           <TrendChart
             chart={chart}

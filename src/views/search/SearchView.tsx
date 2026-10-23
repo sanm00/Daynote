@@ -21,6 +21,8 @@ export function SearchView() {
   const setPlanView = useAppStore((s) => s.setPlanView);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [suggestion] = useState(
     () => SUGGEST_KEYWORDS[Math.floor(Math.random() * SUGGEST_KEYWORDS.length)],
   );
@@ -71,6 +73,14 @@ export function SearchView() {
 
   const total = noteHits.length + taskHits.length;
 
+  useEffect(() => setActiveIndex(-1), [q, searchType, noteHits, taskHits]);
+
+  useEffect(() => {
+    const hits = resultsRef.current?.querySelectorAll<HTMLButtonElement>('.search-hit');
+    hits?.forEach((hit, index) => hit.classList.toggle('keyboard-active', index === activeIndex));
+    if (activeIndex >= 0) hits?.[activeIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [activeIndex]);
+
   const jumpToNote = (id: number) => {
     selectNote(id);
     setNoteFilter('all');
@@ -95,12 +105,17 @@ export function SearchView() {
       row.classList.remove('flash');
       void (row as HTMLElement).offsetWidth;
       row.classList.add('flash');
+      row.scrollIntoView({ block: 'center' });
       window.setTimeout(() => row.classList.remove('flash'), 1400);
     }, 60);
   };
 
   return (
     <section className="page active" id="page-search">
+      <div className="search-navigation">
+        <button type="button" className="btn ghost sm" onClick={closeSearch}>‹ 返回</button>
+        <span>↑↓ 选择 · Enter 打开 · Esc 返回</span>
+      </div>
       <div className="search-hero">
         <div className="search-box">
           <svg viewBox="0 0 24 24">
@@ -115,6 +130,18 @@ export function SearchView() {
             spellCheck={false}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.nativeEvent.isComposing || e.keyCode === 229 || !total) return;
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveIndex((index) => index < 0
+                  ? (e.key === 'ArrowDown' ? 0 : total - 1)
+                  : (index + (e.key === 'ArrowDown' ? 1 : -1) + total) % total);
+              } else if (e.key === 'Enter') {
+                e.preventDefault();
+                resultsRef.current?.querySelectorAll<HTMLButtonElement>('.search-hit')[Math.max(0, activeIndex)]?.click();
+              }
+            }}
           />
           <button
             className="search-clear"
@@ -158,14 +185,16 @@ export function SearchView() {
         }}
       />
 
-      <SearchResults
-        q={q}
-        noteHits={noteHits}
-        taskHits={taskHits}
-        suggestion={suggestion}
-        onJumpNote={jumpToNote}
-        onJumpTask={jumpToTask}
-      />
+      <div ref={resultsRef} className="search-results-host">
+        <SearchResults
+          q={q}
+          noteHits={noteHits}
+          taskHits={taskHits}
+          suggestion={suggestion}
+          onJumpNote={jumpToNote}
+          onJumpTask={jumpToTask}
+        />
+      </div>
     </section>
   );
 }

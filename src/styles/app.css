@@ -9,6 +9,17 @@
   display: contents;
 }
 
+.page-position-host { display: contents; }
+.search-navigation {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: none;
+}
+.search-navigation > span { font-size: var(--fs-2xs); color: var(--muted-2); }
+.search-results-host { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.search-hit.keyboard-active {
+  border-color: var(--primary); background: var(--primary-soft); outline: 1px solid var(--primary);
+}
+.review-basis { font-size: var(--fs-2xs); color: var(--muted); line-height: 1.6; padding: 0 2px; }
+
 /*
  * The demo dressed the page up as a floating macOS app: 14px of "desktop"
  * around a rounded, shadowed `.window`. A real Tauri window already *is* that

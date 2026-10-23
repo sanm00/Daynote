@@ -61,13 +61,15 @@ export function TaskRow({ t, datePop }: Props) {
     if (!isRescheduling) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        e.preventDefault();
         e.stopPropagation();
+        datePop.close();
         setReschedulingId(null);
       }
     };
     document.addEventListener('keydown', onKey, true);
     return () => document.removeEventListener('keydown', onKey, true);
-  }, [isRescheduling, setReschedulingId]);
+  }, [isRescheduling, setReschedulingId, datePop.close]);
 
   const startEdit = () => {
     setDraft(t.title);

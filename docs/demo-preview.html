@@ -906,7 +906,6 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .task.resched-row{display:block;background:var(--surface-2);border-color:var(--primary)}
 .resched-body{display:flex;flex-direction:column;gap:6px}
 .resched-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.resched-hint{font-size:var(--fs-2xs);color:var(--muted-2);line-height:1.4}
 .chip{
   border:1px solid var(--line);background:var(--card);color:var(--text-2);
   font-size:var(--fs-2xs);font-weight:500;padding:4px 6px;border-radius:5px;
@@ -1546,6 +1545,12 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
     transition:none !important;
   }
 }
+/* Interaction preview: retain the existing palette and typography. */
+#dayProgressLine{display:none}
+.search-navigation{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none}
+.search-navigation>span{font-size:var(--fs-2xs);color:var(--muted-2)}
+.search-hit.keyboard-active{border-color:var(--primary);background:var(--primary-soft);outline:1px solid var(--primary)}
+.review-basis{font-size:var(--fs-2xs);color:var(--muted);line-height:1.6;padding:0 2px}
 </style>
 </head>
 <body>
@@ -1770,6 +1775,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
       </section>
 
       <section class="page" id="page-search">
+        <div class="search-navigation"><button class="btn ghost sm" id="searchBack">‹ 返回</button><span>↑↓ 选择 · Enter 打开 · Esc 返回</span></div>
         <div class="search-hero">
           <div class="search-box">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -1801,6 +1807,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
 
         <div class="review-scroll">
           <div class="stats-grid" id="statsGrid"></div>
+          <p class="review-basis" id="reviewBasis"></p>
 
           <div class="charts-row">
             <div class="card chart-card">
@@ -2269,8 +2276,8 @@ const state = {
   calMonth: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1),
   reviewRange: 'today',
   chartType: 'bar',
-  addBegin: '',
-  addEnd: '',
+  addBegin: TODAY_STR,
+  addEnd: TODAY_STR,
   addTag: '工作',
   popMonth: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1),
   reschedulingId: null,
@@ -2297,6 +2304,8 @@ function goToDate(ds, syncAddDate = true){
   const d = parseDate(ds);
   state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
   state.reschedulingId = null;
+  if(syncAddDate){ state.addBegin = ds; state.addEnd = ds; }
+  syncAddControls();
   renderPlan();
 }
 let toastTimer = null;
@@ -2403,7 +2412,6 @@ function rowHTML(t, mode){
           <button type="button" class="chip resched-pick" data-act="pickdate" title="选择起止日期（可跨天）">选择日期</button>
           <button class="chip ghost" data-quick="cancel">取消</button>
         </div>
-        <div class="resched-hint">选择日期时先点开始日，再点结束日即可排成一段（同一天两次即为单日）。</div>
       </div>
     </div>`;
   }
@@ -2514,7 +2522,7 @@ function renderTasksBody(){
     $('#taskDateTitle').textContent =
       `${d.getMonth()+1}月${d.getDate()}日 ${dayNames[d.getDay()]}` + (isToday ? ' · 今天' : '');
     $('#taskSubtitle').textContent = list.length
-      ? `${list.length} 项任务 · 已完成 ${doneN} 项`
+      ? `剩余 ${list.length - doneN} 项 · 共 ${list.length} 项任务`
       : (isFuture ? '还没有安排，添加一条吧' : '这一天没有任务记录');
     const dayBar = $('#dayProgressBar');
     dayBar.style.width = (list.length ? doneN / list.length * 100 : 0) + '%';
@@ -2686,7 +2694,7 @@ function renderTodayCard(){
   $('#todayFoot').hidden = total === 0;
 }
 
-function renderPlan(){ renderCalendar(); renderMetrics(); renderTasks(); renderSideStats(); renderTodayCard(); }
+function renderPlan(){ renderCalendar(); renderMetrics(); renderTasks(); renderSideStats(); renderTodayCard(); syncAddControls(); }
 
 function getRange(key){
   const t = new Date(TODAY);
@@ -2844,7 +2852,7 @@ function renderReview(){
   const prevRate = hasPrev ? Math.round(prevInRange.filter(t => t.done).length / prevInRange.length * 100) : 0;
   const delta = rate - prevRate;
   const trendCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
-  const trendTxt = delta > 0 ? `+${delta}%` : `${delta}%`;
+  const trendTxt = delta > 0 ? `+${delta} 个百分点` : `${delta} 个百分点`;
 
   const inDay = ds => ds >= s && ds <= e;
   const noteDay = n => fmt(new Date(n.updatedAt));
@@ -2905,6 +2913,7 @@ function renderReview(){
     </div>
   `;
 
+  $('#reviewBasis').textContent = `完成任务按实际完成日统计；完成率 ${scheduledDoneN}/${total}，按截止日在周期内的任务统计；有产出指当天完成过任务。`;
   renderChart(r, tasks);
 
   const tagCount = {};
@@ -3401,18 +3410,38 @@ function renderSettings(){
 }
 
 /* ============ 全局搜索 ============ */
-let prevPage = 'plan';
-function planToToday(){
-  state.planView = { kind: 'date' };
-  state.selectedDate = TODAY_STR;
-  state.calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
-  state.reschedulingId = null;
-  state.addBegin = TODAY_STR;
-  state.addEnd = TODAY_STR;
+const pagePositions = new Map();
+let searchResultIndex = -1;
+let searchReturnFocus = null;
+const scrollAreas = '.task-list,.plan-side,.notes-list,.note-render,.note-content-input,.review-scroll,.search-results,.content';
+function rememberPagePosition(){
+  const page = document.getElementById('page-' + state.page);
+  const positions = [...page.querySelectorAll(scrollAreas)].map(el => ({
+    selector: el.id ? '#' + el.id : '.' + el.classList[0], top: el.scrollTop, left: el.scrollLeft,
+  }));
+  const input = document.activeElement;
+  pagePositions.set(state.page, {positions, focusId: input?.id,
+    start: input?.selectionStart, end: input?.selectionEnd});
 }
+function restorePagePosition(page){
+  requestAnimationFrame(() => {
+    if(state.page !== page) return;
+    const saved = pagePositions.get(page);
+    if(!saved) return;
+    const root = document.getElementById('page-' + page);
+    saved.positions.forEach(p => {
+      const el = root.querySelector(p.selector);
+      if(el){ el.scrollTop = p.top; el.scrollLeft = p.left; }
+    });
+    const input = saved.focusId && document.getElementById(saved.focusId);
+    if(input && saved.start != null && input.setSelectionRange) input.setSelectionRange(saved.start, saved.end);
+  });
+}
+let prevPage = 'plan';
 function showPage(page){
+  const changing = state.page !== page;
+  if(changing) rememberPagePosition();
   if(page !== 'notes' && state.findOpen) nfClose();
-  if(page === 'plan') planToToday();
   state.page = page;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
@@ -3421,8 +3450,10 @@ function showPage(page){
   else if(page === 'settings') renderSettings();
   else if(page === 'plan') renderPlan();
   else if(page === 'search') renderGlobalSearch();
+  if(changing) restorePagePosition(page);
 }
 function openSearch(){
+  if(state.page !== 'search') searchReturnFocus = document.activeElement;
   if(state.page !== 'search') prevPage = state.page;
   showPage('search');
   const input = $('#globalSearchInput');
@@ -3430,6 +3461,10 @@ function openSearch(){
 }
 function closeSearch(){
   showPage(prevPage === 'search' ? 'plan' : prevPage);
+  requestAnimationFrame(() => {
+    const target = searchReturnFocus?.id ? document.getElementById(searchReturnFocus.id) : searchReturnFocus;
+    if(target?.isConnected) target.focus({preventScroll:true});
+  });
 }
 function highlight(text, q){
   const safe = escapeHtml(text == null ? '' : text);
@@ -3453,6 +3488,8 @@ function dateLabelFor(ds){
   return `${d.getMonth()+1}月${d.getDate()}日`;
 }
 function renderGlobalSearch(){
+  searchResultIndex = -1;
+  $('#globalSearchInput').removeAttribute('aria-activedescendant');
   const q = state.searchQuery.trim();
   const type = state.searchType;
   document.querySelectorAll('#globalSearchTabs .search-tab').forEach(b => {
@@ -3540,6 +3577,7 @@ function renderGlobalSearch(){
     </div>`;
   }
   results.innerHTML = html;
+  results.querySelectorAll('.search-hit').forEach((hit, i) => { hit.id = 'search-result-' + i; });
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => {
@@ -3556,6 +3594,20 @@ $('#globalSearchInput').addEventListener('input', e => {
 });
 $('#globalSearchInput').addEventListener('keydown', e => {
   if(e.key === 'Escape'){ e.preventDefault(); closeSearch(); }
+  else if(!e.isComposing && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
+    e.preventDefault();
+    const hits = [...document.querySelectorAll('#globalSearchResults .search-hit')];
+    if(!hits.length) return;
+    searchResultIndex = searchResultIndex < 0
+      ? (e.key === 'ArrowDown' ? 0 : hits.length - 1)
+      : (searchResultIndex + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length;
+    hits.forEach((hit, i) => hit.classList.toggle('keyboard-active', i === searchResultIndex));
+    hits[searchResultIndex].scrollIntoView({block:'nearest'});
+    e.currentTarget.setAttribute('aria-activedescendant', hits[searchResultIndex].id);
+  } else if(e.key === 'Enter' && !e.isComposing){
+    const hits = document.querySelectorAll('#globalSearchResults .search-hit');
+    if(hits.length){ e.preventDefault(); hits[Math.max(0, searchResultIndex)].click(); }
+  }
 });
 $('#globalSearchClear').addEventListener('click', () => {
   const input = $('#globalSearchInput');
@@ -3592,10 +3644,12 @@ $('#globalSearchResults').addEventListener('click', e => {
       flashTask(t.id);
       toast('这是一条待排期任务');
     } else {
-      state.selectedDate = t.beginDate;
-      const d = parseDate(t.beginDate);
-      state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      goToDate(t.beginDate);
       showPage('plan');
+      requestAnimationFrame(() => {
+        flashTask(t.id);
+        document.querySelector(`.task[data-id="${t.id}"]`)?.scrollIntoView({block:'center'});
+      });
       toast(`已定位到 ${dateRangeLabel(t.beginDate, t.endDate)} 的任务`);
     }
   }
@@ -3614,6 +3668,7 @@ document.addEventListener('keydown', e => {
     nfClose();
   } else if(e.key === 'Escape' && state.reschedulingId !== null){
     e.preventDefault();
+    dpClose();
     state.reschedulingId = null;
     renderTasks();
   } else if(e.key === 'Escape' && state.page === 'search'){
@@ -3823,14 +3878,12 @@ $('#quickNewForm').addEventListener('submit', e => {
   renderPlan();
   toast(begin ? `已排到 ${dateRangeLabel(begin, end)}` : '已存入待排期');
   input.value = '';
-  state.addBegin = '';
-  state.addEnd = '';
   dpClose();
   syncAddControls();
   input.focus();
 });
 $('#quickNewInput').addEventListener('keydown', e => {
-  if(e.key === 'Enter' && !e.shiftKey){
+  if(e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229){
     e.preventDefault();
     $('#quickNewForm').requestSubmit();
   } else if(e.key === 'Escape'){
@@ -4244,6 +4297,10 @@ $('#quoteCard').addEventListener('mouseenter', stopQuotes);
 $('#quoteCard').addEventListener('mouseleave', startQuotes);
 showQuote(Math.floor(Math.random() * QUOTES.length));
 startQuotes();
+
+/* ---- Interaction preview controls ---- */
+$('#searchBack').addEventListener('click', closeSearch);
+
 
 loadSettings();
 applyTheme();

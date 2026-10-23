@@ -114,7 +114,7 @@ export function NotesView() {
   }, [newNotePending, consumeNewNote]);
 
   return (
-    <section className="page active" id="page-notes">
+    <section className="page active" id="page-notes" data-position-key={currentNoteId ?? ''}>
       <div className="notes-layout">
         <NotesSidebar list={list} onSelect={handleSelect} onCreate={handleCreate} />
         <div className="notes-main">

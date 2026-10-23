@@ -65,8 +65,6 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
           parsedAt: new Date().toISOString(),
         },
       ],
-      addBegin: '',
-      addEnd: '',
     }));
   },
   postponeUnfinished: () => {

@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppStore } from '@/store';
 import { Titlebar } from '@/components/Titlebar';
 import { Sidebar } from '@/components/Sidebar';
 import { ConfirmHost } from '@/components/ConfirmHost';
+import { PagePosition, type PagePositions } from '@/components/PagePosition';
 import { PlanView } from '@/views/plan/PlanView';
 import { NotesView } from '@/views/notes/NotesView';
 import { ReviewView } from '@/views/review/ReviewView';
@@ -11,6 +12,7 @@ import { SettingsView } from '@/views/settings/SettingsView';
 import { HelpView } from '@/views/help/HelpView';
 
 export function App() {
+  const positions = useRef<PagePositions>({ pages: new Map(), previousPage: null });
   const page = useAppStore((s) => s.page);
   const ready = useAppStore((s) => s.ready);
   const applyTheme = useAppStore((s) => s.applyTheme);
@@ -55,12 +57,14 @@ export function App() {
           <Sidebar />
         </div>
         <main className="content">
-          {page === 'plan' && <PlanView />}
-          {page === 'notes' && <NotesView />}
-          {page === 'review' && <ReviewView />}
-          {page === 'search' && <SearchView />}
-          {page === 'settings' && <SettingsView />}
-          {page === 'help' && <HelpView />}
+          <PagePosition key={page} page={page} positions={positions}>
+            {page === 'plan' && <PlanView />}
+            {page === 'notes' && <NotesView />}
+            {page === 'review' && <ReviewView />}
+            {page === 'search' && <SearchView />}
+            {page === 'settings' && <SettingsView />}
+            {page === 'help' && <HelpView />}
+          </PagePosition>
         </main>
       </div>
       <ConfirmHost />

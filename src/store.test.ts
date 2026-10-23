@@ -336,10 +336,10 @@ describe('note draft (manual save)', () => {
   });
 });
 
-describe('plan page defaults', () => {
+describe('plan navigation and quick add', () => {
   beforeEach(resetStore);
 
-  it('selects today (date view) whenever the plan page is entered', () => {
+  it('preserves the selected date and view when returning to plan', () => {
     useAppStore.setState({
       page: 'settings',
       selectedDate: '2000-01-01',
@@ -349,17 +349,45 @@ describe('plan page defaults', () => {
     });
     useAppStore.getState().setPage('plan');
     const s = useAppStore.getState();
-    expect(s.selectedDate).toBe(todayStr());
-    expect(s.planView).toEqual({ kind: 'date' });
+    expect(s.selectedDate).toBe('2000-01-01');
+    expect(s.planView).toEqual({ kind: 'pending' });
     expect(s.reschedulingId).toBeNull();
   });
 
-  it('lands on today for ⌘I new todo as well', () => {
+  it('preserves the working date and view for a new todo', () => {
     useAppStore.setState({ page: 'notes', selectedDate: '2000-01-01', planView: { kind: 'unscheduled' } });
     useAppStore.getState().requestNewTodo();
     const s = useAppStore.getState();
     expect(s.page).toBe('plan');
-    expect(s.selectedDate).toBe(todayStr());
-    expect(s.planView).toEqual({ kind: 'date' });
+    expect(s.selectedDate).toBe('2000-01-01');
+    expect(s.planView).toEqual({ kind: 'unscheduled' });
+  });
+
+  it('returns from search without changing the plan view or add dates', () => {
+    useAppStore.setState({ page: 'plan', selectedDate: '2030-05-12', planView: { kind: 'overdue' }, addBegin: '2030-05-12', addEnd: '2030-05-14' });
+    useAppStore.getState().openSearch();
+    useAppStore.getState().closeSearch();
+    const s = useAppStore.getState();
+    expect(s.page).toBe('plan');
+    expect(s.selectedDate).toBe('2030-05-12');
+    expect(s.planView.kind).toBe('overdue');
+    expect([s.addBegin, s.addEnd]).toEqual(['2030-05-12', '2030-05-14']);
+  });
+
+  it('keeps a selected date range across consecutive additions', () => {
+    useAppStore.getState().setAddRange('2030-05-12', '2030-05-14');
+    useAppStore.getState().submitQuickAdd('First');
+    useAppStore.getState().submitQuickAdd('Second');
+    expect(useAppStore.getState().tasks.map((t) => [t.beginDate, t.endDate])).toEqual([
+      ['2030-05-12', '2030-05-14'], ['2030-05-12', '2030-05-14'],
+    ]);
+    expect(useAppStore.getState().addBegin).toBe('2030-05-12');
+  });
+
+  it('keeps unscheduled additions unscheduled until a date is picked', () => {
+    useAppStore.getState().setAddRange('', '');
+    useAppStore.getState().submitQuickAdd('First');
+    useAppStore.getState().submitQuickAdd('Second');
+    expect(useAppStore.getState().tasks.every((t) => t.beginDate === null && t.endDate === null)).toBe(true);
   });
 });

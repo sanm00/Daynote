@@ -1,5 +1,4 @@
 import { useAppStore } from '@/store';
-import type { Task } from '@/types';
 import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, occursOn } from '@/lib/selectors';
 import { addDays, dayNames, fmt, parseDate, todayStr } from '@/lib/date';
 import { toast } from '@/lib/toast';
@@ -42,7 +41,7 @@ export function TaskPanel({ datePop }: Props) {
       `${selD.getMonth() + 1}月${selD.getDate()}日 ${dayNames[selD.getDay()]}` +
       (isToday ? ' · 今天' : '');
     subtitle = dateList.length
-      ? `${dateList.length} 项任务 · 已完成 ${dateDoneN} 项`
+      ? `剩余 ${dateList.length - dateDoneN} 项 · 共 ${dateList.length} 项任务`
       : isFuture
         ? '还没有安排，添加一条吧'
         : '这一天没有任务记录';
@@ -154,15 +153,6 @@ export function TaskPanel({ datePop }: Props) {
           )}
         </div>
       </div>
-
-      {isDate && (
-        <div className="progress-line">
-          <i
-            className={dateList.length > 0 && dateDoneN === dateList.length ? 'full' : undefined}
-            style={{ width: `${dateList.length ? (dateDoneN / dateList.length) * 100 : 0}%` }}
-          />
-        </div>
-      )}
 
       {!isDate && summary && <div className="view-summary">{summary}</div>}
 
