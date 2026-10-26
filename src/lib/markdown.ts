@@ -1,7 +1,10 @@
 import { highlightCode } from './highlight';
+import { IMAGE_REFERENCE } from './images';
+import iconUrl from '@/assets/daynote-icon.svg';
 
 export function escapeHtml(s: string): string {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 export interface EditResult {
@@ -110,7 +113,14 @@ function inlineMd(input: string): string {
     return `\u0000${codes.length - 1}\u0000`;
   });
   s = escapeHtml(s);
-  s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt, url) => `<img src="${url}" alt="${alt}">`);
+  const images: string[] = [];
+  s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt: string, url: string) => {
+    const source = IMAGE_REFERENCE.test(url)
+      ? `data-note-image="${url}"`
+      : /^https?:\/\//i.test(url) || url === escapeHtml(iconUrl) ? `src="${url}"` : '';
+    images.push(source ? `<img ${source} alt="${alt}" loading="lazy">` : alt);
+    return `\u0001${images.length - 1}\u0001`;
+  });
   s = s.replace(
     /\[([^\]]+)\]\(([^)\s]+)\)/g,
     (_m, txt, url) => `<a href="${url}" target="_blank" rel="noopener">${txt}</a>`,
@@ -121,6 +131,7 @@ function inlineMd(input: string): string {
   s = s.replace(/(^|[^_\w])_([^_\s][^_]*?)_/g, '$1<em>$2</em>');
   s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
   s = s.replace(/\u0000(\d+)\u0000/g, (_m, i) => `<code>${escapeHtml(codes[+i])}</code>`);
+  s = s.replace(/\u0001(\d+)\u0001/g, (_m, i) => images[+i]);
   return s;
 }
 

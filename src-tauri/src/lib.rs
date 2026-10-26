@@ -1,4 +1,5 @@
 mod commands;
+mod images;
 mod models;
 mod paths;
 mod storage;
@@ -28,7 +29,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::storage_root,
             commands::load_data,
-            commands::save_data
+            commands::save_data,
+            commands::save_image,
+            commands::read_image
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");

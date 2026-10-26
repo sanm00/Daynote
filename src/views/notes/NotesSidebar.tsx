@@ -21,6 +21,8 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
   const currentNoteId = useAppStore((s) => s.currentNoteId);
   const noteFilter = useAppStore((s) => s.noteFilter);
   const setNoteFilter = useAppStore((s) => s.setNoteFilter);
+  const notes = useAppStore((s) => s.notes);
+  const total = notes.length;
 
   return (
     <aside className="notes-side">
@@ -34,20 +36,29 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
         <button
           className={`filter-chip${noteFilter === 'all' ? ' active' : ''}`}
           data-filter="all"
+          title={`共 ${total} 篇笔记`}
+          aria-label={`全部，共 ${total} 篇笔记`}
           onClick={() => setNoteFilter('all')}
         >
           全部
+          <span className="notes-count">{total}</span>
         </button>
-        {TAG_ORDER.map((tag) => (
-          <button
-            key={tag}
-            className={`filter-chip${noteFilter === tag ? ' selected active' : ''}`}
-            data-filter={tag}
-            onClick={() => setNoteFilter(tag)}
-          >
-            {tag}
-          </button>
-        ))}
+        {TAG_ORDER.map((tag) => {
+          const count = notes.filter((n) => n.tag === tag).length;
+          return (
+            <button
+              key={tag}
+              className={`filter-chip${noteFilter === tag ? ' selected active' : ''}`}
+              data-filter={tag}
+              title={`${tag} ${count} 篇，共 ${total} 篇笔记`}
+              aria-label={`${tag} ${count} 篇，共 ${total} 篇笔记`}
+              onClick={() => setNoteFilter(tag)}
+            >
+              {tag}
+              {noteFilter === tag && <span className="note-filter-count">{count}</span>}
+            </button>
+          );
+        })}
       </div>
       <div className="notes-list">
         {!list.length ? (

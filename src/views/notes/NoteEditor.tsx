@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { TAG_ORDER } from '@/lib/tags';
 import { mdToHtml, insertPair, toggleFence } from '@/lib/markdown';
 import type { Note } from '@/types';
 import { SaveStatus } from '@/components/SaveStatus';
 import type { NoteFind } from './useNoteFind';
+import { loadNoteImage, saveNoteImage } from '@/lib/images';
+import { toast } from '@/lib/toast';
 
 interface Props {
   note: Note;
@@ -19,6 +21,70 @@ export function NoteEditor({ note, find, dirty }: Props) {
   const commitDraft = useAppStore((s) => s.commitDraft);
 
   const rendered = useMemo(() => mdToHtml(note.content), [note.content]);
+  const [pasting, setPasting] = useState(false);
+  const pastePending = useRef(false);
+  // Invalidated by typing, changing selection, saving, switching, or discarding.
+  const pasteVersion = useRef(0);
+
+  useEffect(() => useAppStore.subscribe((state, previous) => {
+    if (state.noteDraft !== previous.noteDraft || state.currentNoteId !== previous.currentNoteId
+      || state.page !== previous.page || state.noteMode !== previous.noteMode) {
+      pasteVersion.current++;
+    }
+  }), []);
+
+  useEffect(() => {
+    let disposed = false;
+    const urls: string[] = [];
+    find.renderRef.current?.querySelectorAll<HTMLImageElement>('img[data-note-image]').forEach((img) => {
+      void loadNoteImage(img.dataset.noteImage!).then((url) => {
+        if (disposed) { URL.revokeObjectURL(url); return; }
+        urls.push(url);
+        img.src = url;
+      }).catch(() => {
+        if (!disposed) {
+          img.alt = `${img.alt || '图片'}（加载失败）`;
+          img.title = '图片文件不存在或无法读取';
+        }
+      });
+    });
+    return () => { disposed = true; urls.forEach((url) => URL.revokeObjectURL(url)); };
+  }, [rendered, find.renderRef]);
+
+  const onPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.clipboardData.items)
+      .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+      .map((item) => item.getAsFile()).filter((file): file is File => file !== null);
+    if (!files.length) return;
+    e.preventDefault();
+    if (pastePending.current) { toast('图片正在保存，请稍候'); return; }
+    const el = e.currentTarget;
+    const content = el.value;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const version = pasteVersion.current;
+    pastePending.current = true;
+    setPasting(true);
+    try {
+      const references: string[] = [];
+      for (const file of files) references.push(await saveNoteImage(file));
+      const state = useAppStore.getState();
+      if (pasteVersion.current !== version || state.currentNoteId !== note.id
+        || state.page !== 'notes' || state.noteMode !== 'edit'
+        || el.selectionStart !== start || el.selectionEnd !== end) {
+        toast('编辑位置已变化，请重新粘贴图片');
+        return;
+      }
+      const insertion = references.map((path) => `![截图](${path})`).join('\n');
+      applyEdit({ text: content.slice(0, start) + insertion + content.slice(end),
+        start: start + insertion.length, end: start + insertion.length });
+    } catch (error) {
+      toast(`图片粘贴失败：${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      pastePending.current = false;
+      setPasting(false);
+    }
+  };
 
   const applyEdit = (result: { text: string; start: number; end: number }) => {
     editDraft({ content: result.text });
@@ -206,9 +272,13 @@ export function NoteEditor({ note, find, dirty }: Props) {
       )}
 
       <div className="note-editor-hint" style={{ display: noteMode === 'edit' ? '' : 'none' }}>
-        输入 Markdown 实时渲染：<b>#</b> 标题 · <b>-</b> 列表 · <b>- [ ]</b> 待办 · <b>&gt;</b> 引用 ·{' '}
-        <b>|</b> 表格 · <b>`</b> 代码 · <b>**</b> 加粗 · <b>⌘/</b> 代码块 · <b>⌘\`</b> 行内代码 ·{' '}
-        <b>Tab</b> 缩进
+        <span className="note-hint-syntax" title="Markdown：# 标题 · - 列表 · - [ ] 待办 · > 引用 · | 表格 · ` 代码 · ** 加粗。快捷键：⌘/ 代码块 · ⌘` 行内代码 · Tab 缩进">
+          Markdown：<b>#</b> 标题 · <b>-</b> 列表 · <b>- [ ]</b> 待办 · <b>&gt;</b> 引用 ·{' '}
+          <b>|</b> 表格 · <b>`</b> 代码 · <b>**</b> 加粗
+        </span>
+        <span className="note-hint-image" role="status" title="⌘V / Ctrl+V 粘贴图片，支持 PNG、JPEG、GIF、WebP，单张最大 10 MB">
+          {pasting ? '正在保存图片…' : '可粘贴图片'}
+        </span>
       </div>
       <textarea
         ref={find.editRef}
@@ -223,6 +293,7 @@ export function NoteEditor({ note, find, dirty }: Props) {
         onChange={(e) => editDraft({ content: e.target.value })}
         onKeyDown={onContentKeyDown}
         onBeforeInput={onContentBeforeInput}
+        onPaste={onPaste}
       />
       <div
         ref={find.renderRef}

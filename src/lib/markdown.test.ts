@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { insertPair, mdToHtml, toggleFence } from './markdown';
 
+describe('Markdown images', () => {
+  it('keeps local image references for the preview resolver', () => {
+    const path = `images/${'a'.repeat(64)}.png`;
+    expect(mdToHtml(`![截图](${path})`)).toContain(`data-note-image="${path}"`);
+    expect(mdToHtml(`![截图](${path})`)).not.toContain('src=');
+  });
+
+  it('escapes image attributes and protects alt text from inline formatting', () => {
+    const html = mdToHtml('![" **截图**](https://example.com/a.png)');
+    expect(html).toContain('alt="&quot; **截图**"');
+    expect(html).not.toContain('<strong>');
+    expect(mdToHtml('![图片](file:///etc/passwd)')).not.toContain('<img');
+    expect(mdToHtml('![图片](images/../../secret.png)')).not.toContain('<img');
+  });
+});
+
 describe('mdToHtml fenced code', () => {
   it('renders a closed fence as one <pre> with the language badge and highlight spans', () => {
     const html = mdToHtml('```js\nconst a = 1;\n```\n');

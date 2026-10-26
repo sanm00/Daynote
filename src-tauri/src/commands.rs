@@ -17,3 +17,13 @@ pub fn load_data(app: AppHandle) -> Result<Option<StoreData>, String> {
 pub fn save_data(app: AppHandle, data: StoreData) -> Result<(), String> {
     save_to_root(&active_storage_root(&app)?, &data)
 }
+
+#[tauri::command]
+pub fn save_image(app: AppHandle, bytes: Vec<u8>) -> Result<String, String> {
+    crate::images::save(&active_storage_root(&app)?, &bytes)
+}
+
+#[tauri::command]
+pub fn read_image(app: AppHandle, path: String) -> Result<Vec<u8>, String> {
+    crate::images::read(&active_storage_root(&app)?, &path)
+}

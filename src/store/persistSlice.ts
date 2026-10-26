@@ -1,4 +1,5 @@
 import { generateDemoNotes, generateDemoTasks } from '@/lib/seed';
+import { generateStarterNotes, generateStarterTasks } from '@/lib/starter';
 import { storage, type StoreData } from '@/lib/storage';
 import { SCHEMA_VERSION } from '@/lib/constants';
 import { toast } from '@/lib/toast';
@@ -30,10 +31,11 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
         storageKind: storage.kind,
       });
     } else {
-      // First run: start from the demo dataset so the app is not empty, and
-      // write it straight away so the storage root is populated on launch.
-      const tasks = generateDemoTasks();
-      const notes = generateDemoNotes();
+      // First run: production gets minimal examples; development keeps the
+      // full demo dataset. Persist immediately to populate the storage root.
+      const tasks = import.meta.env.PROD ? generateStarterTasks() : generateDemoTasks();
+      const notes = import.meta.env.PROD ? generateStarterNotes() : generateDemoNotes();
+      for (const n of notes) if (n.title.trim()) touchedTitles.add(n.id);
       set({
         tasks,
         notes,
