@@ -150,20 +150,9 @@ button{font-family:inherit;font-size:inherit}
 }
 .brand{display:flex;align-items:center;gap:6px;padding:2px 6px 6px}
 .logo{
-  width:26px;height:26px;border-radius:8px;flex:none;
-  background:var(--grad-brand);
-  color:var(--on-primary);font-weight:700;font-size:var(--fs-lg);font-family:var(--font-serif);
-  display:grid;place-items:center;
-  letter-spacing:0;
-  box-shadow:0 1px 2px rgba(92,70,50,.25), inset 0 1px 0 rgba(255,255,255,.2);
+  width:26px;height:26px;flex:none;display:grid;place-items:center;
 }
-html[data-theme="dark"] .logo{background:var(--grad-accent)}
-.logo svg{
-  width:17px;height:17px;display:block;
-  fill:none;stroke:currentColor;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.12));
-}
+.logo img{width:100%;height:100%;display:block;object-fit:contain}
 .brand-name{font-size:var(--fs-base);font-weight:600;letter-spacing:.04em;font-family:var(--font-serif)}
 .brand-sub{font-size:var(--fs-2xs);color:var(--muted);margin-top:2px;letter-spacing:.14em}
 
@@ -1571,16 +1560,7 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
     <aside class="sidebar">
       <div class="brand">
         <div class="logo" title="随记 Daynote">
-          <svg viewBox="0 0 24 24" aria-label="羽毛笔">
-            <path d="M20.8 3.2c-1.1 5.7-3.6 9.8-7.3 12.2-2.3 1.5-4.6 2.1-6.8 2.2"/>
-            <path d="M20.8 3.2c-5.9.5-10.2 2.4-12.9 5.4-2 2.2-2.8 4.8-2.9 7.4"/>
-            <path d="M11.6 8.9c1.6-.4 3.1-.3 4.4.2"/>
-            <path d="M9.2 11.7c1.7-.6 3.4-.8 5-.6"/>
-            <path d="M7.1 15.1c1.6-.9 3.2-1.5 4.9-1.8"/>
-            <path d="M10.6 14.6 4.3 20.9"/>
-            <path d="M4.3 20.9c-.4-.9-.6-1.8-.5-2.8"/>
-            <path d="M4.3 20.9c.9.1 1.9-.1 2.8-.5"/>
-          </svg>
+          <img src="../src/assets/daynote-mark.svg" alt="随记 Daynote 图标" width="26" height="26" />
         </div>
         <div>
           <div class="brand-name">随记</div>
