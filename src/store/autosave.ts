@@ -4,23 +4,26 @@ const PERSIST_DEBOUNCE_MS = 300;
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
 /**
- * Watches the three persisted slices and writes them back after a short idle
+ * Watches the persisted data slices and writes them back after a short idle
  * delay. Call only after `hydrateFromStorage()` resolves, otherwise the seed
  * state would race the initial load and clobber the real file.
  */
 export function setupAutoPersist() {
+  let prevTags = useAppStore.getState().tags;
   let prevSettings = useAppStore.getState().settings;
   let prevTasks = useAppStore.getState().tasks;
   let prevNotes = useAppStore.getState().notes;
 
-  useAppStore.subscribe((state) => {
+  return useAppStore.subscribe((state) => {
     if (
+      state.tags === prevTags &&
       state.settings === prevSettings &&
       state.tasks === prevTasks &&
       state.notes === prevNotes
     ) {
       return;
     }
+    prevTags = state.tags;
     prevSettings = state.settings;
     prevTasks = state.tasks;
     prevNotes = state.notes;

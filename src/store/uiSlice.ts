@@ -186,6 +186,7 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
     get().applyTheme();
   },
   setDefaultTag: (defaultTag) => {
+    if (!get().tags.some(tag => tag.id === defaultTag)) return;
     set((s) => ({ settings: { ...s.settings, defaultTag }, addTag: defaultTag }));
   },
   applyTheme: () => {

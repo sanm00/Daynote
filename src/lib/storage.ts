@@ -1,8 +1,9 @@
-import type { Note, Settings, Task } from '@/types';
+import type { Note, Settings, TagDefinition, Task } from '@/types';
 import { LOCAL_KEY } from './constants';
 
 export interface StoreData {
   version: number;
+  tags?: TagDefinition[];
   settings: Settings;
   tasks: Task[];
   notes: Note[];

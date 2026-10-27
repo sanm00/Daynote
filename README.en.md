@@ -8,7 +8,7 @@ A **local-first** desktop app for notes and todos: schedule on the calendar, jot
 
 ## ✨ Features
 
-- **Plan** — Pick any date on the month calendar, add tasks with tags and priority, and reschedule to tomorrow / this weekend / next week at any time. Move overdue tasks to today in one click, or bulk-postpone everything still unfinished.
+- **Plan** — Pick any date on the month calendar, add tasks with tags, and reschedule to tomorrow / this weekend / next week at any time. Move overdue tasks to today in one click, or bulk-postpone everything still unfinished.
 - **Notes** — Live Markdown rendering (headings, lists, todos, quotes, code blocks, bold, inline code); save explicitly with the button or ⌘S, and edits are also saved when you leave the note; tag filtering and in-body find (⌘F).
 - **Review** — Completion count, rate, overdue, productive days and tag distribution for today / yesterday / this week / last week / this month / last month, with bar and line chart modes.
 - **Search** — ⌘K global search across note titles, note bodies and tasks, with highlighted matches and click-to-jump.

@@ -1,5 +1,5 @@
 /** Bumped whenever the on-disk `StoreData` shape changes. */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /** localStorage key used by the browser fallback storage adapter. */
 export const LOCAL_KEY = 'daynote-data';

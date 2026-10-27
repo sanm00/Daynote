@@ -2,6 +2,8 @@ import { generateDemoNotes, generateDemoTasks } from '@/lib/seed';
 import { generateStarterNotes, generateStarterTasks } from '@/lib/starter';
 import { storage, type StoreData } from '@/lib/storage';
 import { SCHEMA_VERSION } from '@/lib/constants';
+import { defaultTags, validateTags } from '@/lib/tags';
+import { sanitizeSettings } from '@/lib/sanitize';
 import { toast } from '@/lib/toast';
 import { isBlankNote, touchedTitles } from './noteTitle';
 import type { PersistSlice, SliceCreator } from './types';
@@ -17,15 +19,18 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
     touchedTitles.clear();
 
     if (loaded) {
+      const tags = loaded.tags ? validateTags(loaded.tags) : defaultTags();
+      const settings = sanitizeSettings(loaded.settings, get().settings, tags);
       const notes = loaded.notes.filter((n) => !isBlankNote(n));
       // Existing notes keep whatever title they were saved with; only titleless
       // notes are allowed to keep mirroring their body.
       for (const n of notes) if (n.title.trim()) touchedTitles.add(n.id);
       set({
-        settings: loaded.settings,
+        tags,
+        settings,
         tasks: loaded.tasks,
         notes,
-        addTag: loaded.settings.defaultTag,
+        addTag: settings.defaultTag,
         currentNoteId: notes.length ? notes[0].id : null,
         ready: true,
         storageKind: storage.kind,
@@ -43,9 +48,9 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
         ready: true,
         storageKind: storage.kind,
       });
-      const { settings } = get();
+      const { settings, tags } = get();
       try {
-        await storage.save({ version: SCHEMA_VERSION, settings, tasks, notes });
+        await storage.save({ version: SCHEMA_VERSION, tags, settings, tasks, notes });
       } catch (error) {
         console.error('初始化本地数据失败', error);
       }
@@ -61,11 +66,11 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
   },
 
   persistNow: async () => {
-    const { settings, tasks, notes } = get();
+    const { settings, tags, tasks, notes } = get();
     try {
       // Never persist blank notes (a new note the user abandoned).
       const persistable = notes.filter((n) => !isBlankNote(n));
-      await storage.save({ version: SCHEMA_VERSION, settings, tasks, notes: persistable });
+      await storage.save({ version: SCHEMA_VERSION, tags, settings, tasks, notes: persistable });
       set({ saveState: 'saved' });
     } catch (error) {
       console.error('保存本地数据失败', error);

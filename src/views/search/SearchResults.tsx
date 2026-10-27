@@ -1,3 +1,4 @@
+import { TagName } from '@/components/Tags';
 import { dateRangeLabel, doneAtLabel, relTime, todayStr } from '@/lib/date';
 import { plainText } from '@/lib/markdown';
 import type { Note, Task } from '@/types';
@@ -77,7 +78,7 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                         )}
                         <span className="hit-meta">
                           <span className="tag" data-tag={n.tag}>
-                            {n.tag}
+                            <TagName id={n.tag} />
                           </span>
                           <span>更新于 {relTime(n.updatedAt)}</span>
                         </span>
@@ -126,7 +127,7 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                         />
                         <span className="hit-meta">
                           <span className="tag" data-tag={t.tag}>
-                            {t.tag}
+                            <TagName id={t.tag} />
                           </span>
                           <span>{t.beginDate !== null && `计划于 ${dateRangeLabel(t.beginDate, t.endDate)}`}{t.beginDate === null && '未排期'}</span>
                           {overdue && <span className="overdue-tag">逾期</span>}

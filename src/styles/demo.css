@@ -633,10 +633,6 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .resched-label{font-size:var(--fs-2xs);color:var(--muted-2)}
 .overdue-flag{color:var(--red);font-weight:500}
 .overdue-flag-strong{color:var(--red);font-weight:600}
-.prio{width:6px;height:6px;border-radius:50%;flex:none}
-.prio.high{background:var(--red)}
-.prio.mid{background:var(--orange)}
-.prio.low{background:var(--muted-2)}
 .del{
   border:0;background:transparent;color:var(--muted-2);font-size:var(--fs-lg);line-height:1;
   cursor:pointer;padding:2px 6px;border-radius:5px;

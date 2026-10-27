@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAppStore } from '@/store';
+import { TagStyles } from '@/components/Tags';
 import { Titlebar } from '@/components/Titlebar';
 import { Sidebar } from '@/components/Sidebar';
 import { ConfirmHost } from '@/components/ConfirmHost';
@@ -67,6 +68,7 @@ export function App() {
           </PagePosition>
         </main>
       </div>
+      <TagStyles />
       <ConfirmHost />
     </div>
   );

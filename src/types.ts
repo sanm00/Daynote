@@ -1,4 +1,10 @@
-export type Tag = '工作' | '学习' | '生活' | '健康';
+// Stable identifiers; names and colors live in the tag registry.
+export type Tag = string;
+export interface TagDefinition {
+  id: Tag;
+  name: string;
+  color: string;
+}
 export type Priority = 'high' | 'mid' | 'low';
 export type TodoSource = 'note' | 'quick';
 

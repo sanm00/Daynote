@@ -1,9 +1,32 @@
 use serde::{Deserialize, Serialize};
 
-pub const SCHEMA_VERSION: u32 = 2;
+pub const SCHEMA_VERSION: u32 = 3;
 
 fn default_version() -> u32 {
     SCHEMA_VERSION
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct TagDefinition {
+    pub id: String,
+    pub name: String,
+    pub color: String,
+}
+
+pub fn default_tags() -> Vec<TagDefinition> {
+    [
+        ("工作", "work"),
+        ("学习", "study"),
+        ("生活", "life"),
+        ("健康", "health"),
+    ]
+    .iter()
+    .map(|(name, color)| TagDefinition {
+        id: name.to_string(),
+        name: name.to_string(),
+        color: color.to_string(),
+    })
+    .collect()
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -48,6 +71,8 @@ pub struct StateFile {
     #[serde(default = "default_version")]
     pub version: u32,
     pub settings: Settings,
+    #[serde(default = "default_tags")]
+    pub tags: Vec<TagDefinition>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -55,6 +80,8 @@ pub struct StateFile {
 pub struct StoreData {
     pub version: u32,
     pub settings: Settings,
+    #[serde(default = "default_tags")]
+    pub tags: Vec<TagDefinition>,
     pub tasks: Vec<Task>,
     pub notes: Vec<Note>,
 }

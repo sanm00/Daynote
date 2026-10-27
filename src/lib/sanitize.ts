@@ -1,10 +1,10 @@
-import type { Note, Priority, Settings, Tag, Task } from '@/types';
-import { TAG_ORDER } from './tags';
+import type { Note, Priority, Settings, Tag, TagDefinition, Task } from '@/types';
+import { TAG_ORDER, defaultTags } from './tags';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export function coerceTag(v: unknown, fallback: Tag = '工作'): Tag {
-  return typeof v === 'string' && (TAG_ORDER as string[]).includes(v) ? (v as Tag) : fallback;
+export function coerceTag(v: unknown, fallback: Tag = '工作', tags?: TagDefinition[]): Tag {
+  return typeof v === 'string' && (tags ? tags.map(t => t.id) : TAG_ORDER).includes(v) ? (v as Tag) : fallback;
 }
 
 export function coercePriority(v: unknown): Priority {
@@ -30,7 +30,7 @@ export function coerceISO(v: unknown, fallback: string): string {
  * objects, or that carry no title, are dropped; ids are made positive and
  * unique so the id counters (max + 1) keep working.
  */
-export function sanitizeTasks(input: unknown): Task[] {
+export function sanitizeTasks(input: unknown, tags = defaultTags()): Task[] {
   if (!Array.isArray(input)) return [];
   const seen = new Set<number>();
   const out: Task[] = [];
@@ -56,7 +56,7 @@ export function sanitizeTasks(input: unknown): Task[] {
     out.push({
       id,
       title,
-      tag: coerceTag(t.tag),
+      tag: coerceTag(t.tag, tags[0].id, tags),
       prio: coercePriority(t.prio),
       beginDate: begin,
       endDate: end,
@@ -73,7 +73,7 @@ export function sanitizeTasks(input: unknown): Task[] {
  * Coerce arbitrary imported JSON into well-formed notes, dropping objects with
  * neither title nor body and guaranteeing positive unique ids.
  */
-export function sanitizeNotes(input: unknown): Note[] {
+export function sanitizeNotes(input: unknown, tags = defaultTags()): Note[] {
   if (!Array.isArray(input)) return [];
   const seen = new Set<number>();
   const out: Note[] = [];
@@ -95,7 +95,7 @@ export function sanitizeNotes(input: unknown): Note[] {
       id,
       title,
       content,
-      tag: coerceTag(n.tag),
+      tag: coerceTag(n.tag, tags[0].id, tags),
       createdAt: coerceISO(n.createdAt, now),
       updatedAt: coerceISO(n.updatedAt, now),
     });
@@ -104,10 +104,10 @@ export function sanitizeNotes(input: unknown): Note[] {
 }
 
 /** Merge imported settings over the current ones, ignoring unknown values. */
-export function sanitizeSettings(input: unknown, fallback: Settings): Settings {
-  if (!input || typeof input !== 'object') return fallback;
+export function sanitizeSettings(input: unknown, fallback: Settings, tags = defaultTags()): Settings {
+  if (!input || typeof input !== 'object') return { ...fallback, defaultTag: coerceTag(fallback.defaultTag, tags[0].id, tags) };
   const s = input as Record<string, unknown>;
   const theme =
     s.theme === 'light' || s.theme === 'dark' || s.theme === 'system' ? s.theme : fallback.theme;
-  return { theme, defaultTag: coerceTag(s.defaultTag, fallback.defaultTag) };
+  return { theme, defaultTag: coerceTag(s.defaultTag, coerceTag(fallback.defaultTag, tags[0].id, tags), tags) };
 }

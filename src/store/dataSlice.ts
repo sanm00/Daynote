@@ -1,5 +1,5 @@
 import type { Priority } from '@/types';
-import { nextTag } from '@/lib/tags';
+import { defaultTags, validateTags } from '@/lib/tags';
 import { addDays, fmt, parseDate, todayStr } from '@/lib/date';
 import { sanitizeNotes, sanitizeSettings, sanitizeTasks } from '@/lib/sanitize';
 import { storage } from '@/lib/storage';
@@ -24,15 +24,12 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
           : t,
       ),
     })),
-  cycleTag: (id) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, tag: nextTag(t.tag) } : t)),
-    })),
   updateTask: (id, patch) => {
     const title = patch.title?.trim();
     if (patch.title !== undefined && !title) return;
+    if (patch.tag !== undefined && !get().tags.some(tag => tag.id === patch.tag)) return;
     set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...(title !== undefined ? { title } : {}) } : t)),
+      tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...(title !== undefined ? { title } : {}), ...(patch.tag !== undefined ? { tag: patch.tag } : {}) } : t)),
     }));
   },
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
@@ -112,15 +109,29 @@ export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
     const cur = get();
     // Only replace a slice when its array is present, so a partial file cannot
     // silently wipe the other half of the user's data.
-    const tasks = Array.isArray(data.tasks) ? sanitizeTasks(data.tasks) : cur.tasks;
-    const notes = Array.isArray(data.notes) ? sanitizeNotes(data.notes) : cur.notes;
-    const settings = sanitizeSettings(data.settings, cur.settings);
+    let tags = data.tags !== undefined ? validateTags(data.tags) : cur.tags;
+    // Legacy backups reference the original IDs. Keep their definitions available.
+    if (data.tags === undefined) {
+      const referenced = [...(Array.isArray(data.tasks) ? data.tasks : []), ...(Array.isArray(data.notes) ? data.notes : [])];
+      const missing = defaultTags().filter(tag => referenced.some(row => row?.tag === tag.id) && !tags.some(t => t.id === tag.id));
+      tags = validateTags([...tags, ...missing]);
+    }
+    const preserved = [...(!Array.isArray(data.tasks) ? cur.tasks : []), ...(!Array.isArray(data.notes) ? cur.notes : [])];
+    if (preserved.some(row => !tags.some(tag => tag.id === row.tag))) throw new Error('导入的标签缺少当前记录正在使用的标签，请导入完整备份');
+    if (data.tags !== undefined) {
+      const rows = [...(Array.isArray(data.tasks) ? data.tasks : []), ...(Array.isArray(data.notes) ? data.notes : [])];
+      if (rows.some(row => row && typeof row === 'object' && !tags.some(tag => tag.id === row.tag))) throw new Error('记录引用了不存在的标签');
+    }
+    const tasks = Array.isArray(data.tasks) ? sanitizeTasks(data.tasks, tags) : cur.tasks;
+    const notes = Array.isArray(data.notes) ? sanitizeNotes(data.notes, tags) : cur.notes;
+    const settings = sanitizeSettings(data.settings, cur.settings, tags);
     touchedTitles.clear();
     for (const n of notes) if (n.title.trim()) touchedTitles.add(n.id);
     set({
       tasks,
       notes,
       settings,
+      tags,
       addTag: settings.defaultTag,
       noteDraft: null,
       currentNoteId: notes.length ? notes[0].id : null,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
-import { TAG_ORDER } from '@/lib/tags';
+import { NoteTagPicker } from './NoteTagPicker';
 import { mdToHtml, insertPair, toggleFence } from '@/lib/markdown';
 import type { Note } from '@/types';
 import { SaveStatus } from '@/components/SaveStatus';
@@ -162,18 +162,7 @@ export function NoteEditor({ note, find, dirty }: Props) {
         onChange={(e) => editDraft({ title: e.target.value })}
       />
       <div className="note-editor-meta">
-        <div className="note-tags">
-          {TAG_ORDER.map((tag) => (
-            <button
-              key={tag}
-              className={`note-tag-chip${tag === note.tag ? ' active' : ''}`}
-              data-tag={tag}
-              onClick={() => editDraft({ tag })}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+        <NoteTagPicker value={note.tag} noteId={note.id} onSelect={tag => editDraft({ tag })} />
         <SaveStatus updatedAt={note.updatedAt} dirty={dirty} onSave={commitDraft} />
         <div className="view-switch" data-mode={noteMode}>
           <span className="view-switch-thumb" />

@@ -1,6 +1,6 @@
+import { TagName } from '@/components/Tags';
 import { useAppStore } from '@/store';
 import { relTime } from '@/lib/date';
-import { TAG_ORDER } from '@/lib/tags';
 import { plainText } from '@/lib/markdown';
 import type { Note } from '@/types';
 
@@ -22,6 +22,7 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
   const noteFilter = useAppStore((s) => s.noteFilter);
   const setNoteFilter = useAppStore((s) => s.setNoteFilter);
   const notes = useAppStore((s) => s.notes);
+  const tags = useAppStore(s => s.tags);
   const total = notes.length;
 
   return (
@@ -43,18 +44,18 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
           全部
           <span className="notes-count">{total}</span>
         </button>
-        {TAG_ORDER.map((tag) => {
+        {tags.map(({id: tag, name}) => {
           const count = notes.filter((n) => n.tag === tag).length;
           return (
             <button
               key={tag}
               className={`filter-chip${noteFilter === tag ? ' selected active' : ''}`}
               data-filter={tag}
-              title={`${tag} ${count} 篇，共 ${total} 篇笔记`}
-              aria-label={`${tag} ${count} 篇，共 ${total} 篇笔记`}
+              title={`${name} ${count} 篇，共 ${total} 篇笔记`}
+              aria-label={`${name} ${count} 篇，共 ${total} 篇笔记`}
               onClick={() => setNoteFilter(tag)}
             >
-              {tag}
+              {name}
               {noteFilter === tag && <span className="note-filter-count">{count}</span>}
             </button>
           );
@@ -80,7 +81,7 @@ export function NotesSidebar({ list, onSelect, onCreate }: Props) {
               <div className="note-item-snippet">{plainText(n.content).slice(0, 60) || '暂无内容'}</div>
               <div className="note-item-foot">
                 <span className="tag" data-tag={n.tag}>
-                  {n.tag}
+                  <TagName id={n.tag} />
                 </span>
                 <span className="note-item-time">{relTime(n.updatedAt)}</span>
               </div>

@@ -109,7 +109,7 @@ export function HelpView() {
               <b>批量顺延</b> — 点面板顶部「顺延未完成」，把截止在当天的未完成任务整体挪到第二天
             </li>
             <li>
-              <b>切换标签</b> — 直接点任务行上的标签，会循环切到下一个标签
+              <b>切换标签</b> — 点击任务的「编辑」按钮后选择标签，与任务标题一起保存，标签管理请前往设置
             </li>
             <li>
               <b>搜索笔记</b> — 使用侧边栏品牌下方的全局搜索（⌘K），标题与正文都会匹配
@@ -167,10 +167,6 @@ export function HelpView() {
             <div className="faq-a">
               任务的安排日期已经过去但还没勾选完成，就会被标记为逾期。左侧「逾期未完成」卡片里可以一键把它移到今天。
             </div>
-          </div>
-          <div className="faq-item">
-            <div className="faq-q">任务右侧的小圆点是什么？</div>
-            <div className="faq-a">代表优先级。红为高、橙为中、灰为低，会根据任务标签自动分配。</div>
           </div>
           <div className="faq-item">
             <div className="faq-q">如何切换成深色模式？</div>

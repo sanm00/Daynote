@@ -1,4 +1,5 @@
-import { TAG_STYLE } from '@/lib/tags';
+import { useAppStore } from '@/store';
+import { TagName } from '@/components/Tags';
 import type { TagEntry } from '@/lib/stats';
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function TagDistribution({ tagEntries }: Props) {
+  const tags = useAppStore(s => s.tags);
   const tagMax = Math.max(1, ...tagEntries.map((x) => x[1]));
   return (
     <div className="card tag-card">
@@ -17,14 +19,14 @@ export function TagDistribution({ tagEntries }: Props) {
           tagEntries.map(([tag, n]) => (
             <div className="tag-stat" key={tag}>
               <div className="tag-stat-head">
-                <span>{tag}</span>
+                <span><TagName id={tag} /></span>
                 <b>{n} 项</b>
               </div>
               <div className="tag-bar">
                 <i
                   style={{
                     width: `${Math.round((n / tagMax) * 100)}%`,
-                    background: TAG_STYLE[tag]?.bar ?? 'var(--muted-2)',
+                    background: `var(--tag-${tags.find(t => t.id === tag)?.color ?? 'work'})`,
                   }}
                 />
               </div>

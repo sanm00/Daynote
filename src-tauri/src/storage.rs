@@ -1,4 +1,4 @@
-use crate::models::{Note, Settings, StateFile, StoreData, Task, SCHEMA_VERSION};
+use crate::models::{Note, SCHEMA_VERSION, Settings, StateFile, StoreData, Task, default_tags};
 use serde::Deserialize;
 use std::fs;
 use std::io::Write;
@@ -104,6 +104,7 @@ pub fn load_from_root(root: &Path) -> Result<Option<StoreData>, String> {
 
     let state = state.unwrap_or(StateFile {
         version: SCHEMA_VERSION,
+        tags: default_tags(),
         settings: Settings {
             theme: "light".to_string(),
             default_tag: "工作".to_string(),
@@ -113,6 +114,7 @@ pub fn load_from_root(root: &Path) -> Result<Option<StoreData>, String> {
     Ok(Some(StoreData {
         version: state.version,
         settings: state.settings,
+        tags: state.tags,
         tasks: tasks.unwrap_or_default(),
         notes: notes.unwrap_or_default(),
     }))
@@ -123,6 +125,7 @@ pub fn save_to_root(root: &Path, data: &StoreData) -> Result<(), String> {
 
     let state = StateFile {
         version: SCHEMA_VERSION,
+        tags: data.tags.clone(),
         settings: data.settings.clone(),
     };
 
@@ -156,6 +159,7 @@ mod tests {
     fn sample() -> StoreData {
         StoreData {
             version: SCHEMA_VERSION,
+            tags: default_tags(),
             settings: Settings {
                 theme: "dark".to_string(),
                 default_tag: "学习".to_string(),
@@ -201,6 +205,8 @@ mod tests {
         save_to_root(&root, &sample()).unwrap();
 
         let loaded = load_from_root(&root).unwrap().expect("data");
+        assert_eq!(loaded.tags.len(), 4);
+        assert_eq!(loaded.tags[0].name, "工作");
         assert_eq!(loaded.settings.theme, "dark");
         assert_eq!(loaded.settings.default_tag, "学习");
         assert_eq!(loaded.tasks.len(), 1);
@@ -212,6 +218,33 @@ mod tests {
         assert_eq!(loaded.notes[0].content, "# 标题\n正文");
 
         let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn custom_tags_roundtrip_with_stable_ids_and_order() {
+        let root = temp_root("tags");
+        let mut data = sample();
+        data.tags[0].name = "项目".to_string();
+        data.tags[0].color = "blue".to_string();
+        data.tags.swap(0, 1);
+        save_to_root(&root, &data).unwrap();
+        let loaded = load_from_root(&root).unwrap().unwrap();
+        assert_eq!(loaded.tags[1].id, "工作");
+        assert_eq!(loaded.tags[1].name, "项目");
+        assert_eq!(loaded.tags[1].color, "blue");
+        assert_eq!(loaded.tasks[0].tag, "工作");
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn legacy_state_without_tags_keeps_original_labels() {
+        let state: StateFile = serde_json::from_str(
+            r#"{"version":2,"settings":{"theme":"light","defaultTag":"学习"}}"#,
+        )
+        .unwrap();
+        assert_eq!(state.tags.len(), 4);
+        assert_eq!(state.tags[0].id, "工作");
+        assert_eq!(state.tags[1].id, state.settings.default_tag);
     }
 
     #[test]
@@ -256,7 +289,11 @@ mod tests {
         assert_eq!(backup_count(&root), BACKUP_KEEP);
         // The five oldest (0000000000..0000000004) are gone.
         assert!(!root.join(BACKUP_DIR).join("0000000000").exists());
-        assert!(root.join(BACKUP_DIR).join(format!("{:010}", BACKUP_KEEP + 4)).exists());
+        assert!(
+            root.join(BACKUP_DIR)
+                .join(format!("{:010}", BACKUP_KEEP + 4))
+                .exists()
+        );
         let _ = fs::remove_dir_all(&root);
     }
 }

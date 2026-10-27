@@ -1,3 +1,5 @@
+import { TagSelect } from '@/components/TagSelect';
+import { TagName } from '@/components/Tags';
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import type { Task, TaskRange } from '@/types';
@@ -12,6 +14,7 @@ import {
   todayStr,
 } from '@/lib/date';
 import { toast } from '@/lib/toast';
+import { confirmDialog } from '@/lib/confirm';
 import type { UseDatePop } from './useDatePop';
 
 interface Props {
@@ -26,15 +29,16 @@ export function TaskRow({ t, datePop }: Props) {
   const reschedulingId = useAppStore((s) => s.reschedulingId);
   const setReschedulingId = useAppStore((s) => s.setReschedulingId);
   const toggleTodo = useAppStore((s) => s.toggleTodo);
-  const cycleTag = useAppStore((s) => s.cycleTag);
   const updateTask = useAppStore((s) => s.updateTask);
   const deleteTask = useAppStore((s) => s.deleteTask);
   const rescheduleTask = useAppStore((s) => s.rescheduleTask);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(t.title);
+  const [draftTag, setDraftTag] = useState(t.tag);
   const [justChecked, setJustChecked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const deletePending = useRef(false);
 
   useEffect(() => {
     if (!justChecked) return;
@@ -73,11 +77,30 @@ export function TaskRow({ t, datePop }: Props) {
 
   const startEdit = () => {
     setDraft(t.title);
+    setDraftTag(t.tag);
     setEditing(true);
   };
   const commitEdit = () => {
-    updateTask(t.id, { title: draft });
+    if (!draft.trim()) {inputRef.current?.focus();return;}
+    updateTask(t.id, { title: draft, tag: draftTag });
     setEditing(false);
+  };
+
+  const handleDelete = async () => {
+    if (deletePending.current) return;
+    deletePending.current = true;
+    try {
+      const confirmed = await confirmDialog({
+        title: '删除计划',
+        message: `确定要删除计划「${t.title}」吗？此操作不可恢复。`,
+        confirmText: '删除',
+        cancelText: '取消',
+        danger: true,
+      });
+      if (confirmed) deleteTask(t.id);
+    } finally {
+      deletePending.current = false;
+    }
   };
 
   const tStr = todayStr();
@@ -160,30 +183,39 @@ export function TaskRow({ t, datePop }: Props) {
   if (editing) {
     return (
       <div key={t.id} className={`task rename-row${isUnsched ? ' inbound' : ''}`} data-id={t.id}>
-        <div className="rename-body">
+        <div className="rename-body" onKeyDown={e => {
+          if (e.key === 'Escape' && !e.nativeEvent.isComposing) {
+            e.preventDefault();
+            e.stopPropagation();
+            setEditing(false);
+          }
+        }}>
           <input
             ref={inputRef}
             className="task-title-input"
+            aria-label="任务标题"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
-              e.stopPropagation();
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                e.stopPropagation();
                 e.preventDefault();
                 commitEdit();
-              } else if (e.key === 'Escape') {
-                e.preventDefault();
-                setEditing(false);
               }
             }}
           />
-          <div className="rename-actions">
-            <button className="chip" onClick={commitEdit}>
-              保存
-            </button>
-            <button className="chip ghost" onClick={() => setEditing(false)}>
-              取消
-            </button>
+          <div className="task-edit-toolbar">
+            <div className="task-tag-field">
+              <TagSelect value={draftTag} onSelect={setDraftTag} label="选择任务标签" />
+            </div>
+            <div className="rename-actions">
+              <button className="chip ghost task-edit-cancel" onClick={() => setEditing(false)}>
+                取消
+              </button>
+              <button className="chip task-edit-save" onClick={commitEdit}>
+                保存
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -222,15 +254,7 @@ export function TaskRow({ t, datePop }: Props) {
       <div className="task-body">
         <div className="task-title">{t.title}</div>
         <div className="task-meta">
-          <span
-            className="tag clickable"
-            data-act="tag"
-            data-tag={t.tag}
-            title="点击切换标签"
-            onClick={() => cycleTag(t.id)}
-          >
-            {t.tag}
-          </span>
+          <span className="tag" data-tag={t.tag}><TagName id={t.tag} /></span>
           {t.done && t.doneAt ? (
             <>
               <i className="meta-dot" />
@@ -259,13 +283,12 @@ export function TaskRow({ t, datePop }: Props) {
           )}
         </div>
       </div>
-      <span className={`prio ${t.prio}`} title="优先级" />
       <div className="task-actions">
         <button className="mini-btn" data-act="rename" title="编辑任务" onClick={startEdit}>
           编辑
         </button>
         {action}
-        <button className="del" data-act="del" title="删除" onClick={() => deleteTask(t.id)}>
+        <button className="del" data-act="del" title="删除" onClick={() => void handleDelete()}>
           ×
         </button>
       </div>

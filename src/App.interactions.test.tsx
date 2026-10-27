@@ -41,6 +41,86 @@ afterEach(() => {
 });
 
 describe('approved UI interactions', () => {
+  it('edits a task title and tag together, keeping list tags read-only', () => {
+    render(<StrictMode><App /></StrictMode>);
+    expect(find('.task [data-act="tag"]')).toBeNull();
+    fireEvent.click(find('.task [data-act="rename"]'));
+    const row = find('.task.rename-row');
+    const id = Number(row.getAttribute('data-id'));
+    fireEvent.change(row.querySelector('input')!, {target:{value:'更新任务'}});
+    fireEvent.click(screen.getByRole('button', {name:'选择任务标签'}));
+    const picker = screen.getByRole('group', {name:'选择标签'});
+    const choice = Array.from(picker.querySelectorAll('button')).find(button => button.textContent === '学习')!;
+    expect(picker.textContent).not.toContain('新建');
+    fireEvent.click(choice);
+    expect(useAppStore.getState().tasks.find(task => task.id === id)).toMatchObject({title:'今天的任务',tag:'工作'});
+    fireEvent.click(screen.getByRole('button', {name:'保存'}));
+    expect(useAppStore.getState().tasks.find(task => task.id === id)).toMatchObject({title:'更新任务',tag:'学习'});
+  });
+
+  it('discards both pending title and tag changes on cancel', () => {
+    render(<App />);
+    fireEvent.click(find('.task [data-act="rename"]'));
+    fireEvent.change(find('.rename-row input'), {target:{value:'不保存的任务'}});
+    fireEvent.click(screen.getByRole('button', {name:'选择任务标签'}));
+    const picker = screen.getByRole('group', {name:'选择标签'});
+    fireEvent.click(Array.from(picker.querySelectorAll('button')).find(button => button.textContent === '学习')!);
+    fireEvent.click(screen.getByRole('button', {name:'取消'}));
+    expect(useAppStore.getState().tasks[0]).toMatchObject({title:'今天的任务',tag:'工作'});
+    expect(screen.queryByRole('group', {name:'选择标签'})).toBeNull();
+  });
+
+  it('cancels editing with Escape after selecting a tag, regardless of input focus', () => {
+    render(<StrictMode><App /></StrictMode>);
+    const before = useAppStore.getState().tasks[0];
+    fireEvent.click(find('.task [data-act="rename"]'));
+    fireEvent.change(find('.rename-row input'), {target:{value:'不保存的标题'}});
+    const trigger = screen.getByRole('button', {name:'选择任务标签'});
+    fireEvent.click(trigger);
+    const picker = screen.getByRole('group', {name:'选择标签'});
+    fireEvent.click(Array.from(picker.querySelectorAll('button')).find(button => button.textContent === '学习')!);
+    expect(trigger).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, {key:'Escape'});
+    expect(document.querySelector('.rename-row')).toBeNull();
+    expect(useAppStore.getState().tasks[0]).toEqual(before);
+  });
+
+  it('closes the tag dropdown on the first Escape and cancels editing on the next', () => {
+    render(<App />);
+    fireEvent.click(find('.task [data-act="rename"]'));
+    fireEvent.click(screen.getByRole('button', {name:'选择任务标签'}));
+    fireEvent.keyDown(document.activeElement!, {key:'Escape'});
+    expect(screen.queryByRole('group', {name:'选择标签'})).toBeNull();
+    expect(document.querySelector('.rename-row')).not.toBeNull();
+    fireEvent.keyDown(document.activeElement!, {key:'Escape'});
+    expect(document.querySelector('.rename-row')).toBeNull();
+  });
+
+  it('requires confirmation before deleting a plan and ignores repeated clicks', async () => {
+    render(<App />);
+    const before = useAppStore.getState().tasks;
+    const button = find('.task [data-act="del"]');
+    fireEvent.click(button);fireEvent.click(button);
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('今天的任务');
+    expect(useAppStore.getState().tasks).toEqual(before);
+    await act(async () => {fireEvent.click(screen.getByRole('button',{name:'取消'}));});
+    expect(useAppStore.getState().tasks).toEqual(before);
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    fireEvent.click(button);
+    await act(async () => {fireEvent.click(screen.getByRole('button',{name:'删除'}));});
+    expect(useAppStore.getState().tasks).toHaveLength(before.length - 1);
+    expect(useAppStore.getState().tasks.some(task => task.id === before[0].id)).toBe(false);
+  });
+
+  it('keeps the plan when Escape dismisses the deletion confirmation', async () => {
+    render(<App />);
+    const before = useAppStore.getState().tasks;
+    fireEvent.click(find('.task [data-act="del"]'));
+    await act(async () => {fireEvent.keyDown(document,{key:'Escape'});});
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    expect(useAppStore.getState().tasks).toEqual(before);
+  });
+
   it('adds consecutive tasks on the selected date and ignores IME confirmation', () => {
     render(<StrictMode><App /></StrictMode>);
     act(() => useAppStore.getState().goToDate(nextDate()));

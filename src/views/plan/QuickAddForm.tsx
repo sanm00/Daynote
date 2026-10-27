@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { dateLabel, dateRangeLabel } from '@/lib/date';
-import { TAG_DOT, TAG_ORDER } from '@/lib/tags';
 import { toast } from '@/lib/toast';
 import type { UseDatePop } from './useDatePop';
 
@@ -11,7 +10,9 @@ interface Props {
 
 /** Collapsible quick-add form (⌘I) with tag and date-range pickers. */
 export function QuickAddForm({ datePop }: Props) {
+  const tags = useAppStore(s => s.tags);
   const addTag = useAppStore((s) => s.addTag);
+  const selectedTag = tags.find(t => t.id === addTag);
   const addBegin = useAppStore((s) => s.addBegin);
   const addEnd = useAppStore((s) => s.addEnd);
   const setAddTag = useAppStore((s) => s.setAddTag);
@@ -136,13 +137,14 @@ export function QuickAddForm({ datePop }: Props) {
                   setTagMenuOpen((v) => !v);
                 }}
               >
-                <i className="tag-dot" style={{ background: TAG_DOT[addTag] }} />
+                <i className="tag-dot" style={{ background: `var(--tag-${selectedTag?.color ?? 'work'})` }} />
+                <span className="add-tag-label">{selectedTag?.name}</span>
                 <svg className="caret" viewBox="0 0 24 24">
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </button>
               <div className={`tag-menu${tagMenuOpen ? ' open' : ''}`}>
-                {TAG_ORDER.map((tag) => (
+                {tags.map(({id: tag, name, color}) => (
                   <button
                     key={tag}
                     type="button"
@@ -153,8 +155,8 @@ export function QuickAddForm({ datePop }: Props) {
                       setTagMenuOpen(false);
                     }}
                   >
-                    <i style={{ background: TAG_DOT[tag] }} />
-                    {tag}
+                    <i style={{ background: `var(--tag-${color})` }} />
+                    {name}
                   </button>
                 ))}
               </div>

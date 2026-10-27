@@ -1,3 +1,4 @@
+import { TagName } from '@/components/Tags';
 import { useAppStore } from '@/store';
 import { dateRangeLabel, hmOf, todayStr } from '@/lib/date';
 import { mdLabel, type LogGroup } from '@/lib/stats';
@@ -64,7 +65,7 @@ export function CompletionLog({ logGroups, remaining, overdueCount }: Props) {
                       <i className="log-dot" />
                       <span className="log-title">{t.title}</span>
                       <span className="tag" data-tag={t.tag}>
-                        {t.tag}
+                        <TagName id={t.tag} />
                       </span>
                       <span className="sched-label">
                         计划于 {dateRangeLabel(t.beginDate, t.endDate)}
@@ -109,7 +110,7 @@ export function CompletionLog({ logGroups, remaining, overdueCount }: Props) {
                     <i className={`log-dot ${late ? 'late' : 'open'}`} />
                     <span className="log-title">{t.title}</span>
                     <span className="tag" data-tag={t.tag}>
-                      {t.tag}
+                      <TagName id={t.tag} />
                     </span>
                     <span className="sched-label">
                       计划于 {dateRangeLabel(t.beginDate, t.endDate)}

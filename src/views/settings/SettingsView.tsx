@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { fmt } from '@/lib/date';
-import { TAG_ORDER } from '@/lib/tags';
+import { TagManager } from './TagManager';
+import { SCHEMA_VERSION } from '@/lib/constants';
 import { toast } from '@/lib/toast';
 import { isTauriRuntime } from '@/lib/storage';
 import { pickJsonFile, saveJsonFile } from '@/lib/fileio';
@@ -10,7 +11,7 @@ import { confirmDialog } from '@/lib/confirm';
 export function SettingsView() {
   const settings = useAppStore((s) => s.settings);
   const setTheme = useAppStore((s) => s.setTheme);
-  const setDefaultTag = useAppStore((s) => s.setDefaultTag);
+  const tags = useAppStore(s => s.tags);
   const tasks = useAppStore((s) => s.tasks);
   const notes = useAppStore((s) => s.notes);
   const storagePath = useAppStore((s) => s.storagePath);
@@ -24,7 +25,8 @@ export function SettingsView() {
     if (busy) return;
     const data = {
       app: '随记 Daynote',
-      version: 1,
+      version: SCHEMA_VERSION,
+      tags,
       exportedAt: new Date().toISOString(),
       settings: { ...settings },
       tasks,
@@ -70,7 +72,7 @@ export function SettingsView() {
       toast('文件里没有可导入的任务或笔记');
       return;
     }
-    importData({ tasks: d.tasks, notes: d.notes, settings: d.settings });
+    importData({ tasks: d.tasks, notes: d.notes, settings: d.settings, tags: d.tags });
     toast('数据已导入');
   };
 
@@ -138,27 +140,7 @@ export function SettingsView() {
           </div>
         </div>
 
-        <div className="card setting-card">
-          <div className="setting-title">任务偏好</div>
-          <div className="setting-row">
-            <div>
-              <div className="setting-label">默认标签</div>
-              <div className="setting-desc">新建任务时默认选中的标签</div>
-            </div>
-            <div className="seg-group" id="defaultTagSeg">
-              {TAG_ORDER.map((tag) => (
-                <button
-                  key={tag}
-                  className={`seg-btn${settings.defaultTag === tag ? ' active' : ''}`}
-                  data-tag={tag}
-                  onClick={() => setDefaultTag(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <TagManager />
 
         <div className="card setting-card">
           <div className="setting-title">数据管理</div>

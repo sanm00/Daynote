@@ -8,6 +8,7 @@ import type {
   SearchType,
   Settings,
   Tag,
+  TagDefinition,
   Task,
   TaskRange,
   ThemeMode,
@@ -19,6 +20,14 @@ export interface PlanView {
 }
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+export interface TagSlice {
+  tags: TagDefinition[];
+  saveTag: (tag: Omit<TagDefinition, 'id'>, id?: string) => void;
+  deleteTag: (id: string, replacement: string) => void;
+  moveTag: (id: string, direction: -1 | 1) => void;
+  setTaskTag: (id: number, tag: string) => void;
+}
 
 export interface DataSlice {
   // data
@@ -33,8 +42,7 @@ export interface DataSlice {
   saveState: SaveState;
 
   toggleTodo: (id: number) => void;
-  cycleTag: (id: number) => void;
-  updateTask: (id: number, patch: Partial<Pick<Task, 'title'>>) => void;
+  updateTask: (id: number, patch: Partial<Pick<Task, 'title' | 'tag'>>) => void;
   deleteTask: (id: number) => void;
   rescheduleTask: (id: number, range: TaskRange | null) => void;
   submitQuickAdd: (title: string) => void;
@@ -43,7 +51,7 @@ export interface DataSlice {
 
   deleteNote: (id: number) => void;
   resetAll: () => void;
-  importData: (data: { tasks?: unknown; notes?: unknown; settings?: unknown }) => void;
+  importData: (data: { tasks?: unknown; notes?: unknown; settings?: unknown; tags?: unknown }) => void;
 }
 
 export interface UiSlice {
@@ -111,7 +119,7 @@ export interface PersistSlice {
   persistNow: () => Promise<void>;
 }
 
-export type AppStore = DataSlice & UiSlice & PersistSlice;
+export type AppStore = TagSlice & DataSlice & UiSlice & PersistSlice;
 
 /** A zustand slice creator bound to the combined `AppStore`. */
 export type SliceCreator<T> = StateCreator<AppStore, [], [], T>;
