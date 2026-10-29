@@ -5,17 +5,6 @@ use tauri::AppHandle;
 #[cfg(not(debug_assertions))]
 use tauri::Manager;
 
-const DATA_DIR_ENV: &str = "DAYNOTE_DATA_DIR";
-
-/// Scratch directory that relocates everything the app writes. Trusted as-is,
-/// so tests can point it at a temp folder instead of faking `HOME`.
-fn data_dir_override() -> Option<PathBuf> {
-    match std::env::var_os(DATA_DIR_ENV) {
-        Some(raw) if !raw.to_string_lossy().trim().is_empty() => Some(PathBuf::from(raw)),
-        _ => None,
-    }
-}
-
 /// Development builds keep their data in `<crate>/data` so a fresh clone
 /// never writes into the user's home directory. The path is derived from the
 /// crate directory at compile time because a debug build launched from Finder
@@ -48,9 +37,6 @@ fn default_storage_root(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 pub fn active_storage_root(app: &AppHandle) -> Result<PathBuf, String> {
-    if let Some(root) = data_dir_override() {
-        return Ok(root);
-    }
     default_storage_root(app)
 }
 

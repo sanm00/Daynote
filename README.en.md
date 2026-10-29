@@ -6,6 +6,20 @@
 
 A **local-first** desktop app for notes and todos: schedule on the calendar, jot notes as you go, and review your progress by week or month. Your data stays on your own machine — nothing is uploaded to a server.
 
+## 🖼 Screenshots
+
+| Plan | Notes |
+| --- | --- |
+| ![Plan](docs/screenshots/plan.png) | ![Notes](docs/screenshots/notes.png) |
+
+| Review | Search |
+| --- | --- |
+| ![Review](docs/screenshots/review.png) | ![Search](docs/screenshots/search.png) |
+
+| Settings | Help |
+| --- | --- |
+| ![Settings](docs/screenshots/settings.png) | ![Help](docs/screenshots/help.png) |
+
 ## ✨ Features
 
 - **Plan** — Pick any date on the month calendar, add tasks with tags, and reschedule to tomorrow / this weekend / next week at any time. Move overdue tasks to today in one click, or bulk-postpone everything still unfinished.
@@ -69,7 +83,6 @@ Data is stored locally as JSON files:
 
 - **Development (`npm run tauri dev`)**: `src-tauri/data/`
 - **Release**: `~/.daynote/`
-- **Override**: set the `DAYNOTE_DATA_DIR` environment variable to any directory (portable / testing)
 
 Directory layout:
 

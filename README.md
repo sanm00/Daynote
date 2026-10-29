@@ -6,6 +6,20 @@
 
 一个**本地优先**的桌面笔记与待办应用：左边日历排计划，右边随手记笔记，按周/月回顾完成情况。数据只存在你自己的电脑上，不上传服务器。
 
+## 🖼 界面预览
+
+| 计划 | 笔记 |
+| --- | --- |
+| ![计划](docs/screenshots/plan.png) | ![笔记](docs/screenshots/notes.png) |
+
+| 回顾 | 搜索 |
+| --- | --- |
+| ![回顾](docs/screenshots/review.png) | ![搜索](docs/screenshots/search.png) |
+
+| 设置 | 帮助 |
+| --- | --- |
+| ![设置](docs/screenshots/settings.png) | ![帮助](docs/screenshots/help.png) |
+
 ## ✨ 功能特性
 
 - **计划** — 月历选择任意日期，添加任务、设置标签，随时「改期」到明天 / 本周末 / 延后一周；逾期任务一键移到今天；支持批量「顺延未完成」。
@@ -69,7 +83,6 @@ npm run tauri build
 
 - **开发版（`npm run tauri dev`）**：`src-tauri/data/`
 - **正式版**：`~/.daynote/`
-- **覆盖**：设置环境变量 `DAYNOTE_DATA_DIR` 可指定任意目录（便携 / 测试用）
 
 目录内容：
 
