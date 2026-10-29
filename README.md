@@ -2,6 +2,10 @@
 
 > 计划 · 执行 · 回顾 · 沉淀 —— 一站式管理你的每一天。
 
+[![CI](https://github.com/sanm00/Daynote/actions/workflows/ci.yml/badge.svg)](https://github.com/sanm00/Daynote/actions/workflows/ci.yml)
+[![](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE)
+[![](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](./docs/screenshots)
+
 简体中文 · [English](./README.en.md)
 
 一个**本地优先**的桌面笔记与待办应用：左边日历排计划，右边随手记笔记，按周/月回顾完成情况。数据只存在你自己的电脑上，不上传服务器。
@@ -163,6 +167,10 @@ cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets   # Rust lint
 
 更多说明见应用内「帮助」页。
 
+## 🤝 贡献
+
+Issues 与 Pull Request 欢迎。提交前请先阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)，并确保 `npm run typecheck`、`npm run test` 与 `cargo clippy` / `cargo test` 通过。
+
 ## 📄 许可证
 
-暂未指定。
+本项目基于 [Apache License 2.0](./LICENSE) 授权，详见 [LICENSE](./LICENSE) 与 [NOTICE](./NOTICE)。

@@ -2,6 +2,10 @@
 
 > Plan · Execute · Review · Reflect — manage every day in one place.
 
+[![CI](https://github.com/sanm00/Daynote/actions/workflows/ci.yml/badge.svg)](https://github.com/sanm00/Daynote/actions/workflows/ci.yml)
+[![](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE)
+[![](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](./docs/screenshots)
+
 [简体中文](./README.md) · English
 
 A **local-first** desktop app for notes and todos: schedule on the calendar, jot notes as you go, and review your progress by week or month. Your data stays on your own machine — nothing is uploaded to a server.
@@ -158,6 +162,10 @@ cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets   # Rust lint
 
 See the in-app "Help" page for more.
 
+## 🤝 Contributing
+
+Issues and pull requests are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first, and make sure `npm run typecheck`, `npm run test`, `cargo clippy` and `cargo test` pass before submitting.
+
 ## 📄 License
 
-Not specified yet.
+Licensed under the [Apache License 2.0](./LICENSE). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
