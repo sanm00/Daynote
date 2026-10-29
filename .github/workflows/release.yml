@@ -35,6 +35,9 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - name: Install frontend dependencies
+        run: npm ci
+
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
