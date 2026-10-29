@@ -2,9 +2,9 @@
 name = "daynote"
 version = "1.0.0"
 description = "随记 Daynote — 计划 · 执行 · 回顾 · 沉淀"
-authors = ["Daynote"]
-license = ""
-repository = ""
+authors = ["Sanm <921501935@qq.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/sanm00/Daynote"
 edition = "2024"
 rust-version = "1.90"
 
