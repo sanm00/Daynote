@@ -1,0 +1,56 @@
+name: Bug 反馈 / Bug Report
+description: 报告一个问题 / Report a problem
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先搜索已有 Issues，确认不是重复问题。Please search existing issues first.
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本 / App version
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统 / Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: describe
+    attributes:
+      label: 问题描述 / Describe the bug
+      placeholder: 发生了什么？期望是什么？What happened? What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      placeholder: |
+        1. 打开 …
+        2. 点击 …
+        3. 看到 …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志 / Relevant logs
+      description: 如有控制台或终端输出，请粘贴在这里。Paste console/terminal output if any.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认 / Before submitting
+      options:
+        - label: 我已搜索过已有 Issues，没有重复 / I have searched existing issues
+          required: true
+        - label: 我使用的是最新版本 / I am using the latest version
