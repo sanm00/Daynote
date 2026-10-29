@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macOS-universal
+            runner: macos-latest
+          - platform: ubuntu-x86_64
+            runner: ubuntu-22.04
+          - platform: windows-x86_64
+            runner: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev \
+            librsvg2-dev libxdo-build patchelf
+
+      - name: Build and publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Daynote ${{ github.ref_name }}"
+          releaseBody: |
+            见下方产物：macOS（universal）、Linux（.deb / .AppImage）、Windows（.msi / setup.exe）。
+            首次运行 macOS 包可能需要手动允许（未签名 / 未公证）。
+
+            See the assets below for macOS (universal), Linux (.deb / .AppImage) and Windows (.msi / setup.exe).
+            The unsigned macOS build may need to be allowed manually on first launch.
+          releaseDraft: true
+          prerelease: false
