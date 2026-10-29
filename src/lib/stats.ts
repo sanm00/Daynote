@@ -7,7 +7,12 @@ export interface Range {
   end: Date;
 }
 
-/** Map a review-range key to its concrete start/end dates (inclusive). */
+/**
+ * Map a review-range key to its concrete start/end dates (inclusive). `week`
+ * and `month` cover the full natural period (Mon–Sun, 1st–last day) so upcoming
+ * scheduled tasks stay visible; metrics that must not count the future clamp
+ * their own end to today (see `computeStats`).
+ */
 export function getRange(key: ReviewRange): Range {
   const t = new Date(today());
   const dow = (t.getDay() + 6) % 7;
@@ -20,16 +25,45 @@ export function getRange(key: ReviewRange): Range {
       return { start: d, end: d };
     }
     case 'week':
-      return { start: mon, end: t };
+      return { start: mon, end: addDays(mon, 6) };
     case 'lastweek':
       return { start: addDays(mon, -7), end: addDays(mon, -1) };
     case 'month':
-      return { start: new Date(t.getFullYear(), t.getMonth(), 1), end: t };
+      return { start: new Date(t.getFullYear(), t.getMonth(), 1), end: new Date(t.getFullYear(), t.getMonth() + 1, 0) };
     case 'lastmonth':
       return {
         start: new Date(t.getFullYear(), t.getMonth() - 1, 1),
         end: new Date(t.getFullYear(), t.getMonth(), 0),
       };
+  }
+}
+
+/**
+ * The natural preceding period for a review-range key, used as the baseline for
+ * the completion-rate delta: the previous day for a single day, the same weekday
+ * last week, or the same day last month. Deriving it from the key (not the span
+ * length) keeps `week`/`month` partial ranges aligned to their real predecessor
+ * instead of shifting an arbitrary number of days. The month day is clamped to
+ * the target month's length (e.g. Mar 31 → Feb 28/29).
+ */
+export function prevRange(r: Range, key: ReviewRange): Range {
+  switch (key) {
+    case 'today':
+    case 'yesterday':
+      return { start: addDays(r.start, -1), end: addDays(r.end, -1) };
+    case 'week':
+    case 'lastweek':
+      return { start: addDays(r.start, -7), end: addDays(r.end, -7) };
+    case 'month':
+    case 'lastmonth': {
+      const shift = (d: Date) => {
+        const y = d.getFullYear();
+        const m = d.getMonth() - 1;
+        const last = new Date(y, m + 1, 0).getDate();
+        return new Date(y, m, Math.min(d.getDate(), last));
+      };
+      return { start: shift(r.start), end: shift(r.end) };
+    }
   }
 }
 
@@ -65,20 +99,30 @@ export interface Stats {
   notesEdited: number;
 }
 
-/** Aggregate completion/overdue/notes metrics for the given date range. */
-export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
+/** Aggregate completion/overdue/notes metrics for the given date range. The
+ * review-range key drives the delta baseline (see `prevRange`). */
+export function computeStats(tasks: Task[], notes: Note[], r: Range, key: ReviewRange): Stats {
   const s = fmt(r.start);
   const e = fmt(r.end);
   const unscheduledCount = tasks.filter((t) => t.beginDate === null).length;
+  // Completed tasks: by actual completion day (doneAt) within the period.
   const doneTasks = tasks.filter(
     (t) => t.done && t.doneAt !== null && dayOf(t.doneAt)! >= s && dayOf(t.doneAt)! <= e,
   );
   const doneN = doneTasks.length;
-  // A task belongs to the period that contains its end day (its due date).
-  const inRange = tasks.filter((t) => t.endDate !== null && t.endDate >= s && t.endDate <= e);
+  // Planned tasks: a task counts for a period when its schedule span overlaps
+  // the period (beginDate <= period end and endDate >= period start), matching
+  // the chart's "scheduled" series. Multi-day tasks count on every day they
+  // span, so a task running today..tomorrow still counts as planned today.
+  const inSpan = (t: Task, rs: string, re: string) =>
+    t.beginDate !== null && t.endDate !== null && t.beginDate <= re && t.endDate >= rs;
+  const inRange = tasks.filter((t) => inSpan(t, s, e));
   const total = inRange.length;
   const scheduledDoneN = inRange.filter((t) => t.done).length;
-  const rate = total ? Math.round((scheduledDoneN / total) * 100) : 0;
+  // Rate mixes the two sets on purpose: completions in the period over planned
+  // tasks in the period. May exceed 100% when tasks from earlier periods are
+  // finished now, and is not clamped.
+  const rate = total ? Math.round((doneN / total) * 100) : 0;
   const undoneN = total - scheduledDoneN;
   const activeDays = new Set(doneTasks.map((t) => dayOf(t.doneAt))).size;
   const dayCount = Math.round((r.end.getTime() - r.start.getTime()) / 86400000) + 1;
@@ -88,15 +132,17 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range): Stats {
   const overdueDone = inRange.filter(lateDone);
   const overdueN = overdueUndone.length + overdueDone.length;
 
-  const prevStart = addDays(r.start, -dayCount);
-  const prevEnd = addDays(r.start, -1);
-  const ps = fmt(prevStart);
-  const pe = fmt(prevEnd);
-  const prevInRange = tasks.filter((t) => t.endDate !== null && t.endDate >= ps && t.endDate <= pe);
-  const hasPrev = prevInRange.length > 0;
-  const prevRate = hasPrev
-    ? Math.round((prevInRange.filter((t) => t.done).length / prevInRange.length) * 100)
-    : 0;
+  const prev = prevRange(r, key);
+  const ps = fmt(prev.start);
+  const pe = fmt(prev.end);
+  const prevPlannedN = tasks.filter(
+    (t) => inSpan(t, ps, pe),
+  ).length;
+  const prevDoneN = tasks.filter(
+    (t) => t.done && t.doneAt !== null && dayOf(t.doneAt)! >= ps && dayOf(t.doneAt)! <= pe,
+  ).length;
+  const hasPrev = prevPlannedN > 0;
+  const prevRate = hasPrev ? Math.round((prevDoneN / prevPlannedN) * 100) : 0;
   const delta = rate - prevRate;
 
   const inDay = (ds: string) => ds >= s && ds <= e;
@@ -198,7 +244,7 @@ export function computeLogGroups(doneTasks: Task[]): LogGroup[] {
 }
 
 /**
- * Unfinished tasks whose end day falls inside the range, ordered overdue-first
+ * Unfinished tasks whose schedule span overlaps the range, ordered overdue-first
  * then by due date, then by priority. Kept flat (no date grouping).
  */
 export function computeRemaining(tasks: Task[], r: Range): Task[] {
@@ -206,7 +252,14 @@ export function computeRemaining(tasks: Task[], r: Range): Task[] {
   const e = fmt(r.end);
   const tStr = todayStr();
   return tasks
-    .filter((t) => !t.done && t.endDate !== null && t.endDate >= s && t.endDate <= e)
+    .filter(
+      (t) =>
+        !t.done &&
+        t.beginDate !== null &&
+        t.endDate !== null &&
+        t.beginDate <= e &&
+        t.endDate >= s,
+    )
     .sort((a, b) => {
       const la = a.endDate! < tStr;
       const lb = b.endDate! < tStr;

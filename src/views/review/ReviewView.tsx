@@ -34,7 +34,10 @@ export function ReviewView() {
   const setChartType = useAppStore((s) => s.setChartType);
 
   const r = useMemo(() => getRange(reviewRange), [reviewRange]);
-  const stats = useMemo(() => computeStats(tasks, notes, r), [tasks, notes, r]);
+  const stats = useMemo(
+    () => computeStats(tasks, notes, r, reviewRange),
+    [tasks, notes, r, reviewRange],
+  );
   const chart = useMemo(() => computeChart(r, tasks), [r, tasks]);
   const tagEntries = useMemo(() => computeTagEntries(stats.doneTasks), [stats.doneTasks]);
   const logGroups = useMemo(() => computeLogGroups(stats.doneTasks), [stats.doneTasks]);
@@ -65,7 +68,8 @@ export function ReviewView() {
       <div className="review-scroll">
         <StatCards stats={stats} trendCls={trendCls} trendTxt={trendTxt} />
         <p className="review-basis">
-          完成任务按实际完成日统计；完成率 {stats.total - stats.undoneN}/{stats.total}，按截止日在周期内的任务统计；有产出指当天完成过任务。
+          完成任务按实际完成日统计；计划数按排期与周期有重叠计（含跨天与未来）；完成率 =
+          周期内完成 {stats.doneN} / 周期内计划 {stats.total}。
         </p>
         <div className="charts-row">
           <TrendChart

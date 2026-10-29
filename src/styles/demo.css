@@ -702,6 +702,7 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
   font-size:var(--fs-xs);font-weight:600;color:var(--primary-text);
   font-variant-numeric:tabular-nums;
 }
+.ring-done svg{width:15px;height:15px;fill:none;stroke:var(--primary-text);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 .charts-row{display:grid;grid-template-columns:1.85fr 1fr;gap:6px}
 .chart-card{display:flex;flex-direction:column}

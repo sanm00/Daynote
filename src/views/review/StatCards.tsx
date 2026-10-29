@@ -23,15 +23,21 @@ export function StatCards({ stats, trendCls, trendTxt }: Props) {
           </div>
           <div className="stat-sub">
             {stats.unscheduledCount
-              ? `共安排 ${stats.total} 项（按截止日）· 另有 ${stats.unscheduledCount} 项待排期`
-              : `共安排 ${stats.total} 项（按截止日）`}
+              ? `共安排 ${stats.total} 项 · 另有 ${stats.unscheduledCount} 项待排期`
+              : `共安排 ${stats.total} 项`}
           </div>
         </div>
       </div>
 
       <div className="card stat">
         <div className="ring" style={{ ['--p' as string]: stats.rate }}>
-          <span>{stats.rate}%</span>
+          <span className={stats.rate >= 100 ? 'ring-done' : undefined}>
+            {stats.rate >= 100 ? (
+              <svg viewBox="0 0 24 24">
+                <path d="M4 12.5l5 5L20 6.5" />
+              </svg>
+            ) : null}
+          </span>
         </div>
         <div>
           <div className="stat-label">完成率</div>
@@ -40,13 +46,15 @@ export function StatCards({ stats, trendCls, trendTxt }: Props) {
             <small>%</small>
           </div>
           <div className="stat-sub">
+            <span>
+              已完成 {stats.doneN} / 计划 {stats.total}
+            </span>
             {stats.hasPrev ? (
               <>
-                较上一周期 <span className={`stat-trend ${trendCls}`}>{trendTxt}</span>
+                {' '}
+                <span className={`stat-trend ${trendCls}`}>较上一周期 {trendTxt}</span>
               </>
-            ) : (
-              `${stats.undoneN} 项未完成`
-            )}
+            ) : null}
           </div>
         </div>
       </div>

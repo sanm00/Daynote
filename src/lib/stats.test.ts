@@ -8,6 +8,7 @@ import {
   computeTagEntries,
   countOverdue,
   getRange,
+  prevRange,
 } from './stats';
 import type { Note, Priority, Task } from '@/types';
 
@@ -53,6 +54,50 @@ describe('getRange', () => {
     expect(r.start.getDate()).toBe(1);
     expect(r.start.getMonth()).toBe(r.end.getMonth());
   });
+
+  it('week covers Monday through Sunday', () => {
+    const r = getRange('week');
+    expect(r.start.getDay()).toBe(1);
+    expect(r.end.getDay()).toBe(0);
+    expect(Math.round((r.end.getTime() - r.start.getTime()) / 86400000)).toBe(6);
+  });
+
+  it('month covers the whole calendar month', () => {
+    const r = getRange('month');
+    const t = today();
+    expect(r.start.getDate()).toBe(1);
+    expect(fmt(r.end)).toBe(fmt(new Date(t.getFullYear(), t.getMonth() + 1, 0)));
+  });
+});
+
+describe('prevRange', () => {
+  it('shifts a single day back by one day', () => {
+    const r = { start: new Date(2026, 9, 29), end: new Date(2026, 9, 29) };
+    const p = prevRange(r, 'today');
+    expect(fmt(p.start)).toBe('2026-10-28');
+    expect(fmt(p.end)).toBe('2026-10-28');
+  });
+
+  it('aligns a week range to the same days last week', () => {
+    const r = { start: new Date(2026, 9, 26), end: new Date(2026, 9, 29) };
+    const p = prevRange(r, 'week');
+    expect(fmt(p.start)).toBe('2026-10-19');
+    expect(fmt(p.end)).toBe('2026-10-22');
+  });
+
+  it('aligns a partial month to the same days last month', () => {
+    const r = { start: new Date(2026, 9, 1), end: new Date(2026, 9, 29) };
+    const p = prevRange(r, 'month');
+    expect(fmt(p.start)).toBe('2026-09-01');
+    expect(fmt(p.end)).toBe('2026-09-29');
+  });
+
+  it('clamps the month day to the previous month length', () => {
+    const r = { start: new Date(2026, 2, 1), end: new Date(2026, 2, 31) };
+    const p = prevRange(r, 'month');
+    expect(fmt(p.start)).toBe('2026-02-01');
+    expect(fmt(p.end)).toBe('2026-02-28');
+  });
 });
 
 describe('computeStats', () => {
@@ -68,7 +113,7 @@ describe('computeStats', () => {
       // spans into the month: belongs here because its end day (03-20) is inside
       task({ beginDate: '2026-02-25', endDate: '2026-03-20', done: false }),
     ];
-    const s = computeStats(tasks, [], r);
+    const s = computeStats(tasks, [], r, 'month');
     expect(s.total).toBe(4);
     expect(s.doneN).toBe(2);
     expect(s.rate).toBe(50);
@@ -77,8 +122,56 @@ describe('computeStats', () => {
 
   it('counts notes created in range', () => {
     const r = { start: new Date(2026, 2, 1), end: new Date(2026, 2, 31) };
-    const s = computeStats([], [note({ createdAt: '2026-03-15T00:00:00.000Z' })], r);
+    const s = computeStats([], [note({ createdAt: '2026-03-15T00:00:00.000Z' })], r, 'month');
     expect(s.notesNew).toBe(1);
+  });
+
+  it('counts future planned tasks in the total and lists them as remaining', () => {
+    const r = { start: today(), end: addDays(today(), 1) };
+    const due = task({ beginDate: fmt(today()), endDate: fmt(today()) });
+    const upcoming = task({ beginDate: fmt(addDays(today(), 1)), endDate: fmt(addDays(today(), 1)) });
+    const s = computeStats([due, upcoming], [], r, 'today');
+    expect(s.total).toBe(2);
+    expect(s.rate).toBe(0);
+    expect(computeRemaining([due, upcoming], r).map((t) => t.endDate)).toEqual([
+      fmt(today()),
+      fmt(addDays(today(), 1)),
+    ]);
+  });
+
+  it('derives the rate from completions by day and may exceed 100%', () => {
+    const r = { start: today(), end: today() };
+    const planned = task({ beginDate: fmt(today()), endDate: fmt(today()) });
+    const carried1 = task({ beginDate: fmt(addDays(today(), -1)), endDate: fmt(addDays(today(), -1)), done: true, doneAt: new Date().toISOString() });
+    const carried2 = task({ beginDate: fmt(addDays(today(), -1)), endDate: fmt(addDays(today(), -1)), done: true, doneAt: new Date().toISOString() });
+    const s = computeStats([planned, carried1, carried2], [], r, 'today');
+    expect(s.total).toBe(1);
+    expect(s.doneN).toBe(2);
+    expect(s.rate).toBe(200);
+  });
+
+  it('ignores completions whose day is outside the period', () => {
+    const r = { start: today(), end: today() };
+    const early = task({ beginDate: fmt(today()), endDate: fmt(today()), done: true, doneAt: `${fmt(addDays(today(), -1))}T12:00:00` });
+    const s = computeStats([early], [], r, 'today');
+    expect(s.total).toBe(1);
+    expect(s.doneN).toBe(0);
+    expect(s.rate).toBe(0);
+    expect(s.undoneN).toBe(0);
+  });
+
+  it('counts a multi-day task as planned on every day it spans', () => {
+    const r = { start: today(), end: today() };
+    const span = task({
+      beginDate: fmt(addDays(today(), -1)),
+      endDate: fmt(addDays(today(), 1)),
+      done: true,
+      doneAt: new Date().toISOString(),
+    });
+    const s = computeStats([span], [], r, 'today');
+    expect(s.total).toBe(1);
+    expect(s.doneN).toBe(1);
+    expect(s.rate).toBe(100);
   });
 });
 

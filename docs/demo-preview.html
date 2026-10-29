@@ -719,6 +719,7 @@ button{font-family:inherit;font-size:inherit}
   font-size:var(--fs-xs);font-weight:600;color:var(--primary-text);
   font-variant-numeric:tabular-nums;
 }
+.ring-done svg{width:15px;height:15px;fill:none;stroke:var(--primary-text);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 .charts-row{display:grid;grid-template-columns:1.85fr 1fr;gap:6px}
 .chart-card{display:flex;flex-direction:column}
@@ -2088,8 +2089,8 @@ const pw = { high:0, mid:1, low:2 };
 const isUnscheduled = t => t.beginDate === null;
 const occursOn = (t, ds) => t.beginDate !== null && ds >= t.beginDate && ds <= t.endDate;
 const isOverdueTask = t => !t.done && t.endDate !== null && t.endDate < TODAY_STR;
-/* 周期归属：任务的结束日（截止日）落在 [s,e] 内即算作该周期 */
-const inPeriod = (t, s, e) => t.endDate !== null && t.endDate >= s && t.endDate <= e;
+/* 周期归属：任务的排期区间与 [s,e] 有重叠即算作该周期（跨天任务在其覆盖的每一天都计入） */
+const inPeriod = (t, s, e) => t.beginDate !== null && t.endDate !== null && t.beginDate <= e && t.endDate >= s;
 /* 排期文案：单日显示「今天/明天/M月D日」，跨天显示「M月D日–M月D日」；逾期由调用方以标签单独表示 */
 function dateRangeLabel(begin, end){
   if(!begin) return '待排期';
@@ -2770,9 +2771,9 @@ function getRange(key){
   switch(key){
     case 'today':     return { start:t, end:t };
     case 'yesterday': { const d = addDays(t,-1); return { start:d, end:d }; }
-    case 'week':      return { start:mon, end:t };
+    case 'week':      return { start:mon, end:addDays(mon,6) };
     case 'lastweek':  return { start:addDays(mon,-7), end:addDays(mon,-1) };
-    case 'month':     return { start:new Date(t.getFullYear(), t.getMonth(), 1), end:t };
+    case 'month':     return { start:new Date(t.getFullYear(), t.getMonth(), 1), end:new Date(t.getFullYear(), t.getMonth()+1, 0) };
     case 'lastmonth': return { start:new Date(t.getFullYear(), t.getMonth()-1, 1), end:new Date(t.getFullYear(), t.getMonth(), 0) };
   }
 }
@@ -2783,6 +2784,20 @@ function rangeLabel(r){
   const sameYear = r.start.getFullYear() === r.end.getFullYear();
   const left = `${sameYear ? '' : r.start.getFullYear()+'年'}${r.start.getMonth()+1}月${r.start.getDate()}日`;
   return `${left} — ${r.end.getMonth()+1}月${r.end.getDate()}日`;
+}
+// 上一周期：单日→前一天，周类→上周同星期几，月类→上月同日（按目标月长度截断）
+function prevRange(r, key){
+  switch(key){
+    case 'today':
+    case 'yesterday': return { start:addDays(r.start,-1), end:addDays(r.end,-1) };
+    case 'week':
+    case 'lastweek':  return { start:addDays(r.start,-7), end:addDays(r.end,-7) };
+    case 'month':
+    case 'lastmonth': {
+      const shift = d => { const y = d.getFullYear(), m = d.getMonth()-1, last = new Date(y, m+1, 0).getDate(); return new Date(y, m, Math.min(d.getDate(), last)); };
+      return { start:shift(r.start), end:shift(r.end) };
+    }
+  }
 }
 function mdLabel(ds){ const d = parseDate(ds); return `${d.getMonth()+1}月${d.getDate()}日 ${dayNames[d.getDay()]}`; }
 function chartTipHTML(){ return `<div class="chart-tip" id="chartTip"></div>`; }
@@ -2893,11 +2908,12 @@ function renderReview(){
   // 完成任务：完成日期（doneAt）落在所选周期内的任务
   const doneTasks = tasks.filter(t => t.done && t.doneAt !== null && dayOf(t.doneAt) >= s && dayOf(t.doneAt) <= e);
   const doneN = doneTasks.length;
-  // 完成率：分母 = 结束日（截止日）落在周期内的任务数；分子 = 其中已完成的任务数
+  // 计划任务：排期区间与所选周期有重叠的任务（含跨天与未来排期）
   const inRange = tasks.filter(t => inPeriod(t, s, e));
   const total = inRange.length;
   const scheduledDoneN = inRange.filter(t => t.done).length;
-  const rate = total ? Math.round(scheduledDoneN / total * 100) : 0;
+  // 完成率 = 周期内完成数 / 周期内计划数（分子分母口径不同，可能 >100%，不封顶）
+  const rate = total ? Math.round(doneN / total * 100) : 0;
   const undoneN = total - scheduledDoneN;
   const activeDays = new Set(doneTasks.map(t => dayOf(t.doneAt))).size;
   const dayCount = Math.round((r.end - r.start) / 86400000) + 1;
@@ -2912,11 +2928,12 @@ function renderReview(){
   const overdueDoneN = overdueDone.length;
   const overdueUndoneN = overdueUndone.length;
 
-  const prevStart = addDays(r.start, -dayCount), prevEnd = addDays(r.start, -1);
-  const ps = fmt(prevStart), pe = fmt(prevEnd);
-  const prevInRange = tasks.filter(t => inPeriod(t, ps, pe));
-  const hasPrev = prevInRange.length > 0;
-  const prevRate = hasPrev ? Math.round(prevInRange.filter(t => t.done).length / prevInRange.length * 100) : 0;
+  const prev = prevRange(r, state.reviewRange);
+  const ps = fmt(prev.start), pe = fmt(prev.end);
+  const prevPlannedN = tasks.filter(t => inPeriod(t, ps, pe)).length;
+  const prevDoneN = tasks.filter(t => t.done && t.doneAt !== null && dayOf(t.doneAt) >= ps && dayOf(t.doneAt) <= pe).length;
+  const hasPrev = prevPlannedN > 0;
+  const prevRate = hasPrev ? Math.round(prevDoneN / prevPlannedN * 100) : 0;
   const delta = rate - prevRate;
   const trendCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
   const trendTxt = delta > 0 ? `+${delta} 个百分点` : `${delta} 个百分点`;
@@ -2941,11 +2958,11 @@ function renderReview(){
       </div>
     </div>
     <div class="card stat">
-      <div class="ring" style="--p:${rate}"><span>${rate}%</span></div>
+      <div class="ring" style="--p:${rate}">${rate >= 100 ? '<span class="ring-done"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></span>' : '<span></span>'}</div>
       <div>
         <div class="stat-label">完成率</div>
         <div class="stat-value">${rate}<small>%</small></div>
-        <div class="stat-sub">${hasPrev ? `较上一周期 <span class="stat-trend ${trendCls}">${trendTxt}</span>` : `${undoneN} 项未完成`}</div>
+        <div class="stat-sub">已完成 ${doneN} / 计划 ${total}${hasPrev ? ` · 较上一周期 <span class="stat-trend ${trendCls}">${trendTxt}</span>` : ''}</div>
       </div>
     </div>
     <div class="card stat${overdueN ? ' warn' : ''}">
@@ -2980,7 +2997,7 @@ function renderReview(){
     </div>
   `;
 
-  $('#reviewBasis').textContent = `完成任务按实际完成日统计；完成率 ${scheduledDoneN}/${total}，按截止日在周期内的任务统计；有产出指当天完成过任务。`;
+  $('#reviewBasis').textContent = `完成任务按实际完成日统计；计划数按排期与周期有重叠计（含跨天与未来）；完成率 = 周期内完成 ${doneN} / 周期内计划 ${total}。`;
   renderChart(r, tasks);
 
   const tagCount = {};
