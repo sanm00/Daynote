@@ -1,6 +1,6 @@
 import { TagName } from '@/components/Tags';
 import { useAppStore } from '@/store';
-import { dateRangeLabel, hmOf, todayStr } from '@/lib/date';
+import { dayOf, dateRangeLabel, hmOf, todayStr } from '@/lib/date';
 import { mdLabel, type LogGroup } from '@/lib/stats';
 import { toast } from '@/lib/toast';
 import type { Task } from '@/types';
@@ -21,10 +21,12 @@ export function CompletionLog({ logGroups, remaining, overdueCount }: Props) {
 
   const locate = (id: number) => {
     const t = tasks.find((x) => x.id === id);
-    if (!t || !t.beginDate) return;
+    if (!t) return;
+    const date = t.done ? dayOf(t.doneAt) : t.beginDate;
+    if (!date) return;
     setPage('plan');
-    goToDate(t.beginDate);
-    toast(`已定位到 ${t.beginDate} 的任务`);
+    goToDate(date);
+    toast(`已定位到 ${date} 的任务`);
     const start = performance.now();
     const tick = () => {
       const row = document.querySelector<HTMLElement>(`.task[data-id="${id}"]`);

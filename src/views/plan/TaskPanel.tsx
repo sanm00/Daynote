@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store';
-import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, occursOn } from '@/lib/selectors';
+import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, belongsToPlanDay } from '@/lib/selectors';
 import { addDays, dayNames, fmt, parseDate, todayStr } from '@/lib/date';
 import { toast } from '@/lib/toast';
 import { emptyTip, groupedRows, overdueSubtitle, pendingSubtitle, PendingList } from './TaskLists';
@@ -27,7 +27,7 @@ export function TaskPanel({ datePop }: Props) {
   const isToday = selectedDate === tStr;
   const isFuture = selectedDate > tStr;
   const dateList = tasks
-    .filter((t) => occursOn(t, selectedDate))
+    .filter((t) => belongsToPlanDay(t, selectedDate))
     .sort((a, b) => Number(a.done) - Number(b.done) || pw[a.prio] - pw[b.prio]);
   const dateDoneN = dateList.filter((t) => t.done).length;
 

@@ -1,0 +1,36 @@
+/* Warm dark mode: charcoal, terracotta and muted olive. */
+html[data-palette="warm"][data-theme="dark"] {
+  color-scheme:dark;
+  --bg:#211d1a; --card:#2a2521;
+  --surface:#25201c; --surface-2:#312922; --surface-3:#40352b; --hover:#3d3026;
+  --line:#493d33; --line-2:#3c332c;
+  --text:#f1e8dd; --text-2:#d0c0b0; --muted:#b5a596; --muted-2:#a89889;
+  --primary:#d39a78; --primary-text:#edb595; --primary-hover:#e1ad8d;
+  --primary-soft:#483127; --on-primary:#2b1e17;
+  --grad-brand:linear-gradient(135deg,#e1ae8a,#cf9573);
+  --grad-check:linear-gradient(135deg,#a2ae84,#87976d);
+  --grad-accent:var(--grad-brand);
+  --green:#9dad83; --green-soft:#323b28;
+  --red:#d99c90; --red-soft:#462d27;
+  --orange:#d2ad7e; --orange-soft:#403422;
+  --tag-work-bg:#473229; --tag-work-fg:#efbb98; --tag-work:#d39a78;
+  --tag-study-bg:#39313c; --tag-study-fg:#c7b2ce; --tag-study:#ac94b4;
+  --tag-life-bg:#413626; --tag-life-fg:#dfc19b; --tag-life:#c6a47c;
+  --tag-health-bg:#30392a; --tag-health-fg:#c2d0ad; --tag-health:#a6b98b;
+  --ring-a:#e1bb91; --ring-b:#c99575; --chart-bar:#c99575; --chart-bar-top:#dfb58f;
+  --overdue-bg:#372d23; --overdue-border:#5b4631; --overdue-accent:#c59d6b; --overdue-text:#e4bf90;
+}
+html[data-palette="warm"][data-theme="dark"] body {
+  background:radial-gradient(ellipse at 15% 10%,#322720,transparent 60%),#211d1a;
+}
+html[data-palette="warm"][data-theme="dark"] .check { border-color:#6b5a48; }
+html[data-palette="warm"][data-theme="dark"] .task.is-done .check { border-color:var(--green); }
+html[data-palette="warm"][data-theme="dark"] .today-seg.all-done { background:var(--grad-check); }
+html[data-palette="warm"][data-theme="dark"] .side-ring.full { background:conic-gradient(from -90deg,var(--green),var(--green) 100%); }
+html[data-palette="warm"][data-theme="dark"] :is(.badge,.btn.danger) { background:var(--red-soft); color:var(--red); border-color:var(--red-soft); }
+html[data-palette="warm"][data-theme="dark"] .btn.danger:hover { background:var(--red); color:var(--on-primary); }
+html[data-palette="warm"][data-theme="dark"] .note-item.active .note-item-time { color:var(--muted); }
+html[data-palette="warm"][data-theme="dark"] :is(.toast,.save-now) { background:var(--grad-brand); color:var(--on-primary); }
+html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb { background-color:#544538; }
+html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background-color:#72604e; }
+html[data-palette="warm"][data-theme="dark"] .btn.primary .btn-hint { color:var(--on-primary); opacity:.8; }

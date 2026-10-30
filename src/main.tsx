@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles/demo.css';
 import './styles/tags.css';
 import './styles/app.css';
+import './styles/warm-dark.css';
 import './styles/morandi.css';
 import './styles/appearance.css';
 import './styles/calendar.css';

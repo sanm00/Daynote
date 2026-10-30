@@ -7,8 +7,8 @@
   --line-2:#e6e8e0;
   --text:#414b46;
   --text-2:#69746c;
-  --muted:#758176;
-  --muted-2:#828c81;
+  --muted:#626e63;
+  --muted-2:#697469;
   --primary:#8da997;
   --primary-text:#658674;
   --primary-hover:#789883;
@@ -26,14 +26,14 @@
   --red-soft:#f1e6e1;
   --orange:#a18a68;
   --orange-soft:#eee8dc;
-  --tag-work:#9cb39e;   --tag-work-bg:#e5ede7;   --tag-work-fg:#617d69;
-  --tag-study:#aaa5bc;  --tag-study-bg:#edeaf1;  --tag-study-fg:#7e7695;
-  --tag-life:#c6a7a4;   --tag-life-bg:#f1e6e1;   --tag-life-fg:#9b756f;
-  --tag-health:#a3b5a6; --tag-health-bg:#e8ede2; --tag-health-fg:#6b8065;
-  --tag-blue:#a4b6c5;   --tag-blue-bg:#e7edf1;   --tag-blue-fg:#6a8396;
-  --tag-rose:#c3a0ae;   --tag-rose-bg:#f0e5ea;   --tag-rose-fg:#977187;
-  --tag-slate:#a1acab;  --tag-slate-bg:#e8eceb;  --tag-slate-fg:#6e807c;
-  --tag-cyan:#9ab7b3;   --tag-cyan-bg:#e3eeeb;   --tag-cyan-fg:#61847c;
+  --tag-work:#9cb39e;   --tag-work-bg:#e5ede7;   --tag-work-fg:#526e59;
+  --tag-study:#aaa5bc;  --tag-study-bg:#edeaf1;  --tag-study-fg:#6e6584;
+  --tag-life:#c6a7a4;   --tag-life-bg:#f1e6e1;   --tag-life-fg:#805c57;
+  --tag-health:#a3b5a6; --tag-health-bg:#e8ede2; --tag-health-fg:#566d4f;
+  --tag-blue:#a4b6c5;   --tag-blue-bg:#e7edf1;   --tag-blue-fg:#536d80;
+  --tag-rose:#c3a0ae;   --tag-rose-bg:#f0e5ea;   --tag-rose-fg:#80596f;
+  --tag-slate:#a1acab;  --tag-slate-bg:#e8eceb;  --tag-slate-fg:#566961;
+  --tag-cyan:#9ab7b3;   --tag-cyan-bg:#e3eeeb;   --tag-cyan-fg:#4b7066;
   --ring-a:#b4c6b4;
   --ring-b:#8da997;
   --chart-bar:#8da997;
@@ -71,9 +71,9 @@ html[data-palette="morandi"][data-theme="dark"]{
   --line:#4b5a50;
   --line-2:#424e45;
   --text:#e6e8df;
-  --text-2:#b6c5b9;
-  --muted:#a3afa5;
-  --muted-2:#95a397;
+  --text-2:#c4d0c7;
+  --muted:#b5c1b7;
+  --muted-2:#abb7ad;
   --primary:#a0bdab;
   --primary-text:#afcbb8;
   --primary-hover:#b1cbb9;
@@ -237,3 +237,7 @@ html[data-palette="morandi"]:not([data-theme="dark"]) .check svg{stroke:#fffefa}
 :where(html[data-palette="morandi"]) :is(.quick-new-btn,.notes-side-head > .btn.primary):hover {
   background:var(--create-hover);
 }
+
+/* Use the same readable foreground/background pair as creation buttons. */
+:where(html[data-palette="morandi"]) .save-now { background:var(--create-bg); color:var(--create-text); }
+:where(html[data-palette="morandi"]) .save-now:hover { background:var(--create-hover); filter:none; }

@@ -41,6 +41,31 @@ afterEach(() => {
 });
 
 describe('approved UI interactions', () => {
+  it('shows late and unscheduled completions on their actual completion day across plan and review', () => {
+    const yesterday = fmt(addDays(today(), -1));
+    const doneAt = new Date().toISOString();
+    useAppStore.setState({ tasks: [
+      { id: 1, title: '昨天安排今天完成', tag: '工作', prio: 'mid', beginDate: yesterday, endDate: yesterday, done: false, doneAt: null },
+      { id: 2, title: '未排期今天完成', tag: '工作', prio: 'mid', beginDate: null, endDate: null, done: true, doneAt },
+      { id: 3, title: '跨天计划昨天完成', tag: '工作', prio: 'mid', beginDate: yesterday, endDate: nextDate(), done: true, doneAt: new Date(addDays(new Date(), -1)).toISOString() },
+    ] });
+    render(<App />);
+    act(() => useAppStore.getState().toggleTodo(1));
+    expect(find('.task-list')).toHaveTextContent('昨天安排今天完成');
+    expect(find('.task-list')).toHaveTextContent('未排期今天完成');
+    expect(find('.task-list')).not.toHaveTextContent('跨天计划昨天完成');
+    expect(find('.today-sum')).toHaveTextContent('2 / 2 项已完成');
+    expect(find(`.day[data-date="${todayStr()}"] .dot-sm.done`)).not.toBeNull();
+    fireEvent.click(find('.today-seg[data-id="2"]'));
+    advanceFrame();
+    expect(find('.task.flash')).toHaveTextContent('未排期今天完成');
+    act(() => useAppStore.getState().goToDate(yesterday));
+    expect(find('.task-list')).not.toHaveTextContent('昨天安排今天完成');
+    expect(find('.task-list')).toHaveTextContent('跨天计划昨天完成');
+    act(() => useAppStore.getState().setPage('review'));
+    expect(find('#page-review')).toHaveTextContent('昨天安排今天完成');
+  });
+
   it('edits a task title and tag together, keeping list tags read-only', () => {
     render(<StrictMode><App /></StrictMode>);
     expect(find('.task [data-act="tag"]')).toBeNull();

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { PRIORITY_WEIGHT as pw } from '@/lib/selectors';
-import { getOverdue, occursOn } from '@/lib/selectors';
+import { getOverdue, belongsToPlanDay } from '@/lib/selectors';
 import { todayStr } from '@/lib/date';
 import { toast } from '@/lib/toast';
 import type { Task } from '@/types';
@@ -25,9 +25,9 @@ export function TodayOverview() {
 
   const tStr = todayStr();
   const ordered = useMemo(() => {
-    const done = tasks.filter((t) => occursOn(t, tStr) && t.done);
+    const done = tasks.filter((t) => belongsToPlanDay(t, tStr) && t.done);
     const todo = tasks
-      .filter((t) => occursOn(t, tStr) && !t.done)
+      .filter((t) => belongsToPlanDay(t, tStr) && !t.done)
       .sort((a, b) => pw[a.prio] - pw[b.prio]);
     return [...done, ...todo];
   }, [tasks, tStr]);
@@ -97,7 +97,6 @@ export function TodayOverview() {
   const hideTip = () => tipRef.current?.classList.remove('show');
 
   const locate = (t: Task) => {
-    if (!t.beginDate) return;
     setPage('plan');
     goToDate(tStr);
     toast(`已定位到 ${tStr} 的任务`);

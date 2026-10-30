@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
+import { dayOf } from '@/lib/date';
 import { plainText } from '@/lib/markdown';
 import { toast } from '@/lib/toast';
 import { SUGGEST_KEYWORDS } from '@/lib/constants';
@@ -90,14 +91,15 @@ export function SearchView() {
   const jumpToTask = (id: number) => {
     const t = tasks.find((x) => x.id === id);
     if (!t) return;
-    if (t.beginDate === null) {
+    const date = t.done ? dayOf(t.doneAt) : t.beginDate;
+    if (date === null) {
       setPlanView('unscheduled');
       setPage('plan');
       toast('这是一条待排期任务');
     } else {
-      goToDate(t.beginDate);
+      goToDate(date);
       setPage('plan');
-      toast(`已定位到 ${t.beginDate} 的任务`);
+      toast(`已定位到 ${date} 的任务`);
     }
     window.setTimeout(() => {
       const row = document.querySelector(`.task[data-id="${id}"]`);

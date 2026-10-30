@@ -1,5 +1,5 @@
 import type { Note, Priority, Tag, Task } from '@/types';
-import { todayStr } from './date';
+import { dayOf, todayStr } from './date';
 
 export const PRIORITY_WEIGHT: Record<Priority, number> = { high: 0, mid: 1, low: 2 };
 
@@ -13,6 +13,10 @@ export const isMultiDay = (t: Task) =>
 /** Whether the task is scheduled to occur on the given `YYYY-MM-DD` day. */
 export const occursOn = (t: Task, ds: string) =>
   t.beginDate !== null && t.endDate !== null && ds >= t.beginDate && ds <= t.endDate;
+
+/** Completed tasks belong to their actual completion day; pending tasks keep their schedule. */
+export const belongsToPlanDay = (t: Task, ds: string) =>
+  t.done ? dayOf(t.doneAt) === ds : occursOn(t, ds);
 
 /** Overdue = unfinished and its end day is before today. */
 export const isOverdue = (t: Task) =>
