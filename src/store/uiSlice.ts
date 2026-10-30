@@ -185,12 +185,17 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
     set((s) => ({ settings: { ...s.settings, theme } }));
     get().applyTheme();
   },
+  setPalette: (palette) => {
+    set((s) => ({ settings: { ...s.settings, palette } }));
+    get().applyTheme();
+  },
   setDefaultTag: (defaultTag) => {
     if (!get().tags.some(tag => tag.id === defaultTag)) return;
     set((s) => ({ settings: { ...s.settings, defaultTag }, addTag: defaultTag }));
   },
   applyTheme: () => {
-    const mode = get().settings.theme;
+    const { theme: mode, palette } = get().settings;
+    document.documentElement.dataset.palette = palette;
     const resolved =
       mode === 'system'
         ? window.matchMedia('(prefers-color-scheme: dark)').matches

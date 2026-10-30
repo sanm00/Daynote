@@ -1,8 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/demo.css';
-import './styles/app.css';
 import './styles/tags.css';
+import './styles/app.css';
+import './styles/morandi.css';
+import './styles/appearance.css';
+import './styles/calendar.css';
 import { App } from '@/App';
 import { flushPersist, setupAutoPersist, useAppStore } from '@/store';
 

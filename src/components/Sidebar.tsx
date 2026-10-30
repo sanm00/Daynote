@@ -3,7 +3,6 @@ import { useAppStore } from '@/store';
 import { todayStr } from '@/lib/date';
 import { occursOn } from '@/lib/selectors';
 import { QUOTES } from '@/lib/quotes';
-import brandIcon from '@/assets/daynote-mark.svg';
 import type { Page } from '@/types';
 
 const NAV: Array<{ id: Page; label: string; icon: JSX.Element }> = [
@@ -101,7 +100,7 @@ export function Sidebar() {
     <aside className="sidebar">
       <div className="brand">
         <div className="logo" title="随记 Daynote">
-          <img src={brandIcon} alt="随记 Daynote 图标" width={26} height={26} />
+          <svg viewBox="0 0 100 100" width={26} height={26} role="img" aria-label="随记 Daynote 图标"><path d="M61 27C56 24 50 22 43 22H25V78H43C63 78 75 67 75 50C75 48 75 46 74 45" fill="none" stroke="currentColor" strokeWidth={10} strokeLinecap="round" strokeLinejoin="round" /></svg>
         </div>
         <div>
           <div className="brand-name">随记</div>

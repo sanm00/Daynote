@@ -9,7 +9,7 @@ import type { DataSlice, SliceCreator } from './types';
 export const createDataSlice: SliceCreator<DataSlice> = (set, get) => ({
   tasks: [],
   notes: [],
-  settings: { theme: 'light', defaultTag: '工作' },
+  settings: { theme: 'light', palette: 'morandi', defaultTag: '工作' },
 
   ready: false,
   storageKind: storage.kind,

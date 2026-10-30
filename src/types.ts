@@ -42,6 +42,7 @@ export interface Note {
 
 export interface Settings {
   theme: ThemeMode;
+  palette: ThemePalette;
   defaultTag: Tag;
 }
 
@@ -49,5 +50,6 @@ export type Page = 'plan' | 'notes' | 'search' | 'review' | 'settings' | 'help';
 export type PlanViewKind = 'date' | 'overdue' | 'unscheduled' | 'pending';
 export type ReviewRange = 'today' | 'yesterday' | 'week' | 'lastweek' | 'month' | 'lastmonth';
 export type ChartType = 'bar' | 'line';
+export type ThemePalette = 'warm' | 'morandi';
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type SearchType = 'all' | 'note' | 'task';

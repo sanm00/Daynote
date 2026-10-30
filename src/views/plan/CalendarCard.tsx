@@ -27,26 +27,33 @@ export function CalendarCard() {
     if (ds === tStr) cls.push('today');
     if (ds === selectedDate) cls.push('selected');
     calDays.push(
-      <div key={ds} className={cls.join(' ')} data-date={ds} onClick={() => goToDate(ds)}>
-        <span>{d.getDate()}</span>
-        <span className="day-dots">
+      <button key={ds} type="button" className={cls.join(' ')} data-date={ds}
+        aria-label={`${y === d.getFullYear() ? '' : `${d.getFullYear()}年`}${d.getMonth() + 1}月${d.getDate()}日${ds === tStr ? '，今天' : ''}`}
+        aria-current={ds === tStr ? 'date' : undefined}
+        aria-pressed={ds === selectedDate}
+        onClick={() => goToDate(ds)}>
+        <span className="day-number">{d.getDate()}</span>
+        <span className="day-dots" aria-hidden="true">
           {doneN > 0 && <i className="dot-sm done" />}
           {undoneN > 0 && <i className="dot-sm undone" />}
         </span>
-      </div>,
+      </button>,
     );
   }
 
   return (
     <div className="card cal-card">
       <div className="cal-head">
-        <button className="icon-btn" onClick={() => setCalMonth(new Date(y, m - 1, 1))}>
-          ‹
-        </button>
-        <div className="cal-title">{`${y}年${m + 1}月`}</div>
-        <button className="icon-btn" onClick={() => setCalMonth(new Date(y, m + 1, 1))}>
-          ›
-        </button>
+        <div className="cal-title" aria-live="polite">{`${y}年${m + 1}月`}</div>
+        <div className="cal-navigation">
+          <button type="button" className="cal-today-btn" onClick={() => goToDate(tStr)}>今天</button>
+          <button type="button" className="icon-btn" aria-label="上个月" onClick={() => setCalMonth(new Date(y, m - 1, 1))}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 7-5 5 5 5" /></svg>
+          </button>
+          <button type="button" className="icon-btn" aria-label="下个月" onClick={() => setCalMonth(new Date(y, m + 1, 1))}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 7 5 5-5 5" /></svg>
+          </button>
+        </div>
       </div>
       <div className="cal-week">
         <span>一</span>
@@ -54,8 +61,8 @@ export function CalendarCard() {
         <span>三</span>
         <span>四</span>
         <span>五</span>
-        <span>六</span>
-        <span>日</span>
+        <span className="weekend">六</span>
+        <span className="weekend">日</span>
       </div>
       <div className="cal-grid">{calDays}</div>
       <div className="cal-legend">

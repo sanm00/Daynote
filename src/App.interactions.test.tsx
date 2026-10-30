@@ -22,7 +22,7 @@ beforeEach(() => {
     newTodoPending: false, newNotePending: false, currentNoteId: 1,
     noteDraft: null, noteMode: 'preview', noteFilter: 'all',
     searchQuery: '', searchType: 'all', saveState: 'idle',
-    settings: { theme: 'light', defaultTag: '工作' },
+    settings: { theme: 'light', palette: 'morandi', defaultTag: '工作' },
     tasks: [
       { id: 1, title: '今天的任务', tag: '工作', prio: 'mid', beginDate: todayStr(), endDate: todayStr(), done: false, doneAt: null },
       { id: 2, title: '未来任务甲', tag: '学习', prio: 'mid', beginDate: nextDate(), endDate: nextDate(), done: false, doneAt: null },

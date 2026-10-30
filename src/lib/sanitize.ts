@@ -109,5 +109,6 @@ export function sanitizeSettings(input: unknown, fallback: Settings, tags = defa
   const s = input as Record<string, unknown>;
   const theme =
     s.theme === 'light' || s.theme === 'dark' || s.theme === 'system' ? s.theme : fallback.theme;
-  return { theme, defaultTag: coerceTag(s.defaultTag, coerceTag(fallback.defaultTag, tags[0].id, tags), tags) };
+  const palette = s.palette === 'warm' || s.palette === 'morandi' ? s.palette : fallback.palette;
+  return { theme, palette, defaultTag: coerceTag(s.defaultTag, coerceTag(fallback.defaultTag, tags[0].id, tags), tags) };
 }

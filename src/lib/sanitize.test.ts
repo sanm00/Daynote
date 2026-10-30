@@ -63,15 +63,22 @@ describe('sanitizeNotes', () => {
 
 describe('sanitizeSettings', () => {
   it('merges known values over the fallback', () => {
-    const fallback = { theme: 'light' as const, defaultTag: '工作' as const };
+    const fallback = { theme: 'light' as const, palette: 'morandi' as const, defaultTag: '工作' as const };
     expect(sanitizeSettings({ theme: 'dark' }, fallback)).toEqual({
-      theme: 'dark',
+      theme: 'dark', palette: 'morandi',
       defaultTag: '工作',
     });
     expect(sanitizeSettings({ theme: 'nope', defaultTag: '学习' }, fallback)).toEqual({
-      theme: 'light',
+      theme: 'light', palette: 'morandi',
       defaultTag: '学习',
     });
     expect(sanitizeSettings('garbage', fallback)).toEqual(fallback);
   });
+});
+
+it('accepts known palettes and preserves the current palette for older or invalid imports', () => {
+  const fallback = { theme: 'light', palette: 'morandi', defaultTag: '工作' } as const;
+  expect(sanitizeSettings({ palette: 'warm' }, fallback).palette).toBe('warm');
+  expect(sanitizeSettings({ palette: 'unknown' }, fallback).palette).toBe('morandi');
+  expect(sanitizeSettings({ theme: 'dark' }, fallback).palette).toBe('morandi');
 });

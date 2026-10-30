@@ -20,7 +20,7 @@ export const createPersistSlice: SliceCreator<PersistSlice> = (set, get) => ({
 
     if (loaded) {
       const tags = loaded.tags ? validateTags(loaded.tags) : defaultTags();
-      const settings = sanitizeSettings(loaded.settings, get().settings, tags);
+      const settings = sanitizeSettings(loaded.settings, { ...get().settings, palette: 'warm' }, tags);
       const notes = loaded.notes.filter((n) => !isBlankNote(n));
       // Existing notes keep whatever title they were saved with; only titleless
       // notes are allowed to keep mirroring their body.

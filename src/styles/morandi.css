@@ -1,0 +1,239 @@
+/* Morandi palette, adapted from the standalone demo. */
+:root[data-palette="morandi"]{
+  color-scheme:light;
+  --bg:#e9e9e2;
+  --card:#faf9f5;
+  --line:#dfe4da;
+  --line-2:#e6e8e0;
+  --text:#414b46;
+  --text-2:#69746c;
+  --muted:#758176;
+  --muted-2:#828c81;
+  --primary:#8da997;
+  --primary-text:#658674;
+  --primary-hover:#789883;
+  --create-bg:linear-gradient(135deg,#b7cdbb,#a4bfa9);
+  --create-hover:linear-gradient(135deg,#a8c1ad,#96b49e);
+  --create-text:#2d4435;
+  --primary-soft:#e3ebe4;
+  --on-primary:#fffefa;
+  --grad-brand:linear-gradient(135deg,#9bb3a2,#829f8c);
+  --grad-check:linear-gradient(135deg,#9bb3a2,#789883);
+  --grad-accent:var(--grad-brand);
+  --green:#789883;
+  --green-soft:#e5ede7;
+  --red:#ac7e79;
+  --red-soft:#f1e6e1;
+  --orange:#a18a68;
+  --orange-soft:#eee8dc;
+  --tag-work:#9cb39e;   --tag-work-bg:#e5ede7;   --tag-work-fg:#617d69;
+  --tag-study:#aaa5bc;  --tag-study-bg:#edeaf1;  --tag-study-fg:#7e7695;
+  --tag-life:#c6a7a4;   --tag-life-bg:#f1e6e1;   --tag-life-fg:#9b756f;
+  --tag-health:#a3b5a6; --tag-health-bg:#e8ede2; --tag-health-fg:#6b8065;
+  --tag-blue:#a4b6c5;   --tag-blue-bg:#e7edf1;   --tag-blue-fg:#6a8396;
+  --tag-rose:#c3a0ae;   --tag-rose-bg:#f0e5ea;   --tag-rose-fg:#977187;
+  --tag-slate:#a1acab;  --tag-slate-bg:#e8eceb;  --tag-slate-fg:#6e807c;
+  --tag-cyan:#9ab7b3;   --tag-cyan-bg:#e3eeeb;   --tag-cyan-fg:#61847c;
+  --ring-a:#b4c6b4;
+  --ring-b:#8da997;
+  --chart-bar:#8da997;
+  --chart-bar-top:#b4c6b4;
+  --overdue-bg:#faf5ef;
+  --overdue-border:#e7dacf;
+  --overdue-accent:#b29b7e;
+  --overdue-text:#967b59;
+  --surface:#f1f2eb;
+  --surface-2:#eef0e9;
+  --surface-3:#e3e8de;
+  --hover:#e9eee6;
+  --glass:rgba(255,255,255,.42);
+  --glass-panel:rgba(255,255,255,.58);
+  --glass-tile:rgba(250,249,245,.55);
+  --glass-paper:rgba(250,249,245,.92);
+  --glass-highlight:rgba(255,255,255,.55);
+  --glass-border:rgba(255,255,255,.72);
+  --selected:rgba(252,251,247,.83);
+  --shadow:0 18px 50px rgba(70,79,69,.09);
+  --control-shadow:0 2px 8px rgba(101,134,116,.13);
+  --focus-shadow:0 0 0 3px rgba(141,169,151,.17);
+  --check-border:#b4beb3;
+  --scroll-thumb:#c3ccc0;
+  --scroll-hover:#a9b8a7;
+  --highlight:rgba(141,169,151,.24);
+  --desktop:radial-gradient(ellipse at 16% 16%,#eedbd5 0,transparent 35%),
+    radial-gradient(ellipse at 82% 24%,#d5dddf 0,transparent 40%),
+    radial-gradient(ellipse at 64% 85%,#dce7d8 0,transparent 42%),#e8e6df;
+}
+html[data-palette="morandi"][data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#333b37;
+  --card:#303a35;
+  --line:#4b5a50;
+  --line-2:#424e45;
+  --text:#e6e8df;
+  --text-2:#b6c5b9;
+  --muted:#a3afa5;
+  --muted-2:#95a397;
+  --primary:#a0bdab;
+  --primary-text:#afcbb8;
+  --primary-hover:#b1cbb9;
+  --create-bg:linear-gradient(135deg,#91ae9b,#7f9f8a);
+  --create-hover:linear-gradient(135deg,#a0bba9,#8eac99);
+  --create-text:#1d3226;
+  --primary-soft:#47594f;
+  --on-primary:#263a2e;
+  --grad-brand:linear-gradient(135deg,#b0c6b5,#91ae9b);
+  --grad-check:linear-gradient(135deg,#abc3af,#8da997);
+  --green:#a3c0a8;
+  --green-soft:#3d5144;
+  --red:#d0aaa4;
+  --red-soft:#54423f;
+  --orange:#c8b496;
+  --orange-soft:#4d493b;
+  --tag-work:#a3bea8;   --tag-work-bg:#405348;   --tag-work-fg:#bed3c0;
+  --tag-study:#b7afc8;  --tag-study-bg:#494552;  --tag-study-fg:#d0c7df;
+  --tag-life:#c6a7a4;   --tag-life-bg:#514340;   --tag-life-fg:#ddbfba;
+  --tag-health:#a8bca2; --tag-health-bg:#45513f; --tag-health-fg:#c6d6bc;
+  --tag-blue:#a4b6c5;   --tag-blue-bg:#3e4c56;   --tag-blue-fg:#c0d0de;
+  --tag-rose:#c4a4b4;   --tag-rose-bg:#51424c;   --tag-rose-fg:#dec0cf;
+  --tag-slate:#a5b5b0;  --tag-slate-bg:#414d49;  --tag-slate-fg:#c4d0cb;
+  --tag-cyan:#a0bfba;   --tag-cyan-bg:#3c514c;   --tag-cyan-fg:#bfdbd4;
+  --ring-a:#bfd1b9;
+  --ring-b:#91ae9b;
+  --chart-bar:#91ae9b;
+  --chart-bar-top:#bfd1b9;
+  --overdue-bg:#46443a;
+  --overdue-border:#625a48;
+  --overdue-accent:#b29b7e;
+  --overdue-text:#d2bc9c;
+  --surface:#36423b;
+  --surface-2:#3c4941;
+  --surface-3:#48574c;
+  --hover:#46564b;
+  --glass:rgba(38,50,43,.42);
+  --glass-panel:rgba(42,54,47,.60);
+  --glass-tile:rgba(63,78,67,.48);
+  --glass-paper:rgba(42,51,48,.92);
+  --glass-highlight:rgba(221,233,222,.08);
+  --glass-border:rgba(221,233,222,.12);
+  --selected:rgba(83,96,88,.53);
+  --shadow:0 18px 50px rgba(23,34,26,.21);
+  --control-shadow:0 2px 8px rgba(20,32,25,.18);
+  --focus-shadow:0 0 0 3px rgba(160,189,171,.16);
+  --check-border:#7e9382;
+  --scroll-thumb:#5a6c5e;
+  --scroll-hover:#7a8e7e;
+  --highlight:rgba(160,189,171,.27);
+  --desktop:radial-gradient(ellipse at 16% 16%,#55504f 0,transparent 35%),
+    radial-gradient(ellipse at 82% 24%,#394b53 0,transparent 40%),
+    radial-gradient(ellipse at 64% 85%,#43584b 0,transparent 42%),#333b37;
+}
+:where(html[data-palette="morandi"]) body,html[data-palette="morandi"][data-theme="dark"] body{background:var(--desktop)}
+:where(html[data-palette="morandi"]) .window,html[data-palette="morandi"][data-theme="dark"] .window{
+  background:var(--desktop);
+}
+:where(html[data-palette="morandi"]) .content{background:transparent}
+:where(html[data-palette="morandi"]) .titlebar,:where(html[data-palette="morandi"]) .sidebar{background:var(--glass);border-color:var(--glass-border)}
+:where(html[data-palette="morandi"]) .sidebar{
+  -webkit-backdrop-filter:blur(26px) saturate(125%);
+  backdrop-filter:blur(26px) saturate(125%);
+}
+:where(html[data-palette="morandi"]) .card,:where(html[data-palette="morandi"]) .notes-side,:where(html[data-palette="morandi"]) .side-card{border-radius:14px;box-shadow:var(--shadow)}
+:where(html[data-palette="morandi"]) .notes-side{background:var(--glass);border-color:var(--glass-border)}
+:where(html[data-palette="morandi"]) .notes-main{border-radius:20px;background:var(--card);border-color:var(--glass-border);box-shadow:var(--shadow)}
+:where(html[data-palette="morandi"]) .today-card,:where(html[data-palette="morandi"]) .quote-card{border-radius:14px}
+:where(html[data-palette="morandi"]) .quote-card{background:var(--selected);border-color:var(--glass-border)}
+:where(html[data-palette="morandi"]) .side-card::after{background:radial-gradient(circle,rgba(141,169,151,.14),transparent 70%)}
+:where(html[data-palette="morandi"]) .nav-item{border-radius:10px}
+:where(html[data-palette="morandi"]) .nav-item.active{background:var(--selected);box-shadow:var(--control-shadow)}
+:where(html[data-palette="morandi"]) .note-item{border-radius:12px;background:transparent;border-color:transparent}
+:where(html[data-palette="morandi"]) .note-item.active,html[data-palette="morandi"][data-theme="dark"] .note-item.active{
+  background:var(--selected);border-color:var(--glass-border);box-shadow:var(--control-shadow);
+}
+html[data-palette="morandi"][data-theme="dark"] .note-item.active .note-item-time{color:var(--muted)}
+:where(html[data-palette="morandi"]) .note-item:hover{background:var(--hover)}
+:where(html[data-palette="morandi"]) .task{border-radius:10px}
+:where(html[data-palette="morandi"]) .logo,html[data-palette="morandi"][data-theme="dark"] .logo{background:transparent;color:var(--primary-text);box-shadow:none}
+:where(html[data-palette="morandi"]) .logo svg{display:block;width:100%;height:100%}
+:where(html[data-palette="morandi"]) .btn.primary,:where(html[data-palette="morandi"]) .tab.active,:where(html[data-palette="morandi"]) .search-tab.active,:where(html[data-palette="morandi"]) .seg-btn.active,:where(html[data-palette="morandi"]) .filter-chip.active,:where(html[data-palette="morandi"]) .view-switch-thumb,:where(html[data-palette="morandi"]) .chart-toggle-thumb,:where(html[data-palette="morandi"]) .bar,:where(html[data-palette="morandi"]) .metric-card.active,:where(html[data-palette="morandi"]) .day.selected,:where(html[data-palette="morandi"]) .pop-grid .day.range-lo,:where(html[data-palette="morandi"]) .pop-grid .day.range-hi{box-shadow:var(--control-shadow)}
+:where(html[data-palette="morandi"]) .btn.primary:hover{background:var(--primary-hover)}
+:where(html[data-palette="morandi"]) .btn.primary:active{box-shadow:var(--control-shadow)}
+:where(html[data-palette="morandi"]) .btn.primary .btn-hint{color:var(--on-primary);opacity:.75}
+:where(html[data-palette="morandi"]) .today-card{
+  --today-progress:linear-gradient(110deg,#c5d4c4,#9bb7a3);
+  background:var(--card);
+}
+html[data-palette="morandi"][data-theme="dark"] .today-card{--today-progress:linear-gradient(110deg,#829f8c,#a3bea8)}
+:where(html[data-palette="morandi"]) .today-icon,:where(html[data-palette="morandi"]) .today-sum .pct,:where(html[data-palette="morandi"]) .today-card.warn .today-sum .pct{color:var(--primary-text)}
+:where(html[data-palette="morandi"]) .today-seg.done,:where(html[data-palette="morandi"]) .today-seg.all-done,:where(html[data-palette="morandi"]) .today-seg.alert-done{background:var(--today-progress)}
+:where(html[data-palette="morandi"]) .today-seg:not(.done):not(.all-done):not(.alert-done){background:var(--surface-2)}
+:where(html[data-palette="morandi"]) .today-notice{background:var(--primary-soft)}
+:where(html[data-palette="morandi"]) .today-notice-icon,:where(html[data-palette="morandi"]) .today-notice-title{color:var(--primary-text)}
+:where(html[data-palette="morandi"]) .today-card.warn .today-notice{background:color-mix(in srgb,var(--red-soft) 60%,var(--card))}
+:where(html[data-palette="morandi"]) .today-card.warn .today-notice-copy{color:var(--text-2)}
+:where(html[data-palette="morandi"]) .side-ring.full{background:conic-gradient(from -90deg,var(--primary),var(--green) 100%)}
+:where(html[data-palette="morandi"]) .check,html[data-palette="morandi"][data-theme="dark"] .check{border-color:var(--check-border)}
+:where(html[data-palette="morandi"]) .check:hover,html[data-palette="morandi"][data-theme="dark"] .check:hover{border-color:var(--primary)}
+:where(html[data-palette="morandi"]) .task.is-done .check{border-color:var(--green);box-shadow:var(--control-shadow)}
+:where(html[data-palette="morandi"]) .dot-sm.done,:where(html[data-palette="morandi"]) .dot-sm.undone{box-shadow:none}
+:where(html[data-palette="morandi"]) .badge,html[data-palette="morandi"][data-theme="dark"] .badge{background:var(--red-soft);color:var(--red)}
+:where(html[data-palette="morandi"]) .badge.zero,html[data-palette="morandi"][data-theme="dark"] .badge.zero{background:var(--green-soft);color:var(--green)}
+:where(html[data-palette="morandi"]) .btn.danger,html[data-palette="morandi"][data-theme="dark"] .btn.danger{color:var(--red);border-color:var(--red-soft)}
+:where(html[data-palette="morandi"]) .btn.danger:hover,html[data-palette="morandi"][data-theme="dark"] .btn.danger:hover{background:var(--red);color:var(--on-primary);border-color:var(--red)}
+:where(html[data-palette="morandi"]) .custom-tag-error{color:var(--red)}
+:where(html[data-palette="morandi"]) .hit-mark,html[data-palette="morandi"][data-theme="dark"] .hit-mark{background:var(--highlight)}
+:where(html[data-palette="morandi"]) .filter-chip.selected{box-shadow:inset 0 0 0 100px var(--highlight)}
+:where(html[data-palette="morandi"]) .quick-new-form textarea#quickNewInput:focus,:where(html[data-palette="morandi"]) .search-box:focus-within{box-shadow:var(--focus-shadow)}
+:where(html[data-palette="morandi"]) .date-pop,:where(html[data-palette="morandi"]) .tag-menu,:where(html[data-palette="morandi"]) .custom-tag-picker{
+  background:var(--card);border-color:var(--line);box-shadow:var(--shadow);
+}
+:where(html[data-palette="morandi"]) .toast{background:var(--grad-brand);box-shadow:var(--shadow)}
+html[data-palette="morandi"]:not([data-theme="dark"]){
+  --grad-brand:linear-gradient(135deg,#e5ede4,#d5e2d5);
+  --on-primary:#4c6b58;
+  --primary-hover:#c8d9c9;
+}
+html[data-palette="morandi"]:not([data-theme="dark"]) .check svg{stroke:#fffefa}
+:where(html[data-palette="morandi"]) ::-webkit-scrollbar-thumb,html[data-palette="morandi"][data-theme="dark"] ::-webkit-scrollbar-thumb{background-color:var(--scroll-thumb)}
+:where(html[data-palette="morandi"]) ::-webkit-scrollbar-thumb:hover,html[data-palette="morandi"][data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background-color:var(--scroll-hover)}
+
+
+/* Blur the backdrop once at the column, rather than stacking opaque layers. */
+:where(html[data-palette="morandi"]) .side-col {
+  background:var(--glass);
+  border-color:var(--glass-border);
+  -webkit-backdrop-filter:blur(26px) saturate(125%);
+  backdrop-filter:blur(26px) saturate(125%);
+}
+:where(html[data-palette="morandi"]) .side-col :is(.titlebar,.sidebar) {
+  background:transparent;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+/* These panels do not contain viewport-positioned popovers. Keep the app shell
+   and page containers unfiltered so date-picker positioning stays unchanged. */
+:where(html[data-palette="morandi"]) :is(.card,.notes-side,.today-card,.metric-card,.pending-card) {
+  background:var(--glass-panel);
+  border-color:var(--glass-border);
+  -webkit-backdrop-filter:blur(26px) saturate(125%);
+  backdrop-filter:blur(26px) saturate(125%);
+  box-shadow:inset 0 1px 0 var(--glass-highlight),var(--shadow);
+}
+:where(html[data-palette="morandi"]) :is(.task,.side-card,.quote-card) {
+  background:var(--glass-tile);
+  border-color:var(--glass-border);
+}
+:where(html[data-palette="morandi"]) .notes-main {
+  background:var(--glass-paper);
+  box-shadow:inset 0 1px 0 var(--glass-highlight),var(--shadow);
+}
+
+/* Creation actions need more visual weight than secondary theme controls. */
+:where(html[data-palette="morandi"]) :is(.quick-new-btn,.notes-side-head > .btn.primary) {
+  --on-primary:var(--create-text);
+  background:var(--create-bg);
+  color:var(--create-text);
+}
+:where(html[data-palette="morandi"]) :is(.quick-new-btn,.notes-side-head > .btn.primary):hover {
+  background:var(--create-hover);
+}

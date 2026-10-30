@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub const SCHEMA_VERSION: u32 = 3;
+pub const SCHEMA_VERSION: u32 = 4;
 
 fn default_version() -> u32 {
     SCHEMA_VERSION
@@ -29,10 +29,16 @@ pub fn default_tags() -> Vec<TagDefinition> {
     .collect()
 }
 
+fn legacy_palette() -> String {
+    "warm".to_string()
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub theme: String,
+    #[serde(default = "legacy_palette")]
+    pub palette: String,
     pub default_tag: String,
 }
 

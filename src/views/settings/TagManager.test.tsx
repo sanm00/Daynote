@@ -5,7 +5,7 @@ import { defaultTags } from '@/lib/tags';
 import { TagManager } from './TagManager';
 import { NotesView } from '@/views/notes/NotesView';
 
-beforeEach(() => useAppStore.setState({tags:defaultTags(), tasks:[], notes:[], noteDraft:null, currentNoteId:null, settings:{theme:'light',defaultTag:'工作'},addTag:'工作',noteFilter:'all',newNotePending:false}));
+beforeEach(() => useAppStore.setState({tags:defaultTags(), tasks:[], notes:[], noteDraft:null, currentNoteId:null, settings:{theme:'light',palette:'morandi',defaultTag:'工作'},addTag:'工作',noteFilter:'all',newNotePending:false}));
 afterEach(cleanup);
 
 describe('tag management', () => {

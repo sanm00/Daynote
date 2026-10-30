@@ -7,7 +7,7 @@ import { setupAutoPersist } from '@/store/autosave';
 const note = { id:1, title:'笔记', content:'已保存', tag:'工作', createdAt:'2026-01-01T00:00:00Z', updatedAt:'2026-01-01T00:00:00Z' };
 const task = { id:1, title:'任务', tag:'工作', prio:'mid' as const, beginDate:null, endDate:null, done:false, doneAt:null };
 const state = () => useAppStore.getState();
-beforeEach(() => useAppStore.setState({tags:defaultTags(), settings:{theme:'light', defaultTag:'工作'}, tasks:[task], notes:[note], noteDraft:null, currentNoteId:1, addTag:'工作', noteFilter:'all'}));
+beforeEach(() => useAppStore.setState({tags:defaultTags(), settings:{theme:'light',palette:'morandi', defaultTag:'工作'}, tasks:[task], notes:[note], noteDraft:null, currentNoteId:1, addTag:'工作', noteFilter:'all'}));
 afterEach(() => {vi.restoreAllMocks();vi.useRealTimers();});
 
 describe('custom tags', () => {

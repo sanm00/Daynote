@@ -12,6 +12,7 @@ import type {
   Task,
   TaskRange,
   ThemeMode,
+  ThemePalette,
 } from '@/types';
 import type { StorageKind } from '@/lib/storage';
 
@@ -110,6 +111,7 @@ export interface UiSlice {
   setSearchQuery: (q: string) => void;
   setSearchType: (t: SearchType) => void;
   setTheme: (t: ThemeMode) => void;
+  setPalette: (palette: ThemePalette) => void;
   setDefaultTag: (t: Tag) => void;
   applyTheme: () => void;
 }

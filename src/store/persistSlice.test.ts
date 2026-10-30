@@ -13,7 +13,7 @@ describe('first-run examples', () => {
     vi.spyOn(storage, 'root').mockResolvedValue(null);
     useAppStore.setState({
       tasks: [], notes: [], currentNoteId: null, noteDraft: null, ready: false,
-      settings: { theme: 'light', defaultTag: '工作' },
+      settings: { theme: 'light', palette: 'morandi', defaultTag: '工作' },
     });
   });
 
@@ -72,7 +72,7 @@ describe('first-run examples', () => {
   it.each([false, true])('preserves existing data in production, including an empty collection (%s)', async (empty) => {
     const existing: StoreData = {
       version: 2,
-      settings: { theme: 'light', defaultTag: '生活' },
+      settings: { theme: 'light', palette: 'morandi', defaultTag: '生活' },
       tasks: [],
       notes: empty ? [] : [{
         id: 42, title: '我的笔记', content: '保留已有内容', tag: '生活',

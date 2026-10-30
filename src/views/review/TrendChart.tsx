@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { mdLabel, type Chart } from '@/lib/stats';
 
 interface Props {
@@ -14,6 +14,25 @@ export function TrendChart({ chart, chartType, onChartType, subtitle }: Props) {
   const tipRef = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [lineSize, setLineSize] = useState({ w: 0, h: 0 });
+
+  // Keep the measured tooltip inside the plot, including its first/last bucket.
+  useLayoutEffect(() => {
+    const host = chartRef.current;
+    const el = tipRef.current;
+    if (!tip || !host || !el) return;
+    const position = () => {
+      const half = el.offsetWidth / 2;
+      const x = Math.max(half + 8, Math.min(host.clientWidth - half - 8, tip.x));
+      const y = Math.max(el.offsetHeight + 8, Math.min(host.clientHeight - 8, tip.y));
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+    };
+    position();
+    const observer = new ResizeObserver(position);
+    observer.observe(host);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [tip]);
 
   // Line-chart geometry needs the measured box size.
   useEffect(() => {

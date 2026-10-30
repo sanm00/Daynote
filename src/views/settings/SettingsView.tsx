@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { fmt } from '@/lib/date';
 import { TagManager } from './TagManager';
+import { AppearanceSettings } from './AppearanceSettings';
 import { SCHEMA_VERSION } from '@/lib/constants';
 import { toast } from '@/lib/toast';
 import { isTauriRuntime } from '@/lib/storage';
@@ -10,7 +11,6 @@ import { confirmDialog } from '@/lib/confirm';
 
 export function SettingsView() {
   const settings = useAppStore((s) => s.settings);
-  const setTheme = useAppStore((s) => s.setTheme);
   const tags = useAppStore(s => s.tags);
   const tasks = useAppStore((s) => s.tasks);
   const notes = useAppStore((s) => s.notes);
@@ -115,30 +115,7 @@ export function SettingsView() {
   return (
     <section className="page active" id="page-settings">
       <div className="settings-scroll">
-        <div className="card setting-card">
-          <div className="setting-title">外观</div>
-          <div className="setting-row">
-            <div>
-              <div className="setting-label">主题</div>
-              <div className="setting-desc">选择界面配色方案，跟随系统会自动适配</div>
-            </div>
-            <div className="seg-group" id="themeSeg">
-              {(['light', 'dark', 'system'] as const).map((t) => (
-                <button
-                  key={t}
-                  className={`seg-btn${settings.theme === t ? ' active' : ''}`}
-                  data-theme={t}
-                  onClick={() => {
-                    setTheme(t);
-                    toast(`主题已切换为「${t === 'light' ? '浅色' : t === 'dark' ? '深色' : '跟随系统'}」`);
-                  }}
-                >
-                  {t === 'light' ? '浅色' : t === 'dark' ? '深色' : '跟随系统'}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <AppearanceSettings />
 
         <TagManager />
 

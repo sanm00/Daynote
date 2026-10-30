@@ -107,6 +107,7 @@ pub fn load_from_root(root: &Path) -> Result<Option<StoreData>, String> {
         tags: default_tags(),
         settings: Settings {
             theme: "light".to_string(),
+            palette: "morandi".to_string(),
             default_tag: "工作".to_string(),
         },
     });
@@ -162,6 +163,7 @@ mod tests {
             tags: default_tags(),
             settings: Settings {
                 theme: "dark".to_string(),
+                palette: "morandi".to_string(),
                 default_tag: "学习".to_string(),
             },
             tasks: vec![Task {
@@ -208,6 +210,7 @@ mod tests {
         assert_eq!(loaded.tags.len(), 4);
         assert_eq!(loaded.tags[0].name, "工作");
         assert_eq!(loaded.settings.theme, "dark");
+        assert_eq!(loaded.settings.palette, "morandi");
         assert_eq!(loaded.settings.default_tag, "学习");
         assert_eq!(loaded.tasks.len(), 1);
         assert_eq!(loaded.tasks[0].title, "写周报");
@@ -245,6 +248,7 @@ mod tests {
         assert_eq!(state.tags.len(), 4);
         assert_eq!(state.tags[0].id, "工作");
         assert_eq!(state.tags[1].id, state.settings.default_tag);
+        assert_eq!(state.settings.palette, "warm");
     }
 
     #[test]

@@ -457,3 +457,7 @@ html[data-theme='dark'] .pop-grid .day.in-range {
   color: var(--muted-2);
   white-space: nowrap;
 }
+
+/* Keep the brand mark in sync with the active palette. */
+.logo { color: var(--primary-text); }
+.logo svg { width:100%; height:100%; display:block; }

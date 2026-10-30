@@ -6,7 +6,7 @@ function resetStore() {
   useAppStore.setState({
     tasks: [],
     notes: [],
-    settings: { theme: 'light', defaultTag: '工作' },
+    settings: { theme: 'light', palette: 'morandi', defaultTag: '工作' },
     addTag: '工作',
     currentNoteId: null,
     noteDraft: null,
@@ -84,9 +84,9 @@ describe('importData', () => {
     useAppStore.getState().importData({
       tasks: [],
       notes: [],
-      settings: { theme: 'dark', defaultTag: '健康' },
+      settings: { theme: 'dark', palette: 'morandi', defaultTag: '健康' },
     });
-    expect(useAppStore.getState().settings).toEqual({ theme: 'dark', defaultTag: '健康' });
+    expect(useAppStore.getState().settings).toEqual({ theme: 'dark', palette: 'morandi', defaultTag: '健康' });
     expect(useAppStore.getState().addTag).toBe('健康');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
@@ -100,7 +100,7 @@ describe('importData', () => {
     const s = useAppStore.getState();
     expect(s.tasks).toEqual([]);
     expect(s.notes).toEqual([]);
-    expect(s.settings).toEqual({ theme: 'light', defaultTag: '工作' });
+    expect(s.settings).toEqual({ theme: 'light', palette: 'morandi', defaultTag: '工作' });
   });
 
   it('resets selection and transient view state', () => {
@@ -143,7 +143,7 @@ describe('resetAll', () => {
     useAppStore.setState({
       tasks: [{ id: 1, title: 'a', tag: '工作', prio: 'mid', beginDate: null, endDate: null, done: false, doneAt: null }],
       notes: [{ id: 2, title: '标题', content: '正文', tag: '工作', createdAt: '', updatedAt: '' }],
-      settings: { theme: 'dark', defaultTag: '学习' },
+      settings: { theme: 'dark', palette: 'morandi', defaultTag: '学习' },
       currentNoteId: 2,
       noteMode: 'edit',
       findOpen: true,
@@ -157,7 +157,7 @@ describe('resetAll', () => {
     expect(s.noteMode).toBe('preview');
     expect(s.findOpen).toBe(false);
     expect(s.planView).toEqual({ kind: 'date' });
-    expect(s.settings).toEqual({ theme: 'dark', defaultTag: '学习' });
+    expect(s.settings).toEqual({ theme: 'dark', palette: 'morandi', defaultTag: '学习' });
   });
 });
 

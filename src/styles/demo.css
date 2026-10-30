@@ -787,9 +787,10 @@ html[data-theme="dark"] .logo{background:var(--grad-accent)}
 .chart{position:relative}
 .chart-tip{
   position:absolute;z-index:6;left:0;top:0;pointer-events:none;
-  transform:translate(-50%,-115%);
+  transform:translate(-50%,-100%);
+  width:max-content;max-width:calc(100% - 16px);overflow-wrap:anywhere;
   background:var(--card);border:1px solid var(--line);border-radius:6px;
-  padding:4px 8px;font-size:var(--fs-2xs);color:var(--text);white-space:nowrap;
+  padding:4px 8px;font-size:var(--fs-2xs);color:var(--text);white-space:normal;
   box-shadow:0 4px 14px rgba(60,40,20,.18);
   opacity:0;transition:opacity .12s var(--ease);
   font-variant-numeric:tabular-nums;
