@@ -1,13 +1,13 @@
-/* Warm dark mode: charcoal, terracotta and muted olive. */
+/* Warm dark mode: neutral charcoal surfaces with terracotta accents. */
 html[data-palette="warm"][data-theme="dark"] {
   color-scheme:dark;
-  --bg:#211d1a; --card:#2a2521;
-  --surface:#25201c; --surface-2:#312922; --surface-3:#40352b; --hover:#3d3026;
-  --line:#493d33; --line-2:#3c332c;
-  --text:#f1e8dd; --text-2:#d0c0b0; --muted:#b5a596; --muted-2:#a89889;
-  --primary:#d39a78; --primary-text:#edb595; --primary-hover:#e1ad8d;
-  --primary-soft:#483127; --on-primary:#2b1e17;
-  --grad-brand:linear-gradient(135deg,#e1ae8a,#cf9573);
+  --bg:#1e1f20; --card:#272829;
+  --surface:#232425; --surface-2:#2e2f30; --surface-3:#393a3b; --hover:#343536;
+  --line:#454647; --line-2:#393a3b;
+  --text:#e9e8e6; --text-2:#c6c4c1; --muted:#aaa7a3; --muted-2:#9d9995;
+  --primary:#cf947f; --primary-text:#e4ad98; --primary-hover:#ddb09d;
+  --primary-soft:#42312c; --on-primary:#291f1c;
+  --grad-brand:linear-gradient(135deg,#dfaa96,#c98e78);
   --grad-check:linear-gradient(135deg,#a2ae84,#87976d);
   --grad-accent:var(--grad-brand);
   --green:#9dad83; --green-soft:#323b28;
@@ -21,9 +21,9 @@ html[data-palette="warm"][data-theme="dark"] {
   --overdue-bg:#372d23; --overdue-border:#5b4631; --overdue-accent:#c59d6b; --overdue-text:#e4bf90;
 }
 html[data-palette="warm"][data-theme="dark"] body {
-  background:radial-gradient(ellipse at 15% 10%,#322720,transparent 60%),#211d1a;
+  background:var(--bg);
 }
-html[data-palette="warm"][data-theme="dark"] .check { border-color:#6b5a48; }
+html[data-palette="warm"][data-theme="dark"] .check { border-color:#686561; }
 html[data-palette="warm"][data-theme="dark"] .task.is-done .check { border-color:var(--green); }
 html[data-palette="warm"][data-theme="dark"] .today-seg.all-done { background:var(--grad-check); }
 html[data-palette="warm"][data-theme="dark"] .side-ring.full { background:conic-gradient(from -90deg,var(--green),var(--green) 100%); }
@@ -31,6 +31,6 @@ html[data-palette="warm"][data-theme="dark"] :is(.badge,.btn.danger) { backgroun
 html[data-palette="warm"][data-theme="dark"] .btn.danger:hover { background:var(--red); color:var(--on-primary); }
 html[data-palette="warm"][data-theme="dark"] .note-item.active .note-item-time { color:var(--muted); }
 html[data-palette="warm"][data-theme="dark"] :is(.toast,.save-now) { background:var(--grad-brand); color:var(--on-primary); }
-html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb { background-color:#544538; }
-html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background-color:#72604e; }
+html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb { background-color:#505152; }
+html[data-palette="warm"][data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background-color:#696a6b; }
 html[data-palette="warm"][data-theme="dark"] .btn.primary .btn-hint { color:var(--on-primary); opacity:.8; }

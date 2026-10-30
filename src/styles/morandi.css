@@ -6,9 +6,9 @@
   --line:#dfe4da;
   --line-2:#e6e8e0;
   --text:#414b46;
-  --text-2:#69746c;
-  --muted:#626e63;
-  --muted-2:#697469;
+  --text-2:#536157;
+  --muted:#606c61;
+  --muted-2:#687166;
   --primary:#8da997;
   --primary-text:#658674;
   --primary-hover:#789883;
@@ -23,6 +23,7 @@
   --green:#789883;
   --green-soft:#e5ede7;
   --red:#ac7e79;
+  --warning-text:#895b55;
   --red-soft:#f1e6e1;
   --orange:#a18a68;
   --orange-soft:#eee8dc;
@@ -87,6 +88,7 @@ html[data-palette="morandi"][data-theme="dark"]{
   --green:#a3c0a8;
   --green-soft:#3d5144;
   --red:#d0aaa4;
+  --warning-text:var(--red);
   --red-soft:#54423f;
   --orange:#c8b496;
   --orange-soft:#4d493b;
@@ -212,12 +214,18 @@ html[data-palette="morandi"]:not([data-theme="dark"]) .check svg{stroke:#fffefa}
 }
 /* These panels do not contain viewport-positioned popovers. Keep the app shell
    and page containers unfiltered so date-picker positioning stays unchanged. */
-:where(html[data-palette="morandi"]) :is(.card,.notes-side,.today-card,.metric-card,.pending-card) {
+:where(html[data-palette="morandi"]) :is(.card,.notes-side) {
   background:var(--glass-panel);
   border-color:var(--glass-border);
   -webkit-backdrop-filter:blur(26px) saturate(125%);
   backdrop-filter:blur(26px) saturate(125%);
   box-shadow:inset 0 1px 0 var(--glass-highlight),var(--shadow);
+}
+/* Supporting cards sit close to the panel; only the main surfaces blur. */
+:where(html[data-palette="morandi"]) :is(.today-card,.metric-card,.pending-card,.side-card,.quote-card) {
+  background:var(--glass-tile);
+  border-color:var(--glass-border);
+  box-shadow:inset 0 1px 0 var(--glass-highlight),var(--control-shadow);
 }
 :where(html[data-palette="morandi"]) :is(.task,.side-card,.quote-card) {
   background:var(--glass-tile);

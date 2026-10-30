@@ -1,0 +1,47 @@
+/* Shared reading sizes and layout across palettes and display modes. */
+:root {
+  --fs-2xs:11px;
+  --fs-xs:12px;
+  --fs-sm:13px;
+  --fs-base:14px;
+  --fs-lg:16px;
+  --fs-xl:18px;
+  --fs-2xl:22px;
+}
+.note-editor {
+  --fs-2xs:11px;
+  --fs-xs:12px;
+  --fs-sm:13px;
+  --fs-base:14px;
+  --fs-lg:16px;
+  --fs-xl:18px;
+  --fs-2xl:22px;
+}
+.page { padding:14px; gap:12px; }
+:is(.plan-layout,.notes-layout) { gap:12px; }
+.card { padding:16px; }
+.cal-card { padding:10px; }
+:is(.notes-side,.notes-main) { padding:16px; gap:10px; }
+.task { padding:10px 12px; gap:10px; }
+.task-title { line-height:1.5; }
+.task-list { gap:8px; }
+.panel-head { gap:12px; margin-bottom:8px; flex-wrap:wrap; }
+.panel-head-actions { flex-wrap:wrap; max-width:100%; }
+.note-item { padding:10px 12px; }
+.note-item-snippet { height:auto; line-height:1.5; }
+.note-content-input { line-height:1.75; }
+.settings-scroll { gap:12px; }
+
+/* Keep room for the task list and editor at the native minimum window width. */
+@media (min-width:861px) and (max-width:1120px) {
+  .side-col { width:180px; }
+  .plan-side { width:228px; }
+  .notes-side { width:240px; }
+  .page { padding:10px; }
+  .plan-main { padding:14px; }
+}
+
+/* Enlarged text must remain reachable in short windows and expanded quick add. */
+.side-col .sidebar { width:100%; }
+.plan-side { overflow-y:auto; }
+.plan-side > * { flex-shrink:0; }

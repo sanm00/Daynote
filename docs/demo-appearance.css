@@ -68,3 +68,14 @@ html[data-theme="dark"] .theme-preview{filter:brightness(.8) saturate(.8)}
   .preview-nav{padding:10px 5px}
   .preview-content{padding:10px 7px}
 }
+
+/* Shared text hierarchy and warning semantics; each palette supplies its hues. */
+:root { --warning-text:#9c493c; }
+html[data-palette="warm"]:not([data-theme="dark"]) {
+  --muted:#696358;
+  --muted-2:#70695f;
+}
+html[data-theme="dark"] { --warning-text:var(--red); }
+.today-card.warn .today-notice { background:var(--red-soft); }
+.today-card.warn .today-notice :is(.today-notice-icon,.today-notice-title) { color:var(--warning-text); }
+.today-card.warn .today-notice .today-notice-copy { color:var(--text-2); }

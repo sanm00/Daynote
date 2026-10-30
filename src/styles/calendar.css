@@ -34,19 +34,20 @@ html[data-palette="warm"]:not([data-theme="dark"]) .cal-card {
   font-weight:700; opacity:1; box-shadow:none;
 }
 .cal-card .cal-grid .day:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
-.cal-card .cal-grid .day .dot-sm.done {
-  background:var(--green);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 14%,transparent);
+/* Completion uses a filled dot; pending uses a ring, including on selected days. */
+.cal-card :is(.day-dots,.cal-legend) .dot-sm {
+  width:6px; height:6px; box-shadow:none;
 }
-.cal-card .cal-grid .day .dot-sm.undone {
-  background:var(--orange);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 16%,transparent);
+.cal-card :is(.day-dots,.cal-legend) .dot-sm.done { background:var(--green); }
+.cal-card :is(.day-dots,.cal-legend) .dot-sm.undone {
+  background:transparent; border:1.5px solid var(--orange);
 }
-.cal-card .cal-grid .day-dots { bottom:4px; gap:3px; }
-.cal-card .cal-grid .day .dot-sm { width:5px; height:5px; }
-.cal-card .cal-grid .day.selected .dot-sm.done { background:color-mix(in srgb,var(--green) 45%,var(--cal-selection-ink)); }
-.cal-card .cal-grid .day.selected .dot-sm.undone { background:color-mix(in srgb,var(--orange) 55%,var(--cal-selection-ink)); }
-html[data-palette="warm"]:not([data-theme="dark"]) .cal-card .day.selected .dot-sm.done { background:var(--green); }
-html[data-palette="warm"]:not([data-theme="dark"]) .cal-card .day.selected .dot-sm.undone { background:var(--orange); }
+.cal-card .cal-grid .day-dots { bottom:4px; gap:4px; }
+.cal-card .cal-grid .day.selected .dot-sm.done {
+  background:color-mix(in srgb,var(--green) 35%,var(--cal-selection-ink));
+}
+.cal-card .cal-grid .day.selected .dot-sm.undone {
+  background:transparent;
+  border-color:color-mix(in srgb,var(--orange) 35%,var(--cal-selection-ink));
+}
 .cal-card .cal-legend { gap:10px; margin-top:8px; padding-top:8px; }
-.cal-card .cal-legend .dot-sm { width:5px; height:5px; }

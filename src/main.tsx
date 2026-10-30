@@ -7,6 +7,7 @@ import './styles/warm-dark.css';
 import './styles/morandi.css';
 import './styles/appearance.css';
 import './styles/calendar.css';
+import './styles/layout.css';
 import { App } from '@/App';
 import { flushPersist, setupAutoPersist, useAppStore } from '@/store';
 
