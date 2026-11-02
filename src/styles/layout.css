@@ -45,3 +45,76 @@
 .side-col .sidebar { width:100%; }
 .plan-side { overflow-y:auto; }
 .plan-side > * { flex-shrink:0; }
+
+/* Component geometry belongs to the shared layout, not to a color palette. */
+:root {
+  --radius-panel:14px;
+  --radius-card:12px;
+  --radius-row:10px;
+  --radius-control:8px;
+  --panel-shadow:0 8px 24px rgb(20 24 22 / 8%);
+  --tile-shadow:0 1px 3px rgb(20 24 22 / 8%);
+}
+html[data-theme="dark"] {
+  --panel-shadow:0 8px 24px rgb(0 0 0 / 18%);
+  --tile-shadow:0 1px 3px rgb(0 0 0 / 16%);
+}
+:is(.card,.notes-side,.notes-main) {
+  border-radius:var(--radius-panel);
+  border-width:1px;
+  border-style:solid;
+  border-color:var(--panel-border,var(--line));
+  box-shadow:inset 0 1px 0 var(--panel-highlight,transparent),var(--panel-shadow);
+}
+:is(.today-card,.metric-card,.pending-card,.side-card,.quote-card) {
+  border-radius:var(--radius-card);
+  border:1px solid var(--panel-border,var(--line));
+  box-shadow:var(--tile-shadow);
+}
+:is(.task,.note-item,.nav-item) { border-radius:var(--radius-row); }
+:is(.task,.note-item) {
+  border-width:1px; border-style:solid;
+  border-color:var(--row-border,var(--line));
+}
+:is(.date-pop,.tag-menu,.custom-tag-picker,.confirm-dialog) { border-radius:var(--radius-card); }
+:is(.btn,.search-trigger,.date-trigger,.tag-trigger) { border-radius:var(--radius-control); }
+html[data-theme] :is(.note-item.active,.nav-item.active,.metric-card.active,.pending-card.active) {
+  box-shadow:var(--tile-shadow);
+}
+html[data-theme] .note-item.active { border-color:var(--primary); }
+
+/* Separate navigation through its surface color, without a hard vertical rule. */
+:is(.side-col,.sidebar) { border-right:0; }
+.side-col .titlebar { margin-right:0; }
+
+/* The note list is a column of cards, like the plan sidebar. */
+.notes-layout > .notes-side {
+  width:260px;
+  padding:0;
+  gap:10px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+.notes-side .notes-list { gap:8px; }
+:where(.notes-list) .note-item { background:var(--glass-tile,var(--card)); }
+html[data-palette="warm"] .notes-list .note-item { background:var(--card); }
+html[data-palette="warm"] .notes-list .note-item.active { background:var(--primary-soft); }
+html[data-palette="warm"] .notes-list .note-item:hover { background:var(--hover); }
+@media (min-width:861px) and (max-width:1120px) {
+  .notes-layout > .notes-side { width:228px; }
+}
+@media (max-width:860px) {
+  .notes-layout > .notes-side { width:100%; }
+}
+
+/* Scroll naturally without a visible scrollbar or reserved gutter. */
+.notes-side .notes-list {
+  scrollbar-width:none;
+  scrollbar-gutter:auto;
+  padding-right:0;
+}
+.notes-side .notes-list::-webkit-scrollbar { display:none; width:0; height:0; }
