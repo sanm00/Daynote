@@ -63,5 +63,5 @@ jobs:
 
             See the assets below for macOS (universal), Linux (.deb / .AppImage) and Windows (.msi / setup.exe).
             The unsigned macOS build may need to be allowed manually on first launch.
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
