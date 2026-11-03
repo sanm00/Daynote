@@ -51,3 +51,36 @@ html[data-palette="warm"]:not([data-theme="dark"]) .cal-card {
   border-color:color-mix(in srgb,var(--orange) 35%,var(--cal-selection-ink));
 }
 .cal-card .cal-legend { gap:10px; margin-top:8px; padding-top:8px; }
+
+/* Scope switch (day / week / month) sits under the calendar title row. */
+.cal-scope { display:flex; gap:2px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:3px; margin-bottom:8px; }
+.cal-scope .seg-btn { flex:1; padding:4px 0; font-size:var(--fs-2xs); text-align:center; }
+
+/* Period grids (week / month scopes): same `.day` cells as the date view, one cell
+ *  per week / month, so every grid across the three scopes is identical in size. */
+.cal-card .cal-grid.cal-periods {
+  max-height:322px; overflow-y:auto; overflow-x:hidden;
+  scrollbar-width:thin; align-content:start;
+}
+.cal-card .cal-grid.cal-periods::-webkit-scrollbar { width:6px; }
+.cal-card .cal-grid.cal-periods::-webkit-scrollbar-thumb { background:var(--surface-3); border-radius:3px; }
+
+/* Range panel (week / month): the day header is the primary group; the
+ *  done/todo labels below it are secondary. Groups are separated by spacing only. */
+.range-day-head {
+  display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+  margin-top:14px; padding:2px 6px 5px; border-radius:7px;
+  font-size:var(--fs-sm); font-weight:700; color:var(--text);
+  transition:background .12s var(--ease), color .12s var(--ease);
+}
+.range-day-head:first-child { margin-top:0; }
+.range-day-head:hover { background:var(--hover); }
+.range-day-head.today { color:var(--primary-text); }
+.rdh-label { white-space:nowrap; min-width:0; }
+.rdh-progress { display:flex; align-items:center; gap:8px; margin-left:auto; flex:none; }
+.rdh-meta { font-size:var(--fs-2xs); font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; }
+.rdh-bar { width:96px; height:3px; border-radius:2px; background:var(--surface-3); overflow:hidden; }
+.rdh-bar i { display:block; height:100%; border-radius:2px; background:linear-gradient(90deg,var(--ring-b),var(--ring-a)); }
+
+/* Secondary group label (待完成 / 已完成) inside a day section. */
+.plan-main .group-label { font-weight:500; color:var(--muted-2); }

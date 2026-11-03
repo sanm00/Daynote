@@ -1458,36 +1458,45 @@ html[data-theme="dark"] .note-render pre code .hljs-meta{color:#6f7482}
 .search-summary{font-size:var(--fs-xs);color:var(--muted);padding:2px 2px 0;min-height:16px}
 .search-summary b{color:var(--text-2);font-weight:600;font-variant-numeric:tabular-nums}
 
-.search-results{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+.search-results{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:4px}
 .search-group{display:flex;flex-direction:column;gap:6px}
 .search-group-head{
   display:flex;align-items:center;gap:6px;
-  font-size:var(--fs-2xs);font-weight:600;color:var(--muted);
-  letter-spacing:.4px;text-transform:uppercase;padding:0 2px 2px;
+  padding:0 2px 2px;
+  font-size:var(--fs-2xs);font-weight:600;color:var(--muted);letter-spacing:.3px;
 }
 .search-group-head .cnt{
-  font-size:var(--fs-2xs);padding:2px 6px;border-radius:8px;background:var(--surface-3);
+  font-size:var(--fs-2xs);padding:1px 6px;border-radius:8px;background:var(--surface-3);
   color:var(--text-2);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0;
 }
 .search-hit{
-  display:flex;align-items:flex-start;gap:6px;
-  padding:6px 6px;border:1px solid var(--line);border-radius:8px;
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border:1px solid var(--line);border-radius:10px;
   background:var(--card);cursor:pointer;text-align:left;font-family:inherit;
   transition:border-color .12s var(--ease), box-shadow .12s var(--ease), background .12s var(--ease);
   width:100%;
 }
 .search-hit:hover{border-color:var(--primary);box-shadow:0 1px 3px rgba(92,70,50,.08)}
 .hit-icon{
-  width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;
+  width:26px;height:26px;border-radius:7px;flex:none;display:grid;place-items:center;
   background:var(--primary-soft);
 }
-.hit-icon svg{width:15px;height:15px;fill:none;stroke:var(--primary);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.hit-icon.task{background:var(--green-soft)}
-.hit-icon.task svg{stroke:var(--green)}
-.hit-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.hit-icon svg{width:14px;height:14px;fill:none;stroke:var(--primary);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.search-hit .check{border-color:var(--check-border,#ccd1e4)}
+.search-hit .check.checked{
+  background:var(--grad-check);border-color:#65785b;
+  box-shadow:0 1px 3px rgba(101,120,91,.25);
+}
+.search-hit .check svg{width:9px;height:9px;stroke:var(--on-primary);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hit-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .hit-title{font-size:var(--fs-sm);font-weight:600;color:var(--text);line-height:1.35;word-break:break-word}
-.hit-snippet{font-size:var(--fs-xs);color:var(--muted);line-height:1.45;word-break:break-word}
-.hit-meta{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:var(--fs-2xs);color:var(--muted-2);font-variant-numeric:tabular-nums}
+.search-hit.is-done .hit-title{color:var(--muted-2);text-decoration:line-through;text-decoration-color:var(--muted-2)}
+.hit-snippet{
+  font-size:var(--fs-xs);color:var(--muted);line-height:1.45;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.hit-meta{display:flex;align-items:center;gap:6px;margin-top:1px;font-size:var(--fs-2xs);color:var(--muted);min-width:0}
+.hit-time{margin-left:auto;color:var(--muted-2);font-size:var(--fs-2xs);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none;padding-left:8px}
 .hit-mark{background:rgba(202,137,107,.24);color:var(--text);border-radius:5px;padding:0 2px;font-weight:600}
 html[data-theme="dark"] .hit-mark{background:rgba(202,137,107,.32)}
 .search-empty{
@@ -1729,9 +1738,14 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
                 <div class="cal-title" id="calTitle" aria-live="polite">—</div>
                 <div class="cal-navigation">
                   <button type="button" class="cal-today-btn" id="calToday">今天</button>
-                  <button type="button" class="icon-btn" id="calPrev" aria-label="上个月"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 7-5 5 5 5"/></svg></button>
-                  <button type="button" class="icon-btn" id="calNext" aria-label="下个月"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 7 5 5-5 5"/></svg></button>
+                  <button type="button" class="icon-btn" id="calPrev" aria-label="上一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 7-5 5 5 5"/></svg></button>
+                  <button type="button" class="icon-btn" id="calNext" aria-label="下一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 7 5 5-5 5"/></svg></button>
                 </div>
+              </div>
+              <div class="cal-scope" id="calScope" role="group" aria-label="日历视图">
+                <button type="button" class="seg-btn active" data-scope="date">日</button>
+                <button type="button" class="seg-btn" data-scope="week">周</button>
+                <button type="button" class="seg-btn" data-scope="month">月</button>
               </div>
               <div class="cal-week">
                 <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span class="weekend">六</span><span class="weekend">日</span>
@@ -1787,12 +1801,6 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
               <div>
                 <h2 id="taskDateTitle">—</h2>
                 <p class="sub" id="taskSubtitle"></p>
-              </div>
-              <div class="panel-head-actions">
-                <button class="icon-btn" id="prevDay" title="前一天">‹</button>
-                <button class="btn ghost sm" id="todayBtn">今天</button>
-                <button class="btn ghost sm" id="postponeBtn" title="把这一天未完成的任务移到下一天">顺延未完成</button>
-                <button class="icon-btn" id="nextDay" title="后一天">›</button>
               </div>
             </div>
 
@@ -1976,22 +1984,22 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
           <div class="help-hero"><h2>欢迎使用 随记</h2><p>Daynote · 计划 · 执行 · 回顾 · 沉淀，一站式管理你的每一天</p></div>
           <div class="help-grid">
             <div class="card help-card">
-              <div class="help-icon" style="background:var(--tag-work-bg)">📅</div>
+              <div class="help-icon" style="background:var(--tag-work-bg);color:var(--tag-work-fg)"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"> <rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/> <path d="M8 2.5v4M16 2.5v4M3 10h18"/> <path d="M9 15.5l2 2 4-4.5"/> </svg></div>
               <div class="help-title">计划</div>
               <div class="help-desc">在日历上选择任意日期，添加任务、设置标签、随时改期，逾期任务可以一键移到今天。</div>
             </div>
             <div class="card help-card">
-              <div class="help-icon" style="background:var(--tag-study-bg)">📝</div>
+              <div class="help-icon" style="background:var(--tag-study-bg);color:var(--tag-study-fg)"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"> <path d="M5 3.5h11l3.5 3.5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/> <path d="M8 9h8M8 13h8M8 17h5"/> </svg></div>
               <div class="help-title">笔记</div>
               <div class="help-desc">随手记录想法、会议要点、读书摘抄，支持搜索和标签筛选；编辑后点「保存」或按 ⌘S，离开笔记时也会自动保存。</div>
             </div>
             <div class="card help-card">
-              <div class="help-icon" style="background:var(--tag-health-bg)">📊</div>
+              <div class="help-icon" style="background:var(--tag-health-bg);color:var(--tag-health-fg)"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"> <path d="M3 21h18"/><path d="M6 21V11M11 21V5M16 21v-6M21 21v-9"/> </svg></div>
               <div class="help-title">回顾</div>
               <div class="help-desc">按今天、昨天、本周、上周、当月、上月查看完成情况，用数据了解自己的节奏。</div>
             </div>
             <div class="card help-card">
-              <div class="help-icon" style="background:var(--tag-life-bg)">⚙️</div>
+              <div class="help-icon" style="background:var(--tag-life-bg);color:var(--tag-life-fg)"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="3"/> <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/> </svg></div>
               <div class="help-title">设置</div>
               <div class="help-desc">切换深浅色主题、设置默认标签，导出、导入或清空你的所有数据。</div>
             </div>
@@ -2356,7 +2364,7 @@ const state = {
   page: 'plan',
   selectedDate: TODAY_STR,
   planView: { kind: 'date' },
-  calMonth: new Date(TODAY.getFullYear(), TODAY.getMonth(), 1),
+  calScope: 'date',
   reviewRange: 'today',
   chartType: 'bar',
   addBegin: TODAY_STR,
@@ -2381,14 +2389,53 @@ function nearestWeekend(){
   const dow = (TODAY.getDay() + 6) % 7;
   return addDays(TODAY, (5 - dow + 7) % 7);
 }
+
+/** Monday-anchored 7-day window containing `ds`. */
+function weekDays(ds){
+  const d = parseDate(ds);
+  const mon = addDays(d, -((d.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, i) => fmt(addDays(mon, i)));
+}
+function shiftMonth(ds, n){
+  const d = parseDate(ds);
+  const day = d.getDate();
+  let x = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const dim = new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate();
+  x.setDate(Math.min(day, dim));
+  return fmt(x);
+}
+/** First day of the selected month — the anchor used by the week/month calendars. */
+function calAnchor(){
+  const d = parseDate(state.selectedDate);
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+function setCalScope(scope){
+  state.calScope = scope;
+  state.planView = { kind: scope };
+  state.reschedulingId = null;
+  renderPlan();
+}
 function goToDate(ds, syncAddDate = true){
   state.planView = { kind: 'date' };
   state.selectedDate = ds;
-  const d = parseDate(ds);
-  state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  state.calScope = 'date';
   state.reschedulingId = null;
   if(syncAddDate){ state.addBegin = ds; state.addEnd = ds; }
   syncAddControls();
+  renderPlan();
+}
+function goWeek(ds){
+  state.planView = { kind: 'week' };
+  state.selectedDate = ds;
+  state.calScope = 'week';
+  state.reschedulingId = null;
+  renderPlan();
+}
+function goMonth(ds){
+  state.planView = { kind: 'month' };
+  state.selectedDate = ds;
+  state.calScope = 'month';
+  state.reschedulingId = null;
   renderPlan();
 }
 let toastTimer = null;
@@ -2424,35 +2471,155 @@ function relTime(iso){
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 }
 
+function dayCellHTML(ds, d, opts = {}){
+  const inMonth = opts.inMonth !== false;
+  const dayTasks = tasks.filter(t => occursOn(t, ds));
+  const doneN = dayTasks.filter(t => t.done).length;
+  const undoneN = dayTasks.length - doneN;
+  let dots = '';
+  if(doneN) dots += '<i class="dot-sm done"></i>';
+  if(undoneN) dots += '<i class="dot-sm undone"></i>';
+  const cls = ['day'];
+  if(!inMonth) cls.push('other');
+  if(ds === TODAY_STR) cls.push('today');
+  if(ds === state.selectedDate) cls.push('selected');
+  const dow = ['一','二','三','四','五','六','日'][(d.getDay() + 6) % 7];
+  return `<button type="button" class="${cls.join(' ')}" data-date="${ds}"
+    aria-label="${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 周${dow}${ds === TODAY_STR ? '，今天' : ''}${dayTasks.length ? `，${dayTasks.length} 项任务` : ''}"
+    ${ds === TODAY_STR ? 'aria-current="date"' : ''} aria-pressed="${ds === state.selectedDate}">
+    <span class="day-number">${d.getDate()}</span>
+    <span class="day-dots" aria-hidden="true">${dots}</span>
+  </button>`;
+}
+
+/** ISO-8601 week number (1..52/53) for a date: week containing that Thursday. */
+function isoWeekNum(d){
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = (t.getDay() + 6) % 7 + 1;
+  t.setDate(t.getDate() - (dow - 4));
+  const yearStart = new Date(t.getFullYear(), 0, 1);
+  return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+}
+/** The ISO year a date belongs to (may differ from calendar year near Jan/Dec edges). */
+function isoYearOf(d){
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = (t.getDay() + 6) % 7 + 1;
+  t.setDate(t.getDate() - (dow - 4));
+  return t.getFullYear();
+}
+/** Mondays of the ISO weeks belonging to `year` (52 or 53 entries). */
+function yearWeekStarts(year){
+  const jan4 = new Date(year, 0, 4);
+  const firstMon = addDays(jan4, -((jan4.getDay() + 6) % 7));
+  const count = isoWeekNum(new Date(year, 11, 28));
+  return Array.from({ length: count }, (_, i) => addDays(firstMon, i * 7));
+}
+const scrollSelIntoView = () => requestAnimationFrame(() => {
+  const grid = $('#calGrid');
+  const el = grid && grid.querySelector('.day.period.selected');
+  if(!grid || !el) return;
+  const gr = grid.getBoundingClientRect();
+  const er = el.getBoundingClientRect();
+  if(er.top < gr.top || er.bottom > gr.bottom) grid.scrollTop += (er.top - gr.top) - 8;
+});
+
+/** One period cell (a whole week or a whole month) for the week / month scopes.
+ *  Reuses the same `.day` cell styling as the date view; only the label differs. */
+function periodCellHTML(opts){
+  const { kind, label, aria, date, sel, total, done, isToday } = opts;
+  const cls = ['day', 'period', kind];
+  if(isToday) cls.push('today');
+  if(sel) cls.push('selected');
+  let dots = '';
+  if(done) dots += '<i class="dot-sm done"></i>';
+  if(total > done) dots += '<i class="dot-sm undone"></i>';
+  return `<button type="button" class="${cls.join(' ')}" data-date="${date}"
+    aria-label="${aria || label}${total ? `，${total} 项任务，完成 ${done}` : '，无安排'}"
+    ${isToday ? 'aria-current="date"' : ''} aria-pressed="${sel}">
+    <span class="day-number">${label}</span>
+    <span class="day-dots" aria-hidden="true">${dots}</span>
+  </button>`;
+}
+
+/** Count distinct scheduled tasks overlapping a set of days (multi-day aware). */
+function rangeTaskStats(days){
+  const seen = new Set();
+  let total = 0, done = 0;
+  for(const ds of days){
+    for(const t of tasks){
+      if(seen.has(t.id)) continue;
+      if(occursOn(t, ds)){
+        seen.add(t.id);
+        total++;
+        if(t.done) done++;
+      }
+    }
+  }
+  return { total, done };
+}
+
+/** Calendar: date → day grid of the month · week → one cell per week of the year ·
+ *  month → one cell per month of the year. */
 function renderCalendar(){
-  const y = state.calMonth.getFullYear();
-  const m = state.calMonth.getMonth();
-  $('#calTitle').textContent = `${y}年${m+1}月`;
-  const first = new Date(y, m, 1);
-  const offset = (first.getDay() + 6) % 7;
-  const start = addDays(first, -offset);
+  const scope = state.calScope;
+  const selD = parseDate(state.selectedDate);
+
+  document.querySelectorAll('#calScope .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.scope === scope));
+
+  if(scope === 'date'){
+    const y = selD.getFullYear(), mo = selD.getMonth();
+    $('.cal-card .cal-week').hidden = false;
+    $('#calGrid').className = 'cal-grid';
+    $('#calTitle').textContent = `${y}年${mo + 1}月`;
+    $('#calPrev').setAttribute('aria-label', '上个月');
+    $('#calNext').setAttribute('aria-label', '下个月');
+    $('#calToday').textContent = '今天';
+    const first = new Date(y, mo, 1);
+    const start = addDays(first, -((first.getDay() + 6) % 7));
+    let html = '';
+    for(let i = 0; i < 42; i++){
+      const d = addDays(start, i);
+      html += dayCellHTML(fmt(d), d, { inMonth: d.getMonth() === mo });
+    }
+    $('#calGrid').innerHTML = html;
+    return;
+  }
+
+  const year = scope === 'week' ? isoYearOf(selD) : selD.getFullYear();
+  $('.cal-card .cal-week').hidden = true;
+  $('#calGrid').className = 'cal-grid cal-periods ' + (scope === 'month' ? 'is-month' : 'is-week');
+  $('#calTitle').textContent = `${year}年`;
+  $('#calPrev').setAttribute('aria-label', '上一年');
+  $('#calNext').setAttribute('aria-label', '下一年');
+  $('#calToday').textContent = scope === 'month' ? '当月' : '本周';
+
   let html = '';
-  for(let i = 0; i < 42; i++){
-    const d = addDays(start, i);
-    const ds = fmt(d);
-    const dayTasks = tasks.filter(t => occursOn(t, ds));
-    const doneN = dayTasks.filter(t => t.done).length;
-    const undoneN = dayTasks.length - doneN;
-    let dots = '';
-    if(doneN) dots += '<i class="dot-sm done"></i>';
-    if(undoneN) dots += '<i class="dot-sm undone"></i>';
-    const cls = ['day'];
-    if(d.getMonth() !== m) cls.push('other');
-    if(ds === TODAY_STR) cls.push('today');
-    if(ds === state.selectedDate) cls.push('selected');
-    html += `<button type="button" class="${cls.join(' ')}" data-date="${ds}"
-      aria-label="${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日${ds === TODAY_STR ? '，今天' : ''}"
-      ${ds === TODAY_STR ? 'aria-current="date"' : ''} aria-pressed="${ds === state.selectedDate}">
-      <span class="day-number">${d.getDate()}</span>
-      <span class="day-dots" aria-hidden="true">${dots}</span>
-    </button>`;
+  if(scope === 'month'){
+    const selMon = selD.getMonth();
+    html = Array.from({ length: 12 }, (_, m) => {
+      const dim = new Date(year, m + 1, 0).getDate();
+      const days = Array.from({ length: dim }, (_, i) => fmt(new Date(year, m, i + 1)));
+      const { total, done } = rangeTaskStats(days);
+      return periodCellHTML({
+        kind: 'month', label: `${m + 1}`, aria: `${m + 1}月`, date: fmt(new Date(year, m, 1)),
+        sel: m === selMon, total, done, isToday: m === TODAY.getMonth() && year === TODAY.getFullYear(),
+      });
+    }).join('');
+  } else {
+    const weeks = yearWeekStarts(year);
+    const selMon = weekDays(state.selectedDate)[0];
+    html = weeks.map((mon, i) => {
+      const startDs = fmt(mon);
+      const days = Array.from({ length: 7 }, (_, c) => fmt(addDays(mon, c)));
+      const { total, done } = rangeTaskStats(days);
+      return periodCellHTML({
+        kind: 'week', label: `${i + 1}`, date: startDs,
+        sel: startDs === selMon, total, done, isToday: days.includes(TODAY_STR),
+      });
+    }).join('');
   }
   $('#calGrid').innerHTML = html;
+  scrollSelIntoView();
 }
 
 const getOverdue = () => tasks.filter(t => isOverdueTask(t)).sort((a,b) => b.endDate.localeCompare(a.endDate));
@@ -2461,6 +2628,8 @@ const getPending = () => tasks.filter(t => !t.done);
 
 function setPlanView(view){
   state.planView = view;
+  if(view.kind === 'week' || view.kind === 'month') state.calScope = view.kind;
+  else if(view.kind === 'date') state.calScope = 'date';
   state.reschedulingId = null;
   renderPlan();
 }
@@ -2598,17 +2767,80 @@ function wireRenameInput(){
 
 function renderTasks(){ renderTasksBody(); wireRenameInput(); }
 
+/** Week / month panel: tasks grouped by day, empty days hidden (multi-day aware). */
+function renderRangeTasks(kind){
+  const days = kind === 'week'
+    ? weekDays(state.selectedDate)
+    : (() => {
+        const a = calAnchor();
+        const y = a.getFullYear(), m = a.getMonth();
+        const dim = new Date(y, m + 1, 0).getDate();
+        return Array.from({ length: dim }, (_, i) => fmt(new Date(y, m, i + 1)));
+      })();
+  const seen = new Set();
+  let total = 0, doneN = 0;
+  for(const ds of days){
+    for(const t of tasks){
+      if(seen.has(t.id) || !occursOn(t, ds)) continue;
+      seen.add(t.id); total++; if(t.done) doneN++;
+    }
+  }
+
+  if(kind === 'week'){
+    const a = parseDate(days[0]), b = parseDate(days[6]);
+    const rel = days.includes(TODAY_STR) ? ' · 本周' : '';
+    $('#taskDateTitle').textContent =
+      `${isoYearOf(a)}年第${isoWeekNum(a)}周 · ${a.getMonth()+1}月${a.getDate()}日–${b.getMonth()+1}月${b.getDate()}日${rel}`;
+  } else {
+    const a = calAnchor();
+    const dim = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
+    const rel = (a.getFullYear() === TODAY.getFullYear() && a.getMonth() === TODAY.getMonth()) ? ' · 当月' : '';
+    $('#taskDateTitle').textContent = `${a.getFullYear()}年${a.getMonth()+1}月 · 1日–${dim}日${rel}`;
+  }
+  const un = getUnscheduled().length;
+  $('#taskSubtitle').textContent = total
+    ? `共 ${total} 项 · 完成 ${doneN} · 未完成 ${total - doneN}${un ? ` · 待排期 ${un}` : ''}`
+    : (un ? `这段时间没有安排 · 待排期 ${un}` : '这段时间还没有安排');
+
+  const dayBlock = ds => {
+    const list = tasks.filter(t => occursOn(t, ds)).sort((a,b) => (a.done - b.done) || (pw[a.prio] - pw[b.prio]));
+    const d = parseDate(ds);
+    const dow = ['一','二','三','四','五','六','日'][(d.getDay() + 6) % 7];
+    const isToday = ds === TODAY_STR;
+    const dn = list.filter(t => t.done).length;
+    const pct = Math.round(dn / list.length * 100);
+    const head = `<div class="range-day-head${isToday ? ' today' : ''}" data-date="${ds}" role="button" tabindex="0" title="查看这一天">
+        <span class="rdh-label">${d.getMonth()+1}月${d.getDate()}日 周${dow}${isToday ? ' · 今天' : ''}</span>
+        <span class="rdh-progress"><span class="rdh-meta">${dn}/${list.length}</span><span class="rdh-bar"><i style="width:${pct}%"></i></span></span>
+      </div>`;
+    return head + groupedRows(list, 'range');
+  };
+
+  const html = days.filter(ds => tasks.some(t => occursOn(t, ds))).map(dayBlock).join('');
+  $('#taskList').innerHTML = total
+    ? html
+    : `
+    <div class="empty-tip" style="padding:34px 0">
+      <svg viewBox="0 0 24 24" style="width:30px;height:30px"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg>
+      <span>${kind === 'week' ? '本周还没有安排' : '本月还没有安排'}</span>
+      <span class="tip-sub">留出一点空间，让日子自己长出来。</span>
+    </div>`;
+}
+
 function renderTasksBody(){
   const view = state.planView;
   const isDate = view.kind === 'date';
+  const isWeek = view.kind === 'week';
+  const isMonth = view.kind === 'month';
   const progLine = $('#dayProgressLine');
   const summary = $('#viewSummary');
   progLine.hidden = !isDate;
   summary.hidden = isDate;
-  $('#prevDay').hidden = !isDate;
-  $('#nextDay').hidden = !isDate;
-  $('#todayBtn').hidden = !isDate;
-  $('#postponeBtn').hidden = !isDate;
+
+  if(isWeek || isMonth){
+    renderRangeTasks(view.kind);
+    return;
+  }
 
   if(isDate){
     const ds = state.selectedDate;
@@ -3698,7 +3930,7 @@ function renderGlobalSearch(){
           <span class="hit-main">
             <span class="hit-title">${highlight(n.title || '无标题', q)}</span>
             ${snip ? `<span class="hit-snippet">${highlight(snip, q)}</span>` : ''}
-            <span class="hit-meta"><span class="tag" data-tag="${n.tag}">${tagText(n.tag)}</span><span>更新于 ${relTime(n.updatedAt)}</span></span>
+            <span class="hit-meta"><span class="tag" data-tag="${n.tag}">${tagText(n.tag)}</span><i class="meta-dot"></i><span class="hit-time">更新于 ${relTime(n.updatedAt)}</span></span>
           </span>
         </button>`;
       }).join('')}
@@ -3709,17 +3941,14 @@ function renderGlobalSearch(){
       <div class="search-group-head">待办 <span class="cnt">${taskHits.length}</span></div>
       ${taskHits.map(t => {
         const overdue = isOverdueTask(t);
-        return `<button class="search-hit" data-kind="task" data-id="${t.id}">
-          <span class="hit-icon task">
-            <svg viewBox="0 0 24 24">${t.done ? '<path d="M4 12.5l5 5L20 6.5"/>' : '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8"/>'}</svg>
-          </span>
+        return `<button class="search-hit${t.done ? ' is-done' : ''}" data-kind="task" data-id="${t.id}">
+          <span class="check${t.done ? ' checked' : ''}" aria-hidden="true">${t.done ? '<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>' : ''}</span>
           <span class="hit-main">
-            <span class="hit-title" ${t.done ? 'style="color:var(--muted-2);text-decoration:line-through"' : ''}>${highlight(t.title, q)}</span>
+            <span class="hit-title">${highlight(t.title, q)}</span>
             <span class="hit-meta">
               <span class="tag" data-tag="${t.tag}">${tagText(t.tag)}</span>
-              <span>${isUnscheduled(t) ? '未排期' : taskLabel(t)}</span>
-              ${overdue ? '<span class="overdue-tag">逾期</span>' : ''}
-              ${t.done ? `<span>· 完成于 ${doneAtLabel(t.doneAt)}</span>` : ''}
+              <i class="meta-dot"></i>
+              ${t.done ? `${t.beginDate !== null ? `<span>${taskLabel(t)}</span><i class="meta-dot"></i>` : ''}<span class="hit-time">完成于 ${doneAtLabel(t.doneAt)}</span>` : isUnscheduled(t) ? '<span class="overdue-flag">未排期</span>' : `<span>${taskLabel(t)}</span>${overdue ? '<span class="overdue-tag" title="已逾期">逾期</span>' : ''}`}
             </span>
           </span>
         </button>`;
@@ -3827,9 +4056,26 @@ document.addEventListener('keydown', e => {
 });
 
 $('#calGrid').addEventListener('click', e => {
+  const period = e.target.closest('.period');
+  if(period){
+    if(state.calScope === 'week') goWeek(period.dataset.date);
+    else goMonth(period.dataset.date);
+    return;
+  }
   const cell = e.target.closest('.day');
   if(!cell) return;
   goToDate(cell.dataset.date);
+});
+$('#taskList').addEventListener('click', e => {
+  const head = e.target.closest('.range-day-head');
+  if(head) goToDate(head.dataset.date);
+});
+$('#taskList').addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const head = e.target.closest('.range-day-head');
+  if(!head) return;
+  e.preventDefault();
+  goToDate(head.dataset.date);
 });
 $('#viewOverdueCard').addEventListener('click', () => setPlanView({ kind: 'overdue' }));
 $('#viewUnschedCard').addEventListener('click', () => setPlanView({ kind: 'unscheduled' }));
@@ -4046,33 +4292,29 @@ $('#quickNewInput').addEventListener('keydown', e => {
     $('#tagMenu').classList.remove('open');
   }
 });
-$('#calToday').addEventListener('click', () => goToDate(TODAY_STR));
-$('#calPrev').addEventListener('click', () => {
-  state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() - 1, 1);
-  renderCalendar();
+$('#calToday').addEventListener('click', () => {
+  const s = state.calScope;
+  if(s === 'month') goMonth(TODAY_STR);
+  else if(s === 'week') goWeek(TODAY_STR);
+  else goToDate(TODAY_STR);
 });
-$('#calNext').addEventListener('click', () => {
-  state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() + 1, 1);
-  renderCalendar();
-});
-$('#prevDay').addEventListener('click', () => goToDate(fmt(addDays(parseDate(state.selectedDate), -1))));
-$('#nextDay').addEventListener('click', () => goToDate(fmt(addDays(parseDate(state.selectedDate), 1))));
-$('#todayBtn').addEventListener('click', () => goToDate(TODAY_STR));
-
-$('#postponeBtn').addEventListener('click', () => {
-  const from = state.selectedDate;
-  const to = fmt(addDays(parseDate(from), 1));
-  let n = 0;
-  tasks.forEach(t => {
-    if(t.endDate === from && !t.done){
-      t.beginDate = fmt(addDays(parseDate(t.beginDate), 1));
-      t.endDate = to;
-      n++;
-    }
-  });
-  if(!n){ toast('这一天没有未完成的任务'); return; }
-  renderPlan();
-  toast(`已把 ${n} 项未完成任务顺延到 ${to}`);
+$('#calPrev').addEventListener('click', () => shiftCal(-1));
+$('#calNext').addEventListener('click', () => shiftCal(1));
+function shiftCal(dir){
+  const s = state.calScope;
+  const d = parseDate(state.selectedDate);
+  if(s === 'date'){
+    goToDate(shiftMonth(state.selectedDate, dir));
+    return;
+  }
+  const dim = new Date(d.getFullYear() + dir, d.getMonth() + 1, 0).getDate();
+  const nd = fmt(new Date(d.getFullYear() + dir, d.getMonth(), Math.min(d.getDate(), dim)));
+  if(s === 'week') goWeek(nd);
+  else goMonth(nd);
+}
+$('#calScope').addEventListener('click', e => {
+  const btn = e.target.closest('.seg-btn');
+  if(btn) setCalScope(btn.dataset.scope);
 });
 
 $('#viewSummary').addEventListener('click', e => {
@@ -4173,8 +4415,8 @@ $('#auditTodoList').addEventListener('click', e => {
   if(!t) return;
   state.page = 'plan';
   state.planView = { kind: 'date' };
+  state.calScope = 'date';
   state.selectedDate = t.beginDate;
-  state.calMonth = new Date(parseDate(t.beginDate).getFullYear(), parseDate(t.beginDate).getMonth(), 1);
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === 'plan'));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-plan'));
   renderPlan();

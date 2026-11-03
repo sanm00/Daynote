@@ -1,5 +1,5 @@
 import type { Note } from '@/types';
-import { parseDate, today, todayStr } from '@/lib/date';
+import { today, todayStr } from '@/lib/date';
 import { deriveTitle, isBlankNote, touchedTitles } from './noteTitle';
 import type { SliceCreator, UiSlice } from './types';
 
@@ -12,7 +12,7 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
   prevPage: 'plan',
   planView: { kind: 'date' },
   selectedDate: todayStr(),
-  calMonth: new Date(today().getFullYear(), today().getMonth(), 1),
+  calScope: 'date',
   reviewRange: 'today',
   chartType: 'bar',
   addBegin: todayStr(),
@@ -70,19 +70,27 @@ export const createUiSlice: SliceCreator<UiSlice> = (set, get) => ({
     });
   },
   consumeNewNote: () => set({ newNotePending: false }),
-  setPlanView: (kind) => set({ planView: { kind }, reschedulingId: null }),
+  setPlanView: (kind) =>
+    set((s) => ({
+      planView: { kind },
+      calScope: kind === 'week' || kind === 'month' ? kind : kind === 'date' ? 'date' : s.calScope,
+      reschedulingId: null,
+    })),
   goToDate: (date, syncAddDate = true) => {
-    const d = parseDate(date);
     set((s) => ({
       planView: { kind: 'date' },
       selectedDate: date,
-      calMonth: new Date(d.getFullYear(), d.getMonth(), 1),
+      calScope: 'date',
       reschedulingId: null,
       addBegin: syncAddDate ? date : s.addBegin,
       addEnd: syncAddDate ? date : s.addEnd,
     }));
   },
-  setCalMonth: (calMonth) => set({ calMonth }),
+  goWeek: (date) =>
+    set({ planView: { kind: 'week' }, selectedDate: date, calScope: 'week', reschedulingId: null }),
+  goMonth: (date) =>
+    set({ planView: { kind: 'month' }, selectedDate: date, calScope: 'month', reschedulingId: null }),
+  setCalScope: (scope) => set({ calScope: scope, planView: { kind: scope }, reschedulingId: null }),
   setReviewRange: (reviewRange) => set({ reviewRange }),
   setChartType: (chartType) => set({ chartType }),
   setAddRange: (addBegin, addEnd) => set({ addBegin, addEnd }),

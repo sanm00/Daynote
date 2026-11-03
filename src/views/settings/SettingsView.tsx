@@ -173,7 +173,7 @@ export function SettingsView() {
           </div>
           <div className="about-row">
             <span>版本</span>
-            <b>v1.0.0</b>
+            <b>v1.1.0</b>
           </div>
           <div className="about-row">
             <span>数据存储</span>

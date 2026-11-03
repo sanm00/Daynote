@@ -17,7 +17,7 @@ beforeEach(() => {
   const now = new Date().toISOString();
   useAppStore.setState({
     ready: true, page: 'plan', prevPage: 'plan', selectedDate: todayStr(),
-    planView: { kind: 'date' }, calMonth: today(), reschedulingId: null,
+    planView: { kind: 'date' }, calScope: 'date', reschedulingId: null,
     addBegin: todayStr(), addEnd: todayStr(), addTag: '工作',
     newTodoPending: false, newNotePending: false, currentNoteId: 1,
     noteDraft: null, noteMode: 'preview', noteFilter: 'all',

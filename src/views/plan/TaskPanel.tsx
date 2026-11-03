@@ -1,12 +1,38 @@
 import { useAppStore } from '@/store';
-import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, belongsToPlanDay } from '@/lib/selectors';
-import { addDays, dayNames, fmt, parseDate, todayStr } from '@/lib/date';
-import { toast } from '@/lib/toast';
-import { emptyTip, groupedRows, overdueSubtitle, pendingSubtitle, PendingList } from './TaskLists';
+import type { Task } from '@/types';
+import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, belongsToPlanDay, occursOn } from '@/lib/selectors';
+import {
+  calAnchorOf,
+  dayNames,
+  fmt,
+  isoWeekNum,
+  isoYearOf,
+  parseDate,
+  today,
+  todayStr,
+  weekDays,
+} from '@/lib/date';
+import { emptyTip, groupedRows, overdueSubtitle, pendingSubtitle, PendingList, RangeList } from './TaskLists';
 import type { UseDatePop } from './useDatePop';
 
 interface Props {
   datePop: UseDatePop;
+}
+
+/** Distinct scheduled tasks overlapping a set of days (multi-day aware). */
+function rangeStats(tasks: Task[], days: string[]) {
+  const seen = new Set<number>();
+  let total = 0;
+  let doneN = 0;
+  for(const ds of days){
+    for(const t of tasks){
+      if(seen.has(t.id) || !occursOn(t, ds)) continue;
+      seen.add(t.id);
+      total++;
+      if(t.done) doneN++;
+    }
+  }
+  return { total, doneN };
 }
 
 export function TaskPanel({ datePop }: Props) {
@@ -14,7 +40,6 @@ export function TaskPanel({ datePop }: Props) {
   const planView = useAppStore((s) => s.planView);
   const selectedDate = useAppStore((s) => s.selectedDate);
   const goToDate = useAppStore((s) => s.goToDate);
-  const postponeUnfinished = useAppStore((s) => s.postponeUnfinished);
   const moveAllToToday = useAppStore((s) => s.moveAllToToday);
 
   const tStr = todayStr();
@@ -23,6 +48,8 @@ export function TaskPanel({ datePop }: Props) {
   const pendingList = getPending(tasks);
 
   const isDate = planView.kind === 'date';
+  const isWeek = planView.kind === 'week';
+  const isMonth = planView.kind === 'month';
   const selD = parseDate(selectedDate);
   const isToday = selectedDate === tStr;
   const isFuture = selectedDate > tStr;
@@ -36,7 +63,46 @@ export function TaskPanel({ datePop }: Props) {
   let summary: JSX.Element | null = null;
   let listHTML: React.ReactNode = null;
 
-  if (isDate) {
+  if(isWeek || isMonth){
+    const days = isWeek
+      ? weekDays(selectedDate)
+      : (() => {
+          const a = calAnchorOf(selD);
+          const dim = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
+          return Array.from({ length: dim }, (_, i) => fmt(new Date(a.getFullYear(), a.getMonth(), i + 1)));
+        })();
+    const { total, doneN } = rangeStats(tasks, days);
+    if(isWeek){
+      const a = parseDate(days[0]);
+      const b = parseDate(days[6]);
+      const rel = days.includes(tStr) ? ' · 本周' : '';
+      title = `${isoYearOf(a)}年第${isoWeekNum(a)}周 · ${a.getMonth() + 1}月${a.getDate()}日–${b.getMonth() + 1}月${b.getDate()}日${rel}`;
+    } else {
+      const a = calAnchorOf(selD);
+      const dim = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
+      const cur = today();
+      const rel = a.getFullYear() === cur.getFullYear() && a.getMonth() === cur.getMonth() ? ' · 当月' : '';
+      title = `${a.getFullYear()}年${a.getMonth() + 1}月 · 1日–${dim}日${rel}`;
+    }
+    const un = unschedList.length;
+    subtitle = total
+      ? `共 ${total} 项 · 完成 ${doneN} · 未完成 ${total - doneN}${un ? ` · 待排期 ${un}` : ''}`
+      : un
+        ? `这段时间没有安排 · 待排期 ${un}`
+        : '这段时间还没有安排';
+    listHTML = total ? (
+      <RangeList days={days} tasks={tasks} datePop={datePop} onPickDay={goToDate} />
+    ) : (
+      emptyTip(
+        <>
+          <rect x="3" y="4.5" width="18" height="16.5" rx="2.5" />
+          <path d="M8 2.5v4M16 2.5v4M3 10h18" />
+        </>,
+        isWeek ? '本周还没有安排' : '本月还没有安排',
+        '留出一点空间，让日子自己长出来。',
+      )
+    );
+  } else if (isDate) {
     title =
       `${selD.getMonth() + 1}月${selD.getDate()}日 ${dayNames[selD.getDay()]}` +
       (isToday ? ' · 今天' : '');
@@ -117,44 +183,9 @@ export function TaskPanel({ datePop }: Props) {
           <h2>{title}</h2>
           <p className="sub">{subtitle}</p>
         </div>
-        <div className="panel-head-actions">
-          {isDate && (
-            <>
-              <button
-                className="icon-btn"
-                title="前一天"
-                onClick={() => goToDate(fmt(addDays(selD, -1)))}
-              >
-                ‹
-              </button>
-              <button className="btn ghost sm" onClick={() => goToDate(tStr)}>
-                今天
-              </button>
-              <button
-                className="btn ghost sm"
-                title="把这一天未完成的任务移到下一天"
-                onClick={() => {
-                  const before = tasks.filter((t) => t.endDate === selectedDate && !t.done).length;
-                  postponeUnfinished();
-                  if (before) toast(`已把 ${before} 项未完成任务顺延到 ${fmt(addDays(selD, 1))}`);
-                  else toast('这一天没有未完成的任务');
-                }}
-              >
-                顺延未完成
-              </button>
-              <button
-                className="icon-btn"
-                title="后一天"
-                onClick={() => goToDate(fmt(addDays(selD, 1)))}
-              >
-                ›
-              </button>
-            </>
-          )}
-        </div>
       </div>
 
-      {!isDate && summary && <div className="view-summary">{summary}</div>}
+      {!isDate && !isWeek && !isMonth && summary && <div className="view-summary">{summary}</div>}
 
       <div className="task-list">{listHTML}</div>
     </div>

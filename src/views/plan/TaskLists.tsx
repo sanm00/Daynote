@@ -1,4 +1,5 @@
 import type { Task } from '@/types';
+import { Fragment } from 'react';
 import { PRIORITY_WEIGHT as pw, occursOn } from '@/lib/selectors';
 import { parseDate, todayStr } from '@/lib/date';
 import { TaskRow } from './TaskRow';
@@ -41,6 +42,55 @@ export function emptyTip(svg: JSX.Element, main: string, sub: string) {
       <span>{main}</span>
       <span className="tip-sub">{sub}</span>
     </div>
+  );
+}
+
+/** Week / month range list: tasks sectioned by day, empty days hidden. The day
+ *  header is the primary group; drilling into it opens the single-day view. */
+export function RangeList({ days, tasks, datePop, onPickDay }: ListProps & {
+  days: string[];
+  onPickDay: (ds: string) => void;
+}) {
+  const tStr = todayStr();
+  const dow = ['一', '二', '三', '四', '五', '六', '日'];
+  return (
+    <>
+      {days
+        .filter((ds) => tasks.some((t) => occursOn(t, ds)))
+        .map((ds) => {
+          const list = tasks
+            .filter((t) => occursOn(t, ds))
+            .sort((a, b) => Number(a.done) - Number(b.done) || pw[a.prio] - pw[b.prio]);
+          const d = parseDate(ds);
+          const isToday = ds === tStr;
+          const dn = list.filter((t) => t.done).length;
+          const pct = Math.round((dn / list.length) * 100);
+          return (
+            <Fragment key={ds}>
+              <div
+                className={`range-day-head${isToday ? ' today' : ''}`}
+                role="button"
+                tabIndex={0}
+                title="查看这一天"
+                onClick={() => onPickDay(ds)}
+                onKeyDown={(e) => {
+                  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onPickDay(ds); }
+                }}
+              >
+                <span className="rdh-label">
+                  {d.getMonth() + 1}月{d.getDate()}日 周{dow[(d.getDay() + 6) % 7]}
+                  {isToday ? ' · 今天' : ''}
+                </span>
+                <span className="rdh-progress">
+                  <span className="rdh-meta">{dn}/{list.length}</span>
+                  <span className="rdh-bar"><i style={{ width: `${pct}%` }} /></span>
+                </span>
+              </div>
+              {groupedRows(list, datePop)}
+            </Fragment>
+          );
+        })}
+    </>
   );
 }
 

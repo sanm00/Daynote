@@ -118,3 +118,21 @@ html[data-palette="warm"] .notes-list .note-item:hover { background:var(--hover)
   padding-right:0;
 }
 .notes-side .notes-list::-webkit-scrollbar { display:none; width:0; height:0; }
+
+/* Help feature icons share the navigation's line drawings. */
+.help-icon svg {
+  width:18px;
+  height:18px;
+  display:block;
+  stroke-width:1.75;
+}
+
+/* Keep selection and hover colors aligned; elevation marks the active note. */
+html[data-palette="morandi"] .notes-list .note-item.active {
+  box-shadow:inset 0 1px 0 var(--glass-highlight),
+    0 2px 3px rgb(45 62 50 / 8%),0 5px 12px rgb(45 62 50 / 12%);
+}
+html[data-palette="morandi"][data-theme="dark"] .notes-list .note-item.active {
+  box-shadow:inset 0 1px 0 var(--glass-highlight),
+    0 2px 3px rgb(0 0 0 / 16%),0 5px 12px rgb(0 0 0 / 24%);
+}

@@ -152,7 +152,7 @@ html[data-palette="morandi"][data-theme="dark"]{
 :where(html[data-palette="morandi"]) .nav-item.active{background:var(--selected);box-shadow:var(--control-shadow)}
 :where(html[data-palette="morandi"]) .note-item{background:transparent;border-color:var(--glass-border)}
 :where(html[data-palette="morandi"]) .note-item.active,html[data-palette="morandi"][data-theme="dark"] .note-item.active{
-  background:var(--selected);
+  background:var(--hover);
 }
 html[data-palette="morandi"][data-theme="dark"] .note-item.active .note-item-time{color:var(--muted)}
 :where(html[data-palette="morandi"]) .note-item:hover{background:var(--hover)}

@@ -344,7 +344,7 @@ describe('plan navigation and quick add', () => {
       page: 'settings',
       selectedDate: '2000-01-01',
       planView: { kind: 'pending' },
-      calMonth: new Date(2000, 0, 1),
+      calScope: 'date',
       reschedulingId: 5,
     });
     useAppStore.getState().setPage('plan');

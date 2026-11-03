@@ -65,24 +65,25 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                           <path d="M8 9h8M8 13h8M8 17h5" />
                         </svg>
                       </span>
-                      <span className="hit-main">
-                        <span
-                          className="hit-title"
-                          dangerouslySetInnerHTML={{ __html: highlight(n.title || '无标题', q) }}
-                        />
-                        {snip && (
-                          <span
-                            className="hit-snippet"
-                            dangerouslySetInnerHTML={{ __html: highlight(snip, q) }}
-                          />
-                        )}
-                        <span className="hit-meta">
-                          <span className="tag" data-tag={n.tag}>
-                            <TagName id={n.tag} />
-                          </span>
-                          <span>更新于 {relTime(n.updatedAt)}</span>
-                        </span>
-                      </span>
+                       <span className="hit-main">
+                         <span
+                           className="hit-title"
+                           dangerouslySetInnerHTML={{ __html: highlight(n.title || '无标题', q) }}
+                         />
+                         {snip && (
+                           <span
+                             className="hit-snippet"
+                             dangerouslySetInnerHTML={{ __html: highlight(snip, q) }}
+                           />
+                         )}
+                         <span className="hit-meta">
+                           <span className="tag" data-tag={n.tag}>
+                             <TagName id={n.tag} />
+                           </span>
+                           <i className="meta-dot" />
+                           <span className="hit-time">更新于 {relTime(n.updatedAt)}</span>
+                         </span>
+                       </span>
                     </button>
                   );
                 })}
@@ -98,42 +99,44 @@ export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, o
                   return (
                     <button
                       key={t.id}
-                      className="search-hit"
+                      className={`search-hit${t.done ? ' is-done' : ''}`}
                       data-kind="task"
                       data-id={t.id}
                       onClick={() => onJumpTask(t.id)}
                     >
-                      <span className="hit-icon task">
-                        <svg viewBox="0 0 24 24">
-                          {t.done ? (
+                      <span className={`check${t.done ? ' checked' : ''}`} aria-hidden="true">
+                        {t.done && (
+                          <svg viewBox="0 0 24 24">
                             <path d="M4 12.5l5 5L20 6.5" />
-                          ) : (
-                            <>
-                              <rect x="4" y="4" width="16" height="16" rx="3" />
-                              <path d="M8 12h8" />
-                            </>
-                          )}
-                        </svg>
+                          </svg>
+                        )}
                       </span>
-                      <span className="hit-main">
-                        <span
-                          className="hit-title"
-                          style={
-                            t.done
-                              ? { color: 'var(--muted-2)', textDecoration: 'line-through' }
-                              : undefined
-                          }
-                          dangerouslySetInnerHTML={{ __html: highlight(t.title, q) }}
-                        />
-                        <span className="hit-meta">
-                          <span className="tag" data-tag={t.tag}>
-                            <TagName id={t.tag} />
-                          </span>
-                          <span>{t.beginDate !== null && `计划于 ${dateRangeLabel(t.beginDate, t.endDate)}`}{t.beginDate === null && '未排期'}</span>
-                          {overdue && <span className="overdue-tag">逾期</span>}
-                          {t.done && <span>· 完成于 {doneAtLabel(t.doneAt)}</span>}
-                        </span>
-                      </span>
+                       <span className="hit-main">
+                         <span
+                           className="hit-title"
+                           dangerouslySetInnerHTML={{ __html: highlight(t.title, q) }}
+                         />
+                         <span className="hit-meta">
+                           <span className="tag" data-tag={t.tag}>
+                             <TagName id={t.tag} />
+                           </span>
+                           <i className="meta-dot" />
+                           {t.done ? (
+                             <>
+                               {t.beginDate !== null && <span>计划于 {dateRangeLabel(t.beginDate, t.endDate)}</span>}
+                               {t.beginDate !== null && <i className="meta-dot" />}
+                               <span className="hit-time">完成于 {doneAtLabel(t.doneAt)}</span>
+                             </>
+                           ) : t.beginDate === null ? (
+                             <span className="overdue-flag">未排期</span>
+                           ) : (
+                             <>
+                               <span>计划于 {dateRangeLabel(t.beginDate, t.endDate)}</span>
+                               {overdue && <span className="overdue-tag" title="已逾期">逾期</span>}
+                             </>
+                           )}
+                         </span>
+                       </span>
                     </button>
                   );
                 })}

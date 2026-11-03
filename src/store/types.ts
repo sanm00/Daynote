@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type {
+  CalScope,
   ChartType,
   Note,
   Page,
@@ -61,7 +62,7 @@ export interface UiSlice {
   prevPage: Page;
   planView: PlanView;
   selectedDate: string;
-  calMonth: Date;
+  calScope: CalScope;
   reviewRange: ReviewRange;
   chartType: ChartType;
   addBegin: string;
@@ -93,7 +94,9 @@ export interface UiSlice {
   consumeNewNote: () => void;
   setPlanView: (kind: PlanViewKind) => void;
   goToDate: (date: string, syncAddDate?: boolean) => void;
-  setCalMonth: (d: Date) => void;
+  goWeek: (date: string) => void;
+  goMonth: (date: string) => void;
+  setCalScope: (scope: CalScope) => void;
   setReviewRange: (r: ReviewRange) => void;
   setChartType: (t: ChartType) => void;
   setAddRange: (begin: string, end: string) => void;

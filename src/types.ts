@@ -47,7 +47,8 @@ export interface Settings {
 }
 
 export type Page = 'plan' | 'notes' | 'search' | 'review' | 'settings' | 'help';
-export type PlanViewKind = 'date' | 'overdue' | 'unscheduled' | 'pending';
+export type PlanViewKind = 'date' | 'week' | 'month' | 'overdue' | 'unscheduled' | 'pending';
+export type CalScope = 'date' | 'week' | 'month';
 export type ReviewRange = 'today' | 'yesterday' | 'week' | 'lastweek' | 'month' | 'lastmonth';
 export type ChartType = 'bar' | 'line';
 export type ThemePalette = 'warm' | 'morandi';

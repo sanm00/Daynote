@@ -57,8 +57,8 @@ export function HelpView() {
 
         <div className="help-grid">
           <div className="card help-card">
-            <div className="help-icon" style={{ background: 'var(--tag-work-bg)' }}>
-              📅
+            <div className="help-icon" style={{ background: 'var(--tag-work-bg)', color: 'var(--tag-work-fg)' }}>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"> <rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/> <path d="M8 2.5v4M16 2.5v4M3 10h18"/> <path d="M9 15.5l2 2 4-4.5"/> </svg>
             </div>
             <div className="help-title">计划</div>
             <div className="help-desc">
@@ -66,22 +66,22 @@ export function HelpView() {
             </div>
           </div>
           <div className="card help-card">
-            <div className="help-icon" style={{ background: 'var(--tag-study-bg)' }}>
-              📝
+            <div className="help-icon" style={{ background: 'var(--tag-study-bg)', color: 'var(--tag-study-fg)' }}>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"> <path d="M5 3.5h11l3.5 3.5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/> <path d="M8 9h8M8 13h8M8 17h5"/> </svg>
             </div>
             <div className="help-title">笔记</div>
             <div className="help-desc">随手记录想法、会议要点、读书摘抄，支持搜索和标签筛选；编辑后点「保存」或按 ⌘S，离开笔记时也会自动保存。</div>
           </div>
           <div className="card help-card">
-            <div className="help-icon" style={{ background: 'var(--tag-health-bg)' }}>
-              📊
+            <div className="help-icon" style={{ background: 'var(--tag-health-bg)', color: 'var(--tag-health-fg)' }}>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"> <path d="M3 21h18"/><path d="M6 21V11M11 21V5M16 21v-6M21 21v-9"/> </svg>
             </div>
             <div className="help-title">回顾</div>
             <div className="help-desc">按今天、昨天、本周、上周、当月、上月查看完成情况，用数据了解自己的节奏。</div>
           </div>
           <div className="card help-card">
-            <div className="help-icon" style={{ background: 'var(--tag-life-bg)' }}>
-              ⚙️
+            <div className="help-icon" style={{ background: 'var(--tag-life-bg)', color: 'var(--tag-life-fg)' }}>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"> <circle cx="12" cy="12" r="3"/> <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/> </svg>
             </div>
             <div className="help-title">设置</div>
             <div className="help-desc">切换深浅色主题、设置默认标签，导出、导入或清空你的所有数据。</div>
