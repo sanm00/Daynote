@@ -150,14 +150,27 @@ describe('computeStats', () => {
     expect(s.rate).toBe(200);
   });
 
-  it('ignores completions whose day is outside the period', () => {
+  it('attributes a finished task to its completion day, not the period it was scheduled in', () => {
     const r = { start: today(), end: today() };
     const early = task({ beginDate: fmt(today()), endDate: fmt(today()), done: true, doneAt: `${fmt(addDays(today(), -1))}T12:00:00` });
     const s = computeStats([early], [], r, 'today');
-    expect(s.total).toBe(1);
+    expect(s.total).toBe(0);
     expect(s.doneN).toBe(0);
     expect(s.rate).toBe(0);
     expect(s.undoneN).toBe(0);
+    const y = { start: addDays(today(), -1), end: addDays(today(), -1) };
+    expect(computeStats([early], [], y, 'yesterday').total).toBe(1);
+  });
+
+  it('drops a cross-day task finished before today from today’s plan count', () => {
+    const r = { start: today(), end: today() };
+    const span = task({
+      beginDate: fmt(addDays(today(), -1)),
+      endDate: fmt(today()),
+      done: true,
+      doneAt: `${fmt(addDays(today(), -1))}T18:00:00`,
+    });
+    expect(computeStats([span], [], r, 'today').total).toBe(0);
   });
 
   it('counts a multi-day task as planned on every day it spans', () => {
@@ -243,7 +256,22 @@ describe('computeChart', () => {
       task({ beginDate: '2026-03-18', endDate: '2026-03-18' }),
     ];
     const chart = computeChart({ start, end }, tasks);
-    expect(chart.max).toBe(2);
+    expect(chart.max).toBe(3);
+  });
+
+  it('places a finished cross-day task on its attributed day only', () => {
+    const start = new Date(2026, 2, 16);
+    const end = new Date(2026, 2, 22);
+    const span = task({
+      beginDate: '2026-03-17',
+      endDate: '2026-03-19',
+      done: true,
+      doneAt: '2026-03-17T09:00:00.000Z',
+    });
+    const sched = Object.fromEntries(computeChart({ start, end }, [span]).buckets.map((b) => [b.ds, b.scheduled]));
+    expect(sched['2026-03-17']).toBe(1);
+    expect(sched['2026-03-18']).toBe(0);
+    expect(sched['2026-03-19']).toBe(0);
   });
 });
 

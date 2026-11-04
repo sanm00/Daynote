@@ -1610,7 +1610,6 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
 .search-navigation{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none}
 .search-navigation>span{font-size:var(--fs-2xs);color:var(--muted-2)}
 .search-hit.keyboard-active{border-color:var(--primary);background:var(--primary-soft);outline:1px solid var(--primary)}
-.review-basis{font-size:var(--fs-2xs);color:var(--muted);line-height:1.6;padding:0 2px}
 </style>
 <link rel="stylesheet" href="demo-tags.css">
 <link rel="stylesheet" href="demo-warm-dark.css">
@@ -1866,7 +1865,6 @@ html[data-theme="dark"] .nav-item.active svg{stroke:var(--primary)}
 
         <div class="review-scroll">
           <div class="stats-grid" id="statsGrid"></div>
-          <p class="review-basis" id="reviewBasis"></p>
 
           <div class="charts-row">
             <div class="card chart-card">
@@ -3259,7 +3257,6 @@ function renderReview(){
     </div>
   `;
 
-  $('#reviewBasis').textContent = `完成任务按实际完成日统计；计划数按排期与周期有重叠计（含跨天与未来）；完成率 = 周期内完成 ${doneN} / 周期内计划 ${total}。`;
   renderChart(r, tasks);
 
   const tagCount = {};

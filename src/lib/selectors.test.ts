@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { fmt, addDays, today } from './date';
 import {
+  belongsToPlanDay,
+  countPlanRange,
   getFilteredNotes,
   getOverdue,
   getPending,
   getUnscheduled,
-  isMultiDay,
   isOverdue,
   isUnscheduled,
   occursOn,
+  plannedDay,
+  spansRange,
 } from './selectors';
 import type { Note, Priority, Task } from '@/types';
 
@@ -71,11 +74,9 @@ describe('getOverdue', () => {
 });
 
 describe('schedule helpers', () => {
-  it('classifies unscheduled, multi-day and overdue', () => {
+  it('classifies unscheduled and overdue', () => {
     expect(isUnscheduled(task({ beginDate: null, endDate: null }))).toBe(true);
     expect(isUnscheduled(task({ beginDate: day(0), endDate: day(0) }))).toBe(false);
-    expect(isMultiDay(task({ beginDate: day(0), endDate: day(2) }))).toBe(true);
-    expect(isMultiDay(task({ beginDate: day(0), endDate: day(0) }))).toBe(false);
     expect(isOverdue(task({ beginDate: day(-2), endDate: day(-1) }))).toBe(true);
     expect(isOverdue(task({ beginDate: day(-2), endDate: day(-1), done: true }))).toBe(false);
   });
@@ -88,6 +89,47 @@ describe('schedule helpers', () => {
     expect(occursOn(t, day(2))).toBe(true);
     expect(occursOn(t, day(3))).toBe(false);
     expect(occursOn(task({ beginDate: null, endDate: null }), day(0))).toBe(false);
+  });
+
+  it('spansRange matches any span overlapping the range', () => {
+    const t = task({ beginDate: day(0), endDate: day(2) });
+    expect(spansRange(t, day(-1), day(-1))).toBe(false);
+    expect(spansRange(t, day(-1), day(0))).toBe(true);
+    expect(spansRange(t, day(2), day(5))).toBe(true);
+    expect(spansRange(t, day(3), day(5))).toBe(false);
+    expect(spansRange(task({ beginDate: null, endDate: null }), day(0), day(3))).toBe(false);
+  });
+});
+
+describe('plan attribution', () => {
+  it('plannedDay clamps a completed task into its due date', () => {
+    expect(plannedDay(task({ beginDate: day(0), endDate: day(0) }))).toBeNull();
+    expect(
+      plannedDay(task({ beginDate: day(-1), endDate: day(-1), done: true, doneAt: `${day(0)}T09:00:00` })),
+    ).toBe(day(-1));
+    expect(
+      plannedDay(task({ beginDate: day(1), endDate: day(1), done: true, doneAt: `${day(0)}T09:00:00` })),
+    ).toBe(day(0));
+  });
+
+  it('belongsToPlanDay keeps a completed task on its attributed day only', () => {
+    const late = task({ beginDate: day(-1), endDate: day(-1), done: true, doneAt: `${day(0)}T09:00:00` });
+    expect(belongsToPlanDay(late, day(-1))).toBe(true);
+    expect(belongsToPlanDay(late, day(0))).toBe(false);
+
+    const pending = task({ beginDate: day(-1), endDate: day(1) });
+    expect(belongsToPlanDay(pending, day(0))).toBe(true);
+    expect(belongsToPlanDay(pending, day(2))).toBe(false);
+  });
+
+  it('countPlanRange counts each task once and splits done/total', () => {
+    const tasks = [
+      task({ beginDate: day(0), endDate: day(0), done: true, doneAt: `${day(0)}T09:00:00` }),
+      task({ beginDate: day(-1), endDate: day(1) }),
+      task({ beginDate: day(0), endDate: day(2) }),
+      task({ beginDate: day(5), endDate: day(5) }),
+    ];
+    expect(countPlanRange(tasks, day(0), day(1))).toEqual({ total: 3, done: 1 });
   });
 });
 

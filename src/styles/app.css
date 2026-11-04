@@ -30,7 +30,6 @@ html[data-theme='dark'] .logo {
 .search-hit.keyboard-active {
   border-color: var(--primary); background: var(--primary-soft); outline: 1px solid var(--primary);
 }
-.review-basis { font-size: var(--fs-2xs); color: var(--muted); line-height: 1.6; padding: 0 2px; }
 
 /*
  * The demo dressed the page up as a floating macOS app: 14px of "desktop"

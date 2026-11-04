@@ -41,7 +41,7 @@ afterEach(() => {
 });
 
 describe('approved UI interactions', () => {
-  it('shows late and unscheduled completions on their actual completion day across plan and review', () => {
+  it('attributes finished tasks to their planned day on plan, and their completion day in review', () => {
     const yesterday = fmt(addDays(today(), -1));
     const doneAt = new Date().toISOString();
     useAppStore.setState({ tasks: [
@@ -51,17 +51,20 @@ describe('approved UI interactions', () => {
     ] });
     render(<App />);
     act(() => useAppStore.getState().toggleTodo(1));
-    expect(find('.task-list')).toHaveTextContent('昨天安排今天完成');
+    // Today's plan only holds the task attributed to today.
     expect(find('.task-list')).toHaveTextContent('未排期今天完成');
+    expect(find('.task-list')).not.toHaveTextContent('昨天安排今天完成');
     expect(find('.task-list')).not.toHaveTextContent('跨天计划昨天完成');
-    expect(find('.today-sum')).toHaveTextContent('2 / 2 项已完成');
+    expect(find('.today-sum')).toHaveTextContent('1 / 1 项已完成');
     expect(find(`.day[data-date="${todayStr()}"] .dot-sm.done`)).not.toBeNull();
     fireEvent.click(find('.today-seg[data-id="2"]'));
     advanceFrame();
     expect(find('.task.flash')).toHaveTextContent('未排期今天完成');
+    // A late completion falls back to its due day on the plan page.
     act(() => useAppStore.getState().goToDate(yesterday));
-    expect(find('.task-list')).not.toHaveTextContent('昨天安排今天完成');
+    expect(find('.task-list')).toHaveTextContent('昨天安排今天完成');
     expect(find('.task-list')).toHaveTextContent('跨天计划昨天完成');
+    // Review still credits the actual completion day.
     act(() => useAppStore.getState().setPage('review'));
     expect(find('#page-review')).toHaveTextContent('昨天安排今天完成');
   });

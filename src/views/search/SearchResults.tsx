@@ -13,13 +13,6 @@ interface Props {
   onJumpTask: (id: number) => void;
 }
 
-const SEARCH_ICON = (
-  <>
-    <circle cx="11" cy="11" r="6.5" />
-    <path d="M20 20l-3.6-3.6" />
-  </>
-);
-
 export function SearchResults({ q, noteHits, taskHits, suggestion, onJumpNote, onJumpTask }: Props) {
   const total = noteHits.length + taskHits.length;
   return (

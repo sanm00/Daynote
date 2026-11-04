@@ -67,10 +67,6 @@ export function ReviewView() {
 
       <div className="review-scroll">
         <StatCards stats={stats} trendCls={trendCls} trendTxt={trendTxt} />
-        <p className="review-basis">
-          完成任务按实际完成日统计；计划数按排期与周期有重叠计（含跨天与未来）；完成率 =
-          周期内完成 {stats.doneN} / 周期内计划 {stats.total}。
-        </p>
         <div className="charts-row">
           <TrendChart
             chart={chart}

@@ -1,6 +1,5 @@
 import { useAppStore } from '@/store';
-import type { Task } from '@/types';
-import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, belongsToPlanDay, occursOn } from '@/lib/selectors';
+import { PRIORITY_WEIGHT as pw, getOverdue, getPending, getUnscheduled, belongsToPlanDay, countPlanRange } from '@/lib/selectors';
 import {
   calAnchorOf,
   dayNames,
@@ -17,22 +16,6 @@ import type { UseDatePop } from './useDatePop';
 
 interface Props {
   datePop: UseDatePop;
-}
-
-/** Distinct scheduled tasks overlapping a set of days (multi-day aware). */
-function rangeStats(tasks: Task[], days: string[]) {
-  const seen = new Set<number>();
-  let total = 0;
-  let doneN = 0;
-  for(const ds of days){
-    for(const t of tasks){
-      if(seen.has(t.id) || !occursOn(t, ds)) continue;
-      seen.add(t.id);
-      total++;
-      if(t.done) doneN++;
-    }
-  }
-  return { total, doneN };
 }
 
 export function TaskPanel({ datePop }: Props) {
@@ -71,7 +54,7 @@ export function TaskPanel({ datePop }: Props) {
           const dim = new Date(a.getFullYear(), a.getMonth() + 1, 0).getDate();
           return Array.from({ length: dim }, (_, i) => fmt(new Date(a.getFullYear(), a.getMonth(), i + 1)));
         })();
-    const { total, doneN } = rangeStats(tasks, days);
+    const { total, done: doneN } = countPlanRange(tasks, days[0], days[days.length - 1]);
     if(isWeek){
       const a = parseDate(days[0]);
       const b = parseDate(days[6]);

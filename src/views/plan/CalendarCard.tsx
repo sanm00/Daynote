@@ -12,30 +12,13 @@ import {
   weekDays,
   yearWeekStarts,
 } from '@/lib/date';
-import { belongsToPlanDay, occursOn } from '@/lib/selectors';
-import type { Task } from '@/types';
+import { belongsToPlanDay, countPlanRange } from '@/lib/selectors';
 
 const SCOPES: { scope: CalScope; label: string }[] = [
   { scope: 'date', label: '日' },
   { scope: 'week', label: '周' },
   { scope: 'month', label: '月' },
 ];
-
-/** Distinct scheduled tasks overlapping a set of days (multi-day aware). */
-function rangeTaskStats(tasks: Task[], days: string[]) {
-  const seen = new Set<number>();
-  let total = 0;
-  let done = 0;
-  for(const ds of days){
-    for(const t of tasks){
-      if(seen.has(t.id) || !occursOn(t, ds)) continue;
-      seen.add(t.id);
-      total++;
-      if(t.done) done++;
-    }
-  }
-  return { total, done };
-}
 
 export function CalendarCard() {
   const tasks = useAppStore((s) => s.tasks);
@@ -113,7 +96,7 @@ export function CalendarCard() {
       cells = Array.from({ length: 12 }, (_, m) => {
         const dim = new Date(year, m + 1, 0).getDate();
         const days = Array.from({ length: dim }, (_, i) => fmt(new Date(year, m, i + 1)));
-        const { total, done } = rangeTaskStats(tasks, days);
+        const { total, done } = countPlanRange(tasks, days[0], days[days.length - 1]);
         const date = fmt(new Date(year, m, 1));
         const isToday = m === now.getMonth() && year === now.getFullYear();
         const sel = m === selMon;
@@ -140,7 +123,7 @@ export function CalendarCard() {
       cells = weeks.map((mon, i) => {
         const date = fmt(mon);
         const days = Array.from({ length: 7 }, (_, c) => fmt(addDays(mon, c)));
-        const { total, done } = rangeTaskStats(tasks, days);
+        const { total, done } = countPlanRange(tasks, days[0], days[days.length - 1]);
         const isToday = days.includes(tStr);
         const sel = date === selMon;
         const cls = ['day', 'period', 'week'];

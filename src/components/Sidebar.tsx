@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store';
 import { todayStr } from '@/lib/date';
-import { occursOn } from '@/lib/selectors';
+import { belongsToPlanDay } from '@/lib/selectors';
 import { QUOTES } from '@/lib/quotes';
 import type { Page } from '@/types';
 
@@ -74,7 +74,7 @@ export function Sidebar() {
   const openSearch = useAppStore((s) => s.openSearch);
   const tasks = useAppStore((s) => s.tasks);
 
-  const todayTasks = tasks.filter((t) => occursOn(t, todayStr()));
+  const todayTasks = tasks.filter((t) => belongsToPlanDay(t, todayStr()));
   const doneN = todayTasks.filter((t) => t.done).length;
   const total = todayTasks.length;
   const pct = total ? Math.round((doneN / total) * 100) : 0;

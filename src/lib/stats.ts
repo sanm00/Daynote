@@ -1,6 +1,6 @@
 import type { Note, ReviewRange, Tag, Task } from '@/types';
 import { addDays, dayNames, dayOf, fmt, parseDate, today, todayStr } from './date';
-import { occursOn, PRIORITY_WEIGHT } from './selectors';
+import { PRIORITY_WEIGHT, belongsToPlanDay, belongsToPlanRange, isOverdue, spansRange } from './selectors';
 
 export interface Range {
   start: Date;
@@ -110,13 +110,12 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range, key: Review
     (t) => t.done && t.doneAt !== null && dayOf(t.doneAt)! >= s && dayOf(t.doneAt)! <= e,
   );
   const doneN = doneTasks.length;
-  // Planned tasks: a task counts for a period when its schedule span overlaps
-  // the period (beginDate <= period end and endDate >= period start), matching
-  // the chart's "scheduled" series. Multi-day tasks count on every day they
-  // span, so a task running today..tomorrow still counts as planned today.
-  const inSpan = (t: Task, rs: string, re: string) =>
-    t.beginDate !== null && t.endDate !== null && t.beginDate <= re && t.endDate >= rs;
-  const inRange = tasks.filter((t) => inSpan(t, s, e));
+  // Planned tasks. A finished task counts once, on the day it is attributed to
+  // (see `belongsToPlanRange`: completion day clamped by the due date), so a
+  // cross-day task done yesterday no longer inflates today. An unfinished task
+  // still counts for every period its schedule span overlaps, matching the
+  // chart's "scheduled" series.
+  const inRange = tasks.filter((t) => belongsToPlanRange(t, s, e));
   const total = inRange.length;
   const scheduledDoneN = inRange.filter((t) => t.done).length;
   // Rate mixes the two sets on purpose: completions in the period over planned
@@ -135,9 +134,7 @@ export function computeStats(tasks: Task[], notes: Note[], r: Range, key: Review
   const prev = prevRange(r, key);
   const ps = fmt(prev.start);
   const pe = fmt(prev.end);
-  const prevPlannedN = tasks.filter(
-    (t) => inSpan(t, ps, pe),
-  ).length;
+  const prevPlannedN = tasks.filter((t) => belongsToPlanRange(t, ps, pe)).length;
   const prevDoneN = tasks.filter(
     (t) => t.done && t.doneAt !== null && dayOf(t.doneAt)! >= ps && dayOf(t.doneAt)! <= pe,
   ).length;
@@ -202,7 +199,7 @@ export function computeChart(r: Range, tasks: Task[]): Chart {
       ds,
       label: `${d.getDate()}`,
       value: tasks.filter((t) => t.done && dayOf(t.doneAt) === ds).length,
-      scheduled: tasks.filter((t) => occursOn(t, ds)).length,
+      scheduled: tasks.filter((t) => belongsToPlanDay(t, ds)).length,
       weekend: d.getDay() === 0 || d.getDay() === 6,
       today: ds === todayStr(),
     };
@@ -245,21 +242,15 @@ export function computeLogGroups(doneTasks: Task[]): LogGroup[] {
 
 /**
  * Unfinished tasks whose schedule span overlaps the range, ordered overdue-first
- * then by due date, then by priority. Kept flat (no date grouping).
+ * then by due date, then by priority. Kept flat (no date grouping). Only
+ * unfinished tasks appear here, so the span overlap rule applies throughout.
  */
 export function computeRemaining(tasks: Task[], r: Range): Task[] {
   const s = fmt(r.start);
   const e = fmt(r.end);
   const tStr = todayStr();
   return tasks
-    .filter(
-      (t) =>
-        !t.done &&
-        t.beginDate !== null &&
-        t.endDate !== null &&
-        t.beginDate <= e &&
-        t.endDate >= s,
-    )
+    .filter((t) => !t.done && spansRange(t, s, e))
     .sort((a, b) => {
       const la = a.endDate! < tStr;
       const lb = b.endDate! < tStr;
@@ -270,6 +261,5 @@ export function computeRemaining(tasks: Task[], r: Range): Task[] {
 
 /** Count of overdue tasks among the given list. */
 export function countOverdue(tasks: Task[]): number {
-  const tStr = todayStr();
-  return tasks.filter((t) => !t.done && t.endDate !== null && t.endDate < tStr).length;
+  return tasks.filter(isOverdue).length;
 }

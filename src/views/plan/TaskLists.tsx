@@ -1,6 +1,6 @@
 import type { Task } from '@/types';
 import { Fragment } from 'react';
-import { PRIORITY_WEIGHT as pw, occursOn } from '@/lib/selectors';
+import { PRIORITY_WEIGHT as pw, belongsToPlanDay } from '@/lib/selectors';
 import { parseDate, todayStr } from '@/lib/date';
 import { TaskRow } from './TaskRow';
 import type { UseDatePop } from './useDatePop';
@@ -56,10 +56,10 @@ export function RangeList({ days, tasks, datePop, onPickDay }: ListProps & {
   return (
     <>
       {days
-        .filter((ds) => tasks.some((t) => occursOn(t, ds)))
+        .filter((ds) => tasks.some((t) => belongsToPlanDay(t, ds)))
         .map((ds) => {
           const list = tasks
-            .filter((t) => occursOn(t, ds))
+            .filter((t) => belongsToPlanDay(t, ds))
             .sort((a, b) => Number(a.done) - Number(b.done) || pw[a.prio] - pw[b.prio]);
           const d = parseDate(ds);
           const isToday = ds === tStr;
@@ -100,7 +100,7 @@ export function PendingList({ tasks, datePop }: ListProps) {
   const od = tasks
     .filter((t) => t.endDate !== null && t.endDate < tStr)
     .sort((a, b) => a.endDate!.localeCompare(b.endDate!));
-  const td = tasks.filter((t) => occursOn(t, tStr)).sort((a, b) => pw[a.prio] - pw[b.prio]);
+  const td = tasks.filter((t) => belongsToPlanDay(t, tStr)).sort((a, b) => pw[a.prio] - pw[b.prio]);
   const fut = tasks
     .filter((t) => t.beginDate !== null && t.beginDate > tStr)
     .sort((a, b) => a.beginDate!.localeCompare(b.beginDate!));
