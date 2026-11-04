@@ -1,6 +1,6 @@
 [package]
 name = "daynote"
-version = "1.1.0"
+version = "1.1.1"
 description = "随记 Daynote — 计划 · 执行 · 回顾 · 沉淀"
 authors = ["Sanm <921501935@qq.com>"]
 license = "Apache-2.0"
