@@ -172,9 +172,9 @@ export function mdToHtml(src: string): string {
       const code = buf.join('\n');
       const highlighted = lang ? highlightCode(code, lang) : null;
       out.push(
-        `<pre${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}><code${highlighted ? ' class="hljs"' : ''}>${
+        `<div class="code-block"${lang ? ` data-lang="${escapeHtml(lang)}"` : ''}><button type="button" class="code-copy-btn" title="复制代码" aria-label="复制代码"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg><span>复制</span></button><pre><code${highlighted ? ' class="hljs"' : ''}>${
           highlighted ?? escapeHtml(code)
-        }</code></pre>`,
+        }</code></pre></div>`,
       );
       continue;
     }

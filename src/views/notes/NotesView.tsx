@@ -67,6 +67,9 @@ export function NotesView() {
 
   const find = useNoteFind(note?.content, { onDelete: handleDelete });
   useEditShortcut(find.editRef);
+  // Escape should close the find bar first, not throw the draft away.
+  const findOpenRef = useRef(false);
+  findOpenRef.current = find.open;
 
   // Esc cancels editing: it throws the draft away, so the note rolls back to
   // its last saved content and nothing is pending when you switch away. Saving
@@ -76,7 +79,7 @@ export function NotesView() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       const st = useAppStore.getState();
-      if (st.noteMode !== 'edit') return;
+      if (st.noteMode !== 'edit' || findOpenRef.current) return;
       e.preventDefault();
       st.discardDraft();
       st.setNoteMode('preview');
@@ -85,14 +88,17 @@ export function NotesView() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  // Save the current note from anywhere on the page (⌘S / Ctrl+S).
+  // Save the current note from anywhere on the page (⌘S / Ctrl+S), then show
+  // the rendered preview.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 's') return;
       const ta = e.target as HTMLElement | null;
       if (ta && (ta.id === 'noteFindInput' || ta.id === 'globalSearchInput')) return;
       e.preventDefault();
-      useAppStore.getState().commitDraft();
+      const st = useAppStore.getState();
+      st.commitDraft();
+      st.setNoteMode('preview');
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);

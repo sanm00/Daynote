@@ -21,6 +21,7 @@ export function NoteEditor({ note, find, dirty }: Props) {
   const commitDraft = useAppStore((s) => s.commitDraft);
 
   const rendered = useMemo(() => mdToHtml(note.content), [note.content]);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const [pasting, setPasting] = useState(false);
   const pastePending = useRef(false);
   // Invalidated by typing, changing selection, saving, switching, or discarding.
@@ -50,6 +51,22 @@ export function NoteEditor({ note, find, dirty }: Props) {
     });
     return () => { disposed = true; urls.forEach((url) => URL.revokeObjectURL(url)); };
   }, [rendered, find.renderRef]);
+
+  // The find backdrop mirrors the textarea to paint <mark> hits behind the
+  // transparent text, so it must track the editor's scroll position.
+  const syncBackdropScroll = () => {
+    const ta = find.editRef.current;
+    const bd = backdropRef.current;
+    if (ta && bd) {
+      bd.scrollTop = ta.scrollTop;
+      bd.scrollLeft = ta.scrollLeft;
+    }
+  };
+
+  useEffect(() => {
+    syncBackdropScroll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [find.editHighlight, noteMode]);
 
   const onPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const files = Array.from(e.clipboardData.items)
@@ -152,6 +169,35 @@ export function NoteEditor({ note, find, dirty }: Props) {
     applyEdit(insertPair(el.value, el.selectionStart, el.selectionEnd, data));
   };
 
+  // Manual save commits the draft and reveals the rendered preview.
+  const handleSave = () => {
+    commitDraft();
+    setNoteMode('preview');
+  };
+
+  const onCopyCode = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.code-copy-btn');
+    if (!btn) return;
+    const code = btn.parentElement?.querySelector('pre code');
+    if (!code) return;
+    const text = code.textContent?.replace(/\n$/, '') ?? '';
+    const label = btn.querySelector('span');
+    const done = () => {
+      btn.classList.add('copied');
+      if (label) label.textContent = '已复制';
+      window.setTimeout(() => {
+        btn.classList.remove('copied');
+        if (label) label.textContent = '复制';
+      }, 1500);
+    };
+    try {
+      await navigator.clipboard.writeText(text);
+      done();
+    } catch {
+      toast('代码复制失败，请手动选择复制');
+    }
+  };
+
   return (
     <div className="note-editor" data-id={note.id}>
       <input
@@ -163,7 +209,7 @@ export function NoteEditor({ note, find, dirty }: Props) {
       />
       <div className="note-editor-meta">
         <NoteTagPicker value={note.tag} noteId={note.id} onSelect={tag => editDraft({ tag })} />
-        <SaveStatus updatedAt={note.updatedAt} dirty={dirty} onSave={commitDraft} />
+        <SaveStatus updatedAt={note.updatedAt} dirty={dirty} onSave={handleSave} />
         <div className="view-switch" data-mode={noteMode}>
           <span className="view-switch-thumb" />
           <button
@@ -230,6 +276,9 @@ export function NoteEditor({ note, find, dirty }: Props) {
                 find.step(e.shiftKey ? -1 : 1);
               } else if (e.key === 'Escape') {
                 e.preventDefault();
+                // Keep the event from reaching the editor's document-level
+                // Escape handler, which would discard the edit draft.
+                e.stopPropagation();
                 find.close();
               }
             }}
@@ -269,25 +318,37 @@ export function NoteEditor({ note, find, dirty }: Props) {
           {pasting ? '正在保存图片…' : '可粘贴图片'}
         </span>
       </div>
-      <textarea
-        ref={find.editRef}
-        className="note-content-input"
-        placeholder="开始写点什么，支持 Markdown 语法…"
+      <div
+        className="note-edit"
         style={{ display: noteMode === 'edit' ? '' : 'none' }}
-        value={note.content}
-        spellCheck={false}
-        autoCorrect="off"
-        autoCapitalize="off"
-        autoComplete="off"
-        onChange={(e) => editDraft({ content: e.target.value })}
-        onKeyDown={onContentKeyDown}
-        onBeforeInput={onContentBeforeInput}
-        onPaste={onPaste}
-      />
+      >
+        <div
+          ref={backdropRef}
+          className="note-find-backdrop"
+          aria-hidden="true"
+          dangerouslySetInnerHTML={{ __html: find.editHighlight }}
+        />
+        <textarea
+          ref={find.editRef}
+          className="note-content-input"
+          placeholder="开始写点什么，支持 Markdown 语法…"
+          value={note.content}
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          autoComplete="off"
+          onChange={(e) => editDraft({ content: e.target.value })}
+          onKeyDown={onContentKeyDown}
+          onBeforeInput={onContentBeforeInput}
+          onPaste={onPaste}
+          onScroll={syncBackdropScroll}
+        />
+      </div>
       <div
         ref={find.renderRef}
         className="note-render"
         style={{ display: noteMode === 'edit' ? 'none' : '' }}
+        onClick={onCopyCode}
         dangerouslySetInnerHTML={{ __html: rendered }}
       />
     </div>

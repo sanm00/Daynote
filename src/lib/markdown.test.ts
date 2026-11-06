@@ -20,16 +20,23 @@ describe('Markdown images', () => {
 describe('mdToHtml fenced code', () => {
   it('renders a closed fence as one <pre> with the language badge and highlight spans', () => {
     const html = mdToHtml('```js\nconst a = 1;\n```\n');
-    expect(html).toContain('<pre data-lang="js"><code class="hljs">');
+    expect(html).toContain('<div class="code-block" data-lang="js">');
+    expect(html).toContain('<pre><code class="hljs">');
     expect(html).toContain('hljs-keyword');
     expect(html).toContain('hljs-number');
     expect(html.match(/<pre/g)).toHaveLength(1);
   });
 
+  it('wraps every fence in a copy button', () => {
+    const html = mdToHtml('```js\nconst a = 1;\n```\n');
+    expect(html).toContain('class="code-copy-btn"');
+    expect(html).toContain('>复制</span>');
+  });
+
   it('keeps blank lines inside an unterminated fence instead of splitting blocks', () => {
     const html = mdToHtml('```ts\ninterface A {\n\n}\n');
     expect(html.match(/<pre/g)).toHaveLength(1);
-    expect(html).toContain('<pre data-lang="ts">');
+    expect(html).toContain('<div class="code-block" data-lang="ts">');
     expect(html).toContain('interface');
   });
 
